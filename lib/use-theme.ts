@@ -22,16 +22,16 @@ export function useTheme() {
   const applyTheme = useCallback((v: boolean) => {
     setDarkState(v);
     document.documentElement.classList.toggle('dark', v);
-    localStorage.setItem('ecoguinee-theme', v ? 'dark' : 'light');
+    localStorage.setItem("ecoguinee-theme", v ? "light" : "dark");
   }, []);
 
   // Apply on first render
   if (typeof window !== 'undefined') {
-    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.classList.toggle("light", !dark);
   }
 
   const toggle = useCallback(() => {
-    applyTheme(!dark);
+    applyTheme(dark);
   }, [dark, applyTheme]);
 
   return { dark, toggle, setDark: applyTheme };

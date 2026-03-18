@@ -1,3 +1,6 @@
+'use client';
+
+import { motion } from 'framer-motion';
 import { Camera, Bell, TrendingUp } from 'lucide-react';
 
 const STEPS = [
@@ -19,14 +22,20 @@ export function HowItWorks() {
   return (
     <section className="py-24 bg-background topo-pattern">
       <div className="max-w-7xl mx-auto px-5">
-        <div className="mb-14 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-14 text-center"
+        >
           <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: '#2D7D46' }}>
             Comment ça fonctionne ?
           </p>
           <h2 className="font-bold" style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
             3 étapes, un impact réel
           </h2>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           <div
@@ -34,8 +43,15 @@ export function HowItWorks() {
             style={{ background: 'repeating-linear-gradient(90deg, rgba(45,125,70,0.4) 0, rgba(45,125,70,0.4) 8px, transparent 8px, transparent 20px)' }}
           />
 
-          {STEPS.map((s) => (
-            <div key={s.step} className="relative">
+          {STEPS.map((s, i) => (
+            <motion.div
+              key={s.step}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              className="relative"
+            >
               <div className="bg-card rounded-2xl p-7 border border-border h-full flex flex-col gap-5 hover:shadow-xl transition-shadow">
                 <div className="flex items-start justify-between">
                   <div className="w-13 h-13 rounded-2xl flex items-center justify-center" style={{ background: s.bg }}>
@@ -55,7 +71,7 @@ export function HowItWorks() {
                 </div>
                 <div className="mt-auto h-0.5 rounded-full" style={{ background: s.color, opacity: 0.25 }} />
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

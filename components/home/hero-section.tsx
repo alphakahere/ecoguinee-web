@@ -1,8 +1,57 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FileText, ArrowRight, LogIn, Leaf } from 'lucide-react';
+import { dashboardStats, territoires } from '@/lib/data/mock-data';
+
+function useCountUp(target: number, duration = 1500, delay = 0) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const startTime = performance.now();
+      const tick = (now: number) => {
+        const p = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        setCount(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [target, duration, delay]);
+  return count;
+}
+
+function CounterItem({ value, label, suffix = '', delay = 0 }: {
+  value: number; label: string; suffix?: string; delay?: number;
+}) {
+  const count = useCountUp(value, 1500, delay);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: delay / 1000 + 0.6 }}
+      className="flex flex-col items-center gap-1 px-6 py-4"
+    >
+      <span
+        className="font-bold text-white"
+        style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', lineHeight: 1 }}
+      >
+        {count}{suffix}
+      </span>
+      <span className="text-xs font-mono text-white/50 uppercase tracking-widest text-center">
+        {label}
+      </span>
+    </motion.div>
+  );
+}
+
+const totalResolved = territoires.reduce((s, t) => s + t.resolvedCount, 0);
+const citizensK = Math.round(
+  territoires.reduce((s, t) => s + t.sectors.reduce((ss, sec) => ss + (sec.population ?? 0), 0), 0) / 1000
+);
 
 function TopoSVG() {
   return (
@@ -44,7 +93,7 @@ function TopoSVG() {
 export function HeroSection() {
   return (
     <section
-      className="relative flex flex-col justify-center min-h-[80vh] overflow-hidden"
+      className="relative flex flex-col justify-center overflow-hidden min-h-[calc(100vh-4rem)]"
       style={{ background: '#0A1A10' }}
     >
       {/* Topo SVG lines */}
@@ -106,7 +155,7 @@ export function HeroSection() {
           <motion.div
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-wrap gap-3"
+            className="flex flex-wrap gap-3 mb-16"
           >
             <Link
               href="/signaler"
@@ -129,6 +178,24 @@ export function HeroSection() {
               <LogIn className="w-4 h-4" />
               Voir la carte
             </Link>
+          </motion.div>
+
+          {/* Counter strip */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="inline-flex flex-wrap md:flex-nowrap rounded-2xl overflow-hidden divide-x"
+            style={{
+              border: '1px solid rgba(111,207,74,0.18)',
+              background: 'rgba(15,31,21,0.7)',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
+            <CounterItem value={dashboardStats.totalHotspots} label="Points noirs signalés" delay={0} />
+            <CounterItem value={totalResolved} label="Interventions résolues" delay={150} />
+            <CounterItem value={5} label="Communes couvertes" delay={300} />
+            <CounterItem value={citizensK} label="Citoyens actifs" suffix="k" delay={450} />
           </motion.div>
         </div>
       </div>
