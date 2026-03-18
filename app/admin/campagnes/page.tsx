@@ -38,7 +38,7 @@ const filters = [
 
 export default function AdminCampagnesPage() {
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader
         title="Campagnes"
         description={`${CAMPAIGNS.length} campagnes`}

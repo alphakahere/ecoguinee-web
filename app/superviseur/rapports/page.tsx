@@ -7,7 +7,7 @@ import { MONTHLY_CHART, EVOLUTION_CHART, SECTOR_CHART } from '@/lib/data/supervi
 
 export default function SuperviseurRapportsPage() {
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="space-y-6">
       <PageHeader title="Rapports & Statistiques" description="Analyse détaillée de votre périmètre" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -27,7 +27,7 @@ const filters = [
 
 export default function AdminHotspotsPage() {
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader title="Signalements" description={`${hotspots.length} signalements enregistrés`} />
       <DataTable
         data={hotspots}

@@ -34,7 +34,7 @@ const columns = [
 
 export default function AdminPMEPage() {
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader title="PME" description={`${pmeList.length} PME enregistrées`} />
       <DataTable
         data={pmeList}

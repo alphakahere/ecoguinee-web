@@ -35,7 +35,7 @@ const filters = [
 
 export default function SuperviseurSignalementsPage() {
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader title="Signalements" description="Tous les signalements de votre périmètre" />
       <DataTable
         data={PME_REPORTS}

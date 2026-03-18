@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Shield, Building2, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Building2, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
@@ -46,7 +46,7 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
         <SidebarNav
           items={TABS}
           userInfo={{ name: 'Amadou Diallo', initials: 'AD', subtitle: PME_PROFILE.name }}
-          roleLabel="Espace Superviseur"
+          roleLabel="Superviseur Panel"
           roleIcon="Building2"
           layoutId="supActiveTab"
           collapsed={collapsed}
@@ -59,10 +59,9 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
           roleIcon={<Building2 className="w-3 h-3 text-primary" />}
           roleLabel="Superviseur"
           pageLabel={pageLabel}
-
           onMobileMenuOpen={() => setMobileOpen(true)}
           notifications={3}
-          rightSlot={
+          leftSlot={
             <button
               onClick={() => setCollapsed((v) => !v)}
               className="hidden md:flex w-7 h-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 transition-colors"
@@ -70,16 +69,15 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
               {collapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
             </button>
           }
+          profile={{
+            name: 'Amadou Diallo',
+            initials: 'AD',
+            subtitle: PME_PROFILE.name,
+            roleBadge: 'Superviseur',
+            profileHref: '/superviseur/parametres',
+            settingsHref: '/superviseur/parametres',
+          }}
         />
-
-        {/* Scope banner */}
-        <div className="shrink-0 flex items-center gap-3 px-4 py-2 bg-primary/5 border-b border-primary/15 text-xs font-mono overflow-hidden">
-          <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
-          <span className="text-primary font-semibold whitespace-nowrap">Périmètre :</span>
-          <span className="text-foreground/70 font-semibold truncate">{PME_PROFILE.name}</span>
-          <span className="text-muted-foreground whitespace-nowrap hidden sm:inline">—</span>
-          <span className="text-muted-foreground truncate hidden sm:inline">Secteurs : {PME_PROFILE.secteurs.join(', ')}</span>
-        </div>
 
         <main className="flex-1 overflow-auto p-4 sm:p-5 lg:p-7 topo-pattern">
           {children}
@@ -91,7 +89,7 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
         <SidebarNav
           items={TABS}
           userInfo={{ name: 'Amadou Diallo', initials: 'AD', subtitle: PME_PROFILE.name }}
-          roleLabel="Espace Superviseur"
+          roleLabel="Superviseur"
           roleIcon="Building2"
           layoutId="supActiveTabMobile"
           onNavigate={() => setMobileOpen(false)}

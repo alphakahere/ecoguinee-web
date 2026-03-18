@@ -34,7 +34,7 @@ const columns = [
 
 export default function AdminTerritoiresPage() {
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader title="Territoires" description={`${territoires.length} territoires enregistrés`} />
       <DataTable
         data={territoires}

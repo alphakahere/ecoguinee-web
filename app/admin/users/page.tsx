@@ -52,7 +52,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader
         title="Utilisateurs"
         description={`${usersList.length} utilisateurs enregistrés`}

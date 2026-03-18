@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, MapPin, Calendar, Building2, Users, FileText, Camera, Download, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { CAMPAIGNS } from '@/lib/data/campaigns-data';
 import { CAMP_TYPE_META, CAMP_STATUS_META } from '@/lib/types';
@@ -53,7 +54,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
       {/* Hero */}
       <div className="relative overflow-hidden mt-5" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
         {heroPhoto ? (
-          <img src={heroPhoto} alt={campaign.titre} className="w-full h-full object-cover" />
+          <Image src={heroPhoto} alt={campaign.titre} className="w-full h-full object-cover" fill unoptimized />
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, #0F1F15 0%, #2D7D46 60%, #0F1F15 100%)` }}>
             <span style={{ fontSize: '6rem', opacity: 0.35 }}>{tm.emoji}</span>
@@ -152,7 +153,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {campaign.photos.map((ph, i) => (
                     <button key={ph.id} className="group relative overflow-hidden rounded-xl aspect-square cursor-pointer" onClick={() => setLightboxIdx(i)}>
-                      <img src={ph.url} alt={ph.legende ?? `Photo ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                      <Image src={ph.url} alt={ph.legende ?? `Photo ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" fill unoptimized />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(10,26,16,0.45)' }}>
                         <Camera className="w-6 h-6 text-white" />
                       </div>
@@ -243,7 +244,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
               <ChevronRight className="w-6 h-6 text-white" />
             </button>
           )}
-          <img src={campaign.photos[lightboxIdx].url} alt={campaign.photos[lightboxIdx].legende ?? 'Photo'} className="max-w-[90vw] max-h-[80vh] object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />
+          <Image src={campaign.photos[lightboxIdx].url} alt={campaign.photos[lightboxIdx].legende ?? 'Photo'} className="object-contain rounded-xl" width={1200} height={800} style={{ maxWidth: '90vw', maxHeight: '80vh', width: 'auto', height: 'auto' }} unoptimized onClick={(e) => e.stopPropagation()} />
           {campaign.photos[lightboxIdx].legende && (
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center max-w-md px-4 py-2 rounded-xl text-sm font-mono" style={{ background: 'rgba(0,0,0,0.7)', color: 'rgba(255,255,255,0.8)' }}>
               {campaign.photos[lightboxIdx].legende}

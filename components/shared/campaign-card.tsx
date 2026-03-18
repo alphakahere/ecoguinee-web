@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Users, FileText } from 'lucide-react';
 import { type Campaign, CAMP_TYPE_META, CAMP_STATUS_META } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
@@ -30,10 +31,12 @@ export function CampaignCard({ campaign, index = 0 }: Props) {
     >
       <div className="relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>
         {heroPhoto ? (
-          <img
+          <Image
             src={heroPhoto}
             alt={campaign.titre}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            unoptimized
           />
         ) : (
           <div

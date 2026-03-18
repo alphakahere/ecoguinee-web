@@ -37,7 +37,7 @@ export function SidebarNav({
   return (
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border grain-overlay">
       {/* Brand */}
-      <div className={`flex items-center gap-3 py-5 border-b border-sidebar-border shrink-0 ${collapsed ? 'px-3 justify-center' : 'px-4'}`}>
+      <div className={`flex items-center gap-3 py-4 border-b border-sidebar-border h-18 shrink-0 ${collapsed ? 'px-3 justify-center' : 'px-4'}`}>
         <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
           <MapPin className="w-5 h-5 text-white" />
         </div>
@@ -57,9 +57,6 @@ export function SidebarNav({
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4">
         <div className={`space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
-          {!collapsed && (
-            <p className="text-[10px] font-mono uppercase tracking-widest px-3 mb-3 text-sidebar-foreground/30">Navigation</p>
-          )}
           {items.map((item) => {
             const active = item.exact !== undefined
               ? (item.exact ? pathname === item.href : pathname.startsWith(item.href))
@@ -109,6 +106,11 @@ export function SidebarNav({
                       )}
                     </>
                   )}
+                  {collapsed && ((item.badge !== undefined && item.badge > 0) || (item.count !== undefined && item.count > 0)) && (
+                    <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-primary text-[8px] text-white flex items-center justify-center font-bold z-10">
+                      {item.badge ?? item.count}
+                    </span>
+                  )}
                 </motion.div>
               </Link>
             );
@@ -133,14 +135,21 @@ export function SidebarNav({
               onClick={() => router.push('/')}
               className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-mono text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
-              <LogOut className="w-3.5 h-3.5" /><span>Quitter</span>
+              <LogOut className="w-3.5 h-3.5" /><span>Déconnexion</span>
             </button>
           </>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold" title={userInfo.name}>
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold cursor-pointer" title={userInfo.name}>
               {userInfo.initials}
             </div>
+              <button
+                onClick={() => router.push('/')}
+                title="Se déconnecter"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
           </div>
         )}
       </div>

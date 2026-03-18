@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
 import type { ReportData } from './report-wizard';
 
@@ -75,7 +76,7 @@ export function StepPhoto({ data, update }: Props) {
           <div className="flex gap-2 mt-3 flex-wrap">
             {data.photos.map((p, i) => (
               <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border group">
-                <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                <Image src={p.url} alt={p.name} className="w-full h-full object-cover" fill unoptimized />
                 <button
                   onClick={() => removePhoto(i)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

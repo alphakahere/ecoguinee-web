@@ -9,7 +9,7 @@ const pmeCampaigns = CAMPAIGNS.filter(
 
 export default function SuperviseurCampagnesPage() {
   return (
-    <div className="max-w-6xl">
+    <div>
       <PageHeader
         title="Campagnes"
         description={`Campagnes liées à ${PME_PROFILE.name}`}
