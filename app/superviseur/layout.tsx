@@ -7,7 +7,6 @@ import { Shield, Building2, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
-import { useTheme } from '@/lib/use-theme';
 import { SUPERVISEUR_NAV } from '@/lib/constants';
 import { PME_PROFILE } from '@/lib/data/superviseur-data';
 
@@ -20,7 +19,6 @@ function findLabel(pathname: string) {
 
 export default function SuperviseurLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { dark, toggle, setDark } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -52,8 +50,6 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
           roleIcon="Building2"
           layoutId="supActiveTab"
           collapsed={collapsed}
-          darkMode={dark}
-          setDarkMode={setDark}
         />
       </motion.aside>
 
@@ -64,8 +60,6 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
           roleLabel="Superviseur"
           pageLabel={pageLabel}
 
-          darkMode={dark}
-          onToggleDarkMode={toggle}
           onMobileMenuOpen={() => setMobileOpen(true)}
           notifications={3}
           rightSlot={
@@ -101,8 +95,6 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
           roleIcon="Building2"
           layoutId="supActiveTabMobile"
           onNavigate={() => setMobileOpen(false)}
-          darkMode={dark}
-          setDarkMode={setDark}
         />
       </MobileDrawer>
     </div>

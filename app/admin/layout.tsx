@@ -6,7 +6,6 @@ import { ShieldCheck } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
-import { useTheme } from '@/lib/use-theme';
 import { ADMIN_NAV } from '@/lib/constants';
 
 const TABS = ADMIN_NAV.map((n) => ({ ...n, exact: n.href === '/admin' }));
@@ -18,7 +17,6 @@ function findLabel(pathname: string) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { dark, toggle, setDark } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- close drawer on navigation
@@ -36,8 +34,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           roleLabel="Admin Panel"
           roleIcon="ShieldCheck"
           layoutId="adminActiveTab"
-          darkMode={dark}
-          setDarkMode={setDark}
         />
       </aside>
 
@@ -48,8 +44,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           roleLabel="Admin"
           pageLabel={pageLabel}
 
-          darkMode={dark}
-          onToggleDarkMode={toggle}
           onMobileMenuOpen={() => setMobileOpen(true)}
           notifications={3}
         />
@@ -67,8 +61,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           roleIcon="ShieldCheck"
           layoutId="adminActiveTabMobile"
           onNavigate={() => setMobileOpen(false)}
-          darkMode={dark}
-          setDarkMode={setDark}
         />
       </MobileDrawer>
     </div>

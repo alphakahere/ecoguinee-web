@@ -6,7 +6,6 @@ import { MapPin, Plus, Bell, Activity, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileBottomTabs } from '@/components/layouts/mobile-bottom-tabs';
-import { useTheme } from '@/lib/use-theme';
 import { AGENT_NAV } from '@/lib/constants';
 
 const TABS = AGENT_NAV.map((n) => ({ ...n, exact: n.href === '/agent' }));
@@ -18,7 +17,6 @@ function findLabel(pathname: string) {
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { dark, setDark } = useTheme();
   const pageLabel = findLabel(pathname);
   const isRoot = pathname === '/agent';
 
@@ -32,8 +30,6 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
           roleLabel="Espace Agent"
           roleIcon="Activity"
           layoutId="agentActiveTabDesktop"
-          darkMode={dark}
-          setDarkMode={setDark}
         />
       </aside>
 

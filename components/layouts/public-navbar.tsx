@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MapPin, FileText, LogIn, Sun, Moon, Map, Megaphone } from 'lucide-react';
-import { useTheme } from '@/lib/use-theme';
+import { MapPin, FileText, LogIn, Map, Megaphone } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/carte',     label: 'Carte',     icon: Map },
@@ -12,7 +11,6 @@ const NAV_LINKS = [
 
 export function PublicNavbar() {
   const pathname = usePathname();
-  const { dark, toggle } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
@@ -48,9 +46,6 @@ export function PublicNavbar() {
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button onClick={toggle} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors" aria-label="Basculer le thème">
-            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
           <Link href="/admin" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
             <LogIn className="w-3.5 h-3.5" /> Connexion
           </Link>

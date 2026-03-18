@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  Home, Flag, Wrench, User, MapPin, Activity, Sun, Moon, LogOut,
+  Home, Flag, Wrench, User, MapPin, Activity, LogOut,
   LayoutDashboard, Users, BarChart3, Settings, Megaphone, Map,
   Building2, AlertTriangle, ShieldCheck,
 } from 'lucide-react';
@@ -24,13 +24,11 @@ interface SidebarNavProps {
   layoutId: string;
   collapsed?: boolean;
   onNavigate?: () => void;
-  darkMode: boolean;
-  setDarkMode: (v: boolean) => void;
 }
 
 export function SidebarNav({
   items, userInfo, roleLabel, roleIcon = 'Activity', layoutId,
-  collapsed = false, onNavigate, darkMode, setDarkMode,
+  collapsed = false, onNavigate,
 }: SidebarNavProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -131,30 +129,18 @@ export function SidebarNav({
                 <p className="text-[10px] font-mono text-sidebar-accent-foreground truncate">{userInfo.subtitle}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-mono text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-all"
-              >
-                {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                <span>{darkMode ? 'Clair' : 'Sombre'}</span>
-              </button>
-              <button
-                onClick={() => router.push('/')}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-mono text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-all"
-              >
-                <LogOut className="w-3.5 h-3.5" /><span>Quitter</span>
-              </button>
-            </div>
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-mono text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" /><span>Quitter</span>
+            </button>
           </>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold" title={userInfo.name}>
               {userInfo.initials}
             </div>
-            <button onClick={() => setDarkMode(!darkMode)} className="w-8 h-8 rounded-lg flex items-center justify-center text-sidebar-foreground/60 hover:bg-sidebar-accent/50 transition-colors">
-              {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-            </button>
           </div>
         )}
       </div>
