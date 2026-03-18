@@ -4,12 +4,52 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FileText, ArrowRight, LogIn, Leaf } from 'lucide-react';
 
+function TopoSVG() {
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="xMidYMid slice"
+      viewBox="0 0 1200 700"
+    >
+      <g fill="none" stroke="rgba(111,207,74,0.13)" strokeWidth="1">
+        {/* Topographic contours — nested ellipses */}
+        {[280, 240, 200, 162, 126, 92, 60, 34].map((r, i) => (
+          <ellipse key={i} cx="600" cy="350" rx={r * 2.2} ry={r * 1.3} />
+        ))}
+        {/* Second cluster offset */}
+        {[180, 148, 118, 90, 64, 42].map((r, i) => (
+          <ellipse key={`b${i}`} cx="200" cy="150" rx={r * 2} ry={r * 1.2} />
+        ))}
+        {/* Third cluster */}
+        {[160, 128, 98, 72].map((r, i) => (
+          <ellipse key={`c${i}`} cx="1050" cy="580" rx={r * 1.8} ry={r} />
+        ))}
+        {/* Horizontal contour lines */}
+        {Array.from({ length: 14 }, (_, i) => (
+          <line
+            key={`h${i}`}
+            x1="0"
+            y1={i * 52}
+            x2="1200"
+            y2={i * 52 + 18}
+            strokeOpacity="0.06"
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 export function HeroSection() {
   return (
     <section
       className="relative flex flex-col justify-center min-h-[80vh] overflow-hidden"
       style={{ background: '#0A1A10' }}
     >
+      {/* Topo SVG lines */}
+      <TopoSVG />
+
       {/* Green radial glow */}
       <div
         className="absolute pointer-events-none"

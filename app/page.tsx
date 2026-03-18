@@ -5,6 +5,8 @@ import { StatsBar } from '@/components/home/stats-bar';
 import { HowItWorks } from '@/components/home/how-it-works';
 import { CampaignsPreview } from '@/components/home/campaigns-preview';
 import { MapPreview } from '@/components/home/map-preview';
+import { KeyFigures } from '@/components/home/key-figures';
+import { WhoIsItFor } from '@/components/home/who-is-it-for';
 import { CtaSection } from '@/components/home/cta-section';
 
 export default function HomePage() {
@@ -16,6 +18,8 @@ export default function HomePage() {
       <HowItWorks />
       <CampaignsPreview />
       <MapPreview />
+      <KeyFigures />
+      <WhoIsItFor />
       <CtaSection />
       <PublicFooter />
     </div>
