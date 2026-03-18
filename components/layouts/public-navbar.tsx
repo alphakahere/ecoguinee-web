@@ -17,8 +17,8 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
+        <Link href="/" className="flex items-center gap-3 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
             <MapPin className="w-5 h-5 text-white" />
           </div>
           <div className="hidden sm:block">
@@ -47,7 +47,7 @@ export function PublicNavbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button onClick={toggle} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors" aria-label="Basculer le thème">
             {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>

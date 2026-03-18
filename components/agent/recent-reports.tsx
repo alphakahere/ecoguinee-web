@@ -84,7 +84,7 @@ export function RecentReports() {
           <div className="divide-y divide-border">
             {RECENT_ACTIVITY.map((a) => (
               <div key={a.id} className="flex items-start gap-3 px-5 py-3">
-                <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 mt-0.5">
                   <a.icon className="w-3.5 h-3.5 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">

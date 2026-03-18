@@ -29,7 +29,7 @@ export function DeleteConfirmDialog({ open, name, onClose, onConfirm }: DeleteCo
             <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm pointer-events-auto border border-border overflow-hidden" onClick={(e) => e.stopPropagation()}>
               <div className="p-6">
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#D94035]/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#D94035]/10 flex items-center justify-center shrink-0">
                     <AlertTriangle className="w-5 h-5 text-[#D94035]" />
                   </div>
                   <div>

@@ -23,7 +23,7 @@ export function HeaderBar({
   const isRoot = pageLabel === 'Dashboard' || pageLabel === 'Tableau de bord' || pageLabel === 'Accueil';
 
   return (
-    <header className="flex-shrink-0 h-14 flex items-center justify-between px-4 border-b border-border bg-card/95 backdrop-blur-md z-20">
+    <header className="shrink-0 h-14 flex items-center justify-between px-4 border-b border-border bg-card/95 backdrop-blur-md z-20 sticky top-0">
       <div className="flex items-center gap-3">
         {onMobileMenuOpen && (
           <button onClick={onMobileMenuOpen} className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted/50">

@@ -94,23 +94,23 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
               {campaign.statut === 'terminee' ? (
                 <div className="rounded-2xl p-6 flex flex-col gap-3" style={{ borderLeft: '3px solid #6FCF4A', background: 'rgba(111,207,74,0.05)', border: '1px solid rgba(111,207,74,0.2)' }}>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#6FCF4A' }} />
+                    <CheckCircle className="w-4 h-4 shrink-0" style={{ color: '#6FCF4A' }} />
                     <span className="font-mono text-sm"><span style={{ color: '#6FCF4A', fontWeight: 600 }}>{campaign.participants ?? 0}</span> participants</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+                    <Calendar className="w-4 h-4 shrink-0 text-muted-foreground" />
                     <span className="font-mono text-sm text-muted-foreground">Tenue le <span className="text-foreground">{formatDate(campaign.datePrevue)}</span></span>
                   </div>
                   {(termineeEvent?.note ?? campaign.notes) && (
                     <div className="flex items-start gap-3">
-                      <FileText className="w-4 h-4 flex-shrink-0 text-muted-foreground mt-0.5" />
+                      <FileText className="w-4 h-4 shrink-0 text-muted-foreground mt-0.5" />
                       <span className="font-mono text-sm text-muted-foreground">{termineeEvent?.note ?? campaign.notes}</span>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="rounded-2xl p-6 flex items-start gap-4" style={{ background: 'rgba(232,160,32,0.06)', border: '1px solid rgba(232,160,32,0.25)' }}>
-                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#E8A020' }} />
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#E8A020' }} />
                   <div>
                     <p className="font-mono text-sm" style={{ color: '#E8A020' }}>Cette campagne n&apos;a pas encore eu lieu.</p>
                     <p className="font-mono text-sm text-muted-foreground mt-1">Rendez-vous le <span className="text-foreground">{formatDate(campaign.datePrevue)}</span>.</p>
@@ -126,7 +126,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                 <div className="flex flex-col gap-3">
                   {campaign.documents.map((doc) => (
                     <div key={doc.id} className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 font-mono text-xs font-bold" style={{ background: `${DOC_COLORS[doc.type]}18`, color: DOC_COLORS[doc.type], border: `1px solid ${DOC_COLORS[doc.type]}30` }}>
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 font-mono text-xs font-bold" style={{ background: `${DOC_COLORS[doc.type]}18`, color: DOC_COLORS[doc.type], border: `1px solid ${DOC_COLORS[doc.type]}30` }}>
                         {DOC_LABELS[doc.type]}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -134,7 +134,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                         {doc.description && <p className="font-mono text-xs text-muted-foreground mt-0.5 truncate">{doc.description}</p>}
                         <p className="font-mono text-xs text-muted-foreground mt-0.5">{doc.taille}</p>
                       </div>
-                      <button className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs" style={{ border: '1px solid #2D7D46', color: '#2D7D46' }}>
+                      <button className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs" style={{ border: '1px solid #2D7D46', color: '#2D7D46' }}>
                         <Download className="w-3 h-3" />Télécharger
                       </button>
                     </div>
@@ -180,10 +180,10 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: sm.dot }} />{sm.label}
                   </span>
                 </div>
-                <div className="flex items-start gap-3"><MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" /><span className="font-mono text-sm">{campaign.secteur} — {campaign.commune}</span></div>
-                <div className="flex items-start gap-3"><Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" /><span className="font-mono text-sm">{formatDate(campaign.datePrevue)}</span></div>
-                {campaign.pmeOrganisatrice && <div className="flex items-center gap-3"><Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" /><span className="font-mono text-sm">{campaign.pmeOrganisatrice}</span></div>}
-                <div className="flex items-center gap-3"><Users className="w-4 h-4 text-muted-foreground flex-shrink-0" /><span className="font-mono text-sm text-muted-foreground">Agent : {campaign.agentNom}</span></div>
+                <div className="flex items-start gap-3"><MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" /><span className="font-mono text-sm">{campaign.secteur} — {campaign.commune}</span></div>
+                <div className="flex items-start gap-3"><Calendar className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" /><span className="font-mono text-sm">{formatDate(campaign.datePrevue)}</span></div>
+                {campaign.pmeOrganisatrice && <div className="flex items-center gap-3"><Building2 className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm">{campaign.pmeOrganisatrice}</span></div>}
+                <div className="flex items-center gap-3"><Users className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm text-muted-foreground">Agent : {campaign.agentNom}</span></div>
               </div>
             </div>
           </div>
@@ -194,7 +194,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
           <div className="flex items-stretch justify-between gap-4 mt-16 pt-8 border-t border-border">
             {prevC ? (
               <Link href={`${basePath}/${prevC.id}`} className="group flex items-center gap-3 max-w-xs text-left">
-                <ChevronLeft className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <ChevronLeft className="w-5 h-5 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
                 <div>
                   <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">Précédent</p>
                   <p className="font-mono text-sm line-clamp-2 group-hover:text-primary transition-colors">{prevC.titre}</p>
@@ -207,7 +207,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                   <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">Suivant</p>
                   <p className="font-mono text-sm line-clamp-2 group-hover:text-primary transition-colors">{nextC.titre}</p>
                 </div>
-                <ChevronRight className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <ChevronRight className="w-5 h-5 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
               </Link>
             )}
           </div>

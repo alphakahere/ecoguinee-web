@@ -25,7 +25,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-56 flex-shrink-0 flex-col h-full">
+      <aside className="hidden lg:flex w-56 shrink-0 flex-col h-full">
         <SidebarNav
           items={TABS}
           userInfo={{ name: 'Fatoumata Camara', initials: 'FC', subtitle: 'Agent · Dixinn' }}
@@ -39,9 +39,9 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
       {/* Main column */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header className="flex-shrink-0 h-14 flex items-center justify-between px-4 border-b border-border bg-card/95 backdrop-blur-md z-20">
+        <header className="shrink-0 h-14 flex items-center justify-between px-4 border-b border-border bg-card/95 backdrop-blur-md z-20">
           <div className="flex items-center gap-3 lg:hidden">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
               <MapPin className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-sm">{pageLabel}</span>

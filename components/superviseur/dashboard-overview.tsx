@@ -57,7 +57,7 @@ export function DashboardOverview() {
           <div className="divide-y divide-border">
             {ACTIVITY_FEED.slice(0, 6).map((a) => (
               <div key={a.id} className="flex items-start gap-3 px-5 py-3">
-                <div className="w-2 h-2 rounded-full flex-shrink-0 mt-2" style={{ background: a.color }} />
+                <div className="w-2 h-2 rounded-full shrink-0 mt-2" style={{ background: a.color }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-mono truncate">{a.text}</p>
                   <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{a.time}</p>

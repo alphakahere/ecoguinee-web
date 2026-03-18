@@ -72,7 +72,7 @@ export function MapFilters({
                   severity === opt.value ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted/50 text-foreground'
                 }`}
               >
-                {opt.color && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: opt.color }} />}
+                {opt.color && <div className="w-2 h-2 rounded-full shrink-0" style={{ background: opt.color }} />}
                 {opt.label}
               </button>
             ))}
@@ -107,7 +107,7 @@ export function MapFilters({
                   status === opt.value ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted/50 text-foreground'
                 }`}
               >
-                {opt.color && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: opt.color }} />}
+                {opt.color && <div className="w-2 h-2 rounded-full shrink-0" style={{ background: opt.color }} />}
                 {opt.label}
               </button>
             ))}

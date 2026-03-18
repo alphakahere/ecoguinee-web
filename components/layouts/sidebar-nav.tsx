@@ -39,8 +39,8 @@ export function SidebarNav({
   return (
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border grain-overlay">
       {/* Brand */}
-      <div className={`flex items-center gap-3 py-5 border-b border-sidebar-border flex-shrink-0 ${collapsed ? 'px-3 justify-center' : 'px-4'}`}>
-        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+      <div className={`flex items-center gap-3 py-5 border-b border-sidebar-border shrink-0 ${collapsed ? 'px-3 justify-center' : 'px-4'}`}>
+        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
           <MapPin className="w-5 h-5 text-white" />
         </div>
         {!collapsed && (
@@ -87,7 +87,7 @@ export function SidebarNav({
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
-                  <Icon className={`w-4 h-4 flex-shrink-0 relative z-10 transition-colors ${
+                  <Icon className={`w-4 h-4 shrink-0 relative z-10 transition-colors ${
                     active ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground/60 group-hover:text-sidebar-foreground'
                   }`} />
                   {!collapsed && (
@@ -119,11 +119,11 @@ export function SidebarNav({
       </nav>
 
       {/* Bottom user card */}
-      <div className={`border-t border-sidebar-border py-3 flex-shrink-0 space-y-2 ${collapsed ? 'px-2' : 'px-3'}`}>
+      <div className={`border-t border-sidebar-border py-3 shrink-0 space-y-2 ${collapsed ? 'px-2' : 'px-3'}`}>
         {!collapsed ? (
           <>
             <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-sidebar-accent">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {userInfo.initials}
               </div>
               <div className="flex-1 min-w-0">

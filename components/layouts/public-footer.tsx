@@ -43,13 +43,13 @@ export function PublicFooter() {
           <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Contact</p>
           <ul className="space-y-3">
             <li className="flex items-center gap-2.5 text-sm font-mono text-muted-foreground">
-              <Mail className="w-4 h-4 flex-shrink-0 text-primary" />contact@ecoguinee.gn
+              <Mail className="w-4 h-4 shrink-0 text-primary" />contact@ecoguinee.gn
             </li>
             <li className="flex items-center gap-2.5 text-sm font-mono text-muted-foreground">
-              <Phone className="w-4 h-4 flex-shrink-0 text-primary" />+224 620 00 00 00
+              <Phone className="w-4 h-4 shrink-0 text-primary" />+224 620 00 00 00
             </li>
             <li className="flex items-center gap-2.5 text-sm font-mono text-muted-foreground">
-              <Globe className="w-4 h-4 flex-shrink-0 text-primary" />www.ecoguinee.gn
+              <Globe className="w-4 h-4 shrink-0 text-primary" />www.ecoguinee.gn
             </li>
           </ul>
         </div>

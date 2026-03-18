@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 flex-shrink-0 flex-col h-full">
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col h-full">
         <SidebarNav
           items={TABS}
           userInfo={{ name: 'Amadou Kouyaté', initials: 'AK', subtitle: 'Administrateur' }}

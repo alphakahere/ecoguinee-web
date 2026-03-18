@@ -62,7 +62,7 @@ export function CampaignList() {
               <button
                 key={chip.id}
                 onClick={() => { setTypeFilter(chip.id); setVisible(PAGE_SIZE); }}
-                className="flex-shrink-0 px-4 py-2 rounded-full font-mono text-sm transition-all"
+                className="shrink-0 px-4 py-2 rounded-full font-mono text-sm transition-all"
                 style={{
                   background: typeFilter === chip.id ? '#2D7D46' : 'var(--muted)',
                   color: typeFilter === chip.id ? '#fff' : 'var(--muted-foreground)',
@@ -73,7 +73,7 @@ export function CampaignList() {
               </button>
             ))}
 
-            <div className="hidden md:flex items-center gap-2 ml-auto flex-shrink-0">
+            <div className="hidden md:flex items-center gap-2 ml-auto shrink-0">
               <div className="relative">
                 <select
                   value={communeFilter}

@@ -75,11 +75,11 @@ export function CampaignCard({ campaign, index = 0 }: Props) {
 
       <div className="flex items-stretch border-t border-border">
         <div className="flex items-center gap-2 px-5 py-3 flex-1">
-          <Users className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+          <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span className="text-xs font-mono text-muted-foreground">{campaign.participants ?? 0} participants</span>
         </div>
         <div className="flex items-center gap-2 px-5 py-3 flex-1 border-l border-border">
-          <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+          <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span className="text-xs font-mono text-muted-foreground">{docCount} documents</span>
         </div>
       </div>

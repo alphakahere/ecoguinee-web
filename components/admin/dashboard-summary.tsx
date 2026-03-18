@@ -80,7 +80,7 @@ export function DashboardSummary() {
                 href={link.href}
                 className="group flex items-center gap-3 p-4 rounded-xl border border-border hover:bg-muted/30 hover:border-primary/30 transition-all"
               >
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <link.icon className="w-4 h-4 text-primary" />
                 </div>
                 <div>
@@ -105,13 +105,13 @@ export function DashboardSummary() {
             {recentHotspots.map((h) => (
               <div key={h.id} className="flex items-center justify-between px-5 py-3 hover:bg-muted/20 transition-colors">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: SEV_COLOR[h.severity] }} />
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: SEV_COLOR[h.severity] }} />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold truncate">{h.location.address}</p>
                     <p className="text-[10px] font-mono text-muted-foreground">{h.location.territoire} · {h.id}</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-muted-foreground ml-2 flex-shrink-0">
+                <span className="text-[10px] font-mono text-muted-foreground ml-2 shrink-0">
                   {STA_LABEL[h.status]}
                 </span>
               </div>

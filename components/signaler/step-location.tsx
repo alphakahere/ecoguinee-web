@@ -58,7 +58,7 @@ export function StepLocation({ data, update }: Props) {
 
       {gpsState === 'denied' && (
         <div className="flex items-start gap-3 p-3.5 rounded-xl bg-[#E8A020]/10 border border-[#E8A020]/30">
-          <AlertTriangle className="w-4 h-4 text-[#E8A020] flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="w-4 h-4 text-[#E8A020] shrink-0 mt-0.5" />
           <p className="text-sm font-mono text-[#E8A020]">
             Localisation non disponible. Veuillez sélectionner manuellement.
           </p>

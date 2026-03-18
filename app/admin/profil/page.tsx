@@ -39,7 +39,7 @@ export default function AdminProfilPage() {
             { icon: User, label: 'Dernière connexion', value: new Date(ADMIN.lastLogin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-4">
-              <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
                 <item.icon className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>

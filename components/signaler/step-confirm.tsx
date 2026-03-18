@@ -35,7 +35,7 @@ export function StepConfirm({ data, goTo }: Props) {
             <p className="text-sm font-mono">{item.label}</p>
             <button
               onClick={() => goTo(item.step)}
-              className="text-[11px] font-mono text-primary hover:underline flex items-center gap-0.5 ml-3 flex-shrink-0"
+              className="text-[11px] font-mono text-primary hover:underline flex items-center gap-0.5 ml-3 shrink-0"
             >
               Modifier <ChevronRight className="w-3 h-3" />
             </button>
@@ -45,7 +45,7 @@ export function StepConfirm({ data, goTo }: Props) {
 
       {data.wasteType === 'solid' && (
         <div className="flex items-start gap-3 p-3.5 rounded-xl bg-[#6FCF4A]/10 border border-[#6FCF4A]/30">
-          <CheckCircle className="w-4 h-4 text-[#6FCF4A] flex-shrink-0 mt-0.5" />
+          <CheckCircle className="w-4 h-4 text-[#6FCF4A] shrink-0 mt-0.5" />
           <p className="text-sm font-mono text-[#6FCF4A]">
             <span className="font-semibold">PME Vert Guinée</span> sera notifiée — responsable de ce secteur.
           </p>
@@ -54,7 +54,7 @@ export function StepConfirm({ data, goTo }: Props) {
 
       {!data.telephone && (
         <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border">
-          <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
           <p className="text-[12px] font-mono text-muted-foreground">
             Vous ne recevrez pas de mise à jour sur ce signalement.{' '}
             <button onClick={() => goTo(3)} className="text-primary underline underline-offset-2">

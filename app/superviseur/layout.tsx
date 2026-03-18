@@ -42,7 +42,7 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
       <motion.aside
         animate={{ width: collapsed ? 56 : 224 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="hidden md:flex flex-col flex-shrink-0 h-full overflow-hidden"
+        className="hidden md:flex flex-col shrink-0 h-full overflow-hidden"
         style={{ width: collapsed ? 56 : 224 }}
       >
         <SidebarNav
@@ -79,8 +79,8 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
         />
 
         {/* Scope banner */}
-        <div className="flex-shrink-0 flex items-center gap-3 px-4 py-2 bg-primary/5 border-b border-primary/15 text-xs font-mono overflow-hidden">
-          <Shield className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+        <div className="shrink-0 flex items-center gap-3 px-4 py-2 bg-primary/5 border-b border-primary/15 text-xs font-mono overflow-hidden">
+          <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
           <span className="text-primary font-semibold whitespace-nowrap">Périmètre :</span>
           <span className="text-foreground/70 font-semibold truncate">{PME_PROFILE.name}</span>
           <span className="text-muted-foreground whitespace-nowrap hidden sm:inline">—</span>
