@@ -46,7 +46,7 @@ export function PublicNavbar() {
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Link href="/admin" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
+          <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
             <LogIn className="w-3.5 h-3.5" /> Connexion
           </Link>
           <Link href="/signaler" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-mono hover:bg-primary/90 transition-all hover:shadow-md hover:shadow-primary/30">
