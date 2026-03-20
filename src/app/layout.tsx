@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
 const syne = Syne({
@@ -37,7 +38,9 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
         <Toaster position="top-right" richColors />
       </body>
     </html>
