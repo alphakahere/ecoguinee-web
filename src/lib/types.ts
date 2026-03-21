@@ -168,13 +168,13 @@ export const STATUS_META: Record<InterventionStatus, { label: string; color: str
   resolved:      { label: 'Résolu',    color: 'text-[#6FCF4A]',  bg: 'bg-[#6FCF4A]/10' },
 };
 
-export const ROLE_META: Record<UserRole, { label: string; color: string; bg: string }> = {
-  SUPER_ADMIN: { label: 'Super Admin', color: 'text-[#D94035]', bg: 'bg-[#D94035]/10' },
-  ADMIN:       { label: 'Admin',       color: 'text-[#D94035]', bg: 'bg-[#D94035]/10' },
-  MANAGER:     { label: 'Manager',     color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10' },
-  SUPERVISOR:  { label: 'Superviseur', color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10' },
-  AGENT:       { label: 'Agent',       color: 'text-[#2D7D46]', bg: 'bg-[#2D7D46]/10' },
-  USER:        { label: 'Citoyen',     color: 'text-muted-foreground', bg: 'bg-muted' },
+export const ROLE_META: Record<UserRole, { label: string; color: string; bg: string; dot: string }> = {
+  SUPER_ADMIN: { label: 'Super administrateur', color: 'text-[#D94035]', bg: 'bg-[#D94035]/10', dot: '#D94035' },
+  ADMIN:       { label: 'Administrateur', color: 'text-[#D94035]', bg: 'bg-[#D94035]/10', dot: '#D94035' },
+  MANAGER:     { label: 'Manager',        color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10', dot: '#E8A020' },
+  SUPERVISOR:  { label: 'Superviseur',    color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10', dot: '#E8A020' },
+  AGENT:       { label: 'Agent',          color: 'text-[#2D7D46]', bg: 'bg-[#2D7D46]/10', dot: '#2D7D46' },
+  USER:        { label: 'Citoyen',        color: 'text-muted-foreground', bg: 'bg-muted', dot: '#6B7280' },
 };
 
 export function redirectByRole(role: UserRole): string {
