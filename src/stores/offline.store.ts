@@ -31,9 +31,9 @@ export const useOfflineStore = create<OfflineState>()(
 
         set({ isSyncing: true });
         try {
-          const { reportsService } = await import('@/services/reports');
+          const { api } = await import('@/services/api');
           for (const report of queue) {
-            await reportsService.create(report);
+            await api.post('/reports', report);
             set((state) => ({
               queue: state.queue.filter((r) => r.localId !== report.localId),
             }));

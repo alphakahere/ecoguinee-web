@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { zonesService } from '@/services/zones';
+import type { ZoneFilters } from '@/types/api';
 
-export function useZones(type?: string) {
+export function useZones(filters?: ZoneFilters) {
   return useQuery({
-    queryKey: type ? queryKeys.zones.byType(type) : queryKeys.zones.all,
-    queryFn: () => (type ? zonesService.getByType(type) : zonesService.getAll()),
+    queryKey: filters ? queryKeys.zones.filtered(filters) : queryKeys.zones.all,
+    queryFn: () => zonesService.getAll(filters),
   });
 }
 

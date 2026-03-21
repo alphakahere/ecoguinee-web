@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { smesService } from '@/services/smes';
+import type { SMEFilters } from '@/types/api';
 
-export function useSMEs() {
+export function useSMEs(filters?: SMEFilters) {
   return useQuery({
-    queryKey: queryKeys.smes.all,
-    queryFn: () => smesService.getAll(),
+    queryKey: filters ? queryKeys.smes.filtered(filters) : queryKeys.smes.all,
+    queryFn: () => smesService.getAll(filters),
   });
 }
 

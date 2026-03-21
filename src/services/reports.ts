@@ -1,38 +1,34 @@
 import { api } from './api';
-import type { Report, ReportFilters, PaginatedResponse, PendingReport } from '@/types';
+import type {
+  ApiReport,
+  ApiReportFilters,
+  ApiPaginatedResponse,
+} from '@/types/api';
+
+function normalize(
+  data: ApiPaginatedResponse<ApiReport> | ApiReport[],
+): ApiPaginatedResponse<ApiReport> {
+  if (Array.isArray(data)) {
+    return { data, total: data.length, page: 1, limit: data.length };
+  }
+  return data;
+}
 
 export const reportsService = {
-  async getAll(filters?: ReportFilters): Promise<PaginatedResponse<Report>> {
-    const { data } = await api.get<PaginatedResponse<Report>>('/reports', {
-      params: filters,
-    });
+  async getAll(filters?: ApiReportFilters): Promise<ApiPaginatedResponse<ApiReport>> {
+    const { data } = await api.get<ApiPaginatedResponse<ApiReport> | ApiReport[]>(
+      '/reports',
+      { params: filters },
+    );
+    return normalize(data);
+  },
+
+  async getById(id: string): Promise<ApiReport> {
+    const { data } = await api.get<ApiReport>(`/reports/${id}`);
     return data;
   },
 
-  async getById(id: string): Promise<Report> {
-    const { data } = await api.get<Report>(`/reports/${id}`);
-    return data;
-  },
-
-  async create(
-    payload: Omit<PendingReport, 'localId'>,
-  ): Promise<Report> {
-    const { data } = await api.post<Report>('/reports', payload);
-    return data;
-  },
-
-  async update(id: string, payload: Partial<Report>): Promise<Report> {
-    const { data } = await api.patch<Report>(`/reports/${id}`, payload);
-    return data;
-  },
-
-  async updateStatus(
-    id: string,
-    status: Report['status'],
-  ): Promise<Report> {
-    const { data } = await api.patch<Report>(`/reports/${id}/status`, {
-      status,
-    });
-    return data;
+  async delete(id: string): Promise<void> {
+    await api.delete(`/reports/${id}`);
   },
 };

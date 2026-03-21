@@ -20,12 +20,14 @@ export const queryKeys = {
 
   zones: {
     all: ['zones'] as const,
+    filtered: (filters: object) => ['zones', 'list', filters] as const,
     byType: (type: string) => ['zones', 'type', type] as const,
     detail: (id: string) => ['zones', 'detail', id] as const,
   },
 
   smes: {
     all: ['smes'] as const,
+    filtered: (filters: object) => ['smes', 'list', filters] as const,
     detail: (id: string) => ['smes', 'detail', id] as const,
   },
 

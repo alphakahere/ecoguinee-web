@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { reportsService } from '@/services/reports';
-import type { ReportFilters } from '@/types';
+import type { ApiReportFilters } from '@/types/api';
 
-export function useReports(filters?: ReportFilters) {
+export function useReports(filters?: ApiReportFilters) {
   return useQuery({
     queryKey: filters
       ? queryKeys.reports.filtered(filters)

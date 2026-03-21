@@ -1,24 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { campaignsService } from '@/services/campaigns';
-import type { Campaign } from '@/types';
+import type { UpdateCampaignPayload } from '@/types/api';
 
 export function useUpdateCampaign() {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string;
-      payload: Partial<Campaign>;
-    }) => campaignsService.update(id, payload),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns.all });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.campaigns.detail(id),
-      });
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateCampaignPayload }) =>
+      campaignsService.update(id, payload),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: queryKeys.campaigns.all });
+      qc.invalidateQueries({ queryKey: queryKeys.campaigns.detail(id) });
     },
   });
 }

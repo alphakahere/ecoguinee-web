@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { campaignsService } from '@/services/campaigns';
-import type { CampaignFilters } from '@/types';
+import type { ApiCampaignFilters } from '@/types/api';
 
-export function useCampaigns(filters?: CampaignFilters) {
+export function useCampaigns(filters?: ApiCampaignFilters) {
   return useQuery({
     queryKey: filters
       ? queryKeys.campaigns.filtered(filters)
