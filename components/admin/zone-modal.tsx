@@ -10,6 +10,7 @@ interface ZoneModalProps {
   open: boolean;
   zone?: ApiZone | null;
   allZones: ApiZone[];
+  defaultParentId?: string;
   onClose: () => void;
   onSave: (payload: CreateZonePayload | UpdateZonePayload, id?: string) => void | Promise<void>;
   isSubmitting?: boolean;
@@ -25,7 +26,7 @@ interface FormState {
 
 const empty: FormState = { name: '', type: 'MUNICIPALITY', parentId: '' };
 
-export function ZoneModal({ open, zone, allZones, onClose, onSave, isSubmitting = false }: ZoneModalProps) {
+export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose, onSave, isSubmitting = false }: ZoneModalProps) {
   const [form, setForm] = useState<FormState>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -34,10 +35,10 @@ export function ZoneModal({ open, zone, allZones, onClose, onSave, isSubmitting 
     if (zone) {
       setForm({ name: zone.name, type: zone.type, parentId: zone.parentId ?? '' });
     } else {
-      setForm(empty);
+      setForm({ ...empty, parentId: defaultParentId });
     }
     setErrors({});
-  }, [zone, open]);
+  }, [zone, open, defaultParentId]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const parentOptions = allZones.filter((z) => z.id !== zone?.id);

@@ -45,4 +45,9 @@ export const zonesService = {
   async delete(id: string): Promise<void> {
     await api.delete(`/zones/${id}`);
   },
+
+  async getTree(): Promise<ApiZone[]> {
+    const { data } = await api.get<ApiZone[]>('/zones/tree');
+    return data;
+  },
 };

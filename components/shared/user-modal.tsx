@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, User as UserIcon, Mail, Phone, Shield, MapPin, ToggleLeft, Trash2, Lock } from 'lucide-react';
+import { X, User as UserIcon, Mail, Phone, Shield, ToggleLeft, Trash2, Lock } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROLE_META } from '@/lib/types';
 import type { User, UserRole, UserStatus } from '@/lib/types';
@@ -33,15 +33,8 @@ interface UserModalProps {
   isSubmitting?: boolean;
 }
 
-const COMMUNES = ['Kaloum', 'Dixinn', 'Matam', 'Ratoma', 'Matoto'];
 const ROLE_OPTIONS: { value: UserRole; label: string }[] =
   (Object.entries(ROLE_META) as [UserRole, { label: string }][]).map(([value, m]) => ({ value, label: m.label }));
-const STATUS_OPTIONS: { value: UserStatus; label: string }[] = [
-  { value: 'ACTIVE', label: 'Actif' },
-  { value: 'INACTIVE', label: 'Inactif' },
-  { value: 'SUSPENDED', label: 'Suspendu' },
-];
-
 const emptyFull: UserSaveFullPayload = {
   name: '',
   email: '',
@@ -293,55 +286,9 @@ export function UserModal({
                           </p>
                         )}
                       </div>
-                      <div>
-                        <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
-                          Territoire
-                        </label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <select
-                            className={`${inputCls} appearance-none`}
-                            value={form.territoire}
-                            onChange={(e) => setForm((f) => ({ ...f, territoire: e.target.value }))}
-                          >
-                            <option value="">— Aucune —</option>
-                            {COMMUNES.map((c) => (
-                              <option key={c} value={c}>
-                                {c}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
                     </div>
                   </>
                 )}
-
-                <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">
-                    Statut du compte
-                  </label>
-                  <div className="flex gap-2">
-                    {STATUS_OPTIONS.map((s) => (
-                      <button
-                        key={s.value}
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, status: s.value }))}
-                        className={`flex-1 py-2 px-3 rounded-lg text-xs font-mono border transition-all ${
-                          form.status === s.value
-                            ? s.value === 'ACTIVE'
-                              ? 'bg-[#6FCF4A]/20 border-[#6FCF4A] text-[#6FCF4A]'
-                              : s.value === 'SUSPENDED'
-                                ? 'bg-[#D94035]/20 border-[#D94035] text-[#D94035]'
-                                : 'bg-[#E8A020]/20 border-[#E8A020] text-[#E8A020]'
-                            : 'border-border text-muted-foreground hover:bg-muted/50'
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 <div className="flex flex-wrap justify-between gap-3 pt-2 border-t border-border">
                   <div>

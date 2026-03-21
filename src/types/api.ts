@@ -46,6 +46,7 @@ export interface ApiZone {
   parentId: string | null;
   parent?: ApiZone;
   children?: ApiZone[];
+  _count?: { reports: number; campaigns: number; smes: number };
   createdAt: string;
   updatedAt: string;
 }

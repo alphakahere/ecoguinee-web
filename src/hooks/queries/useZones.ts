@@ -18,6 +18,13 @@ export function useZone(id: string) {
   });
 }
 
+export function useZoneTree() {
+  return useQuery({
+    queryKey: queryKeys.zones.tree,
+    queryFn: () => zonesService.getTree(),
+  });
+}
+
 export function useZoneChildren(parentId: string) {
   return useQuery({
     queryKey: [...queryKeys.zones.detail(parentId), 'children'] as const,
