@@ -1,16 +1,17 @@
-import { dashboardStats } from '@/lib/data/mock-data';
-import { territoires } from '@/lib/data/mock-data';
+'use client';
 
-const totalResolved = territoires.reduce((s, t) => s + t.resolvedCount, 0);
-
-const stats = [
-  { value: dashboardStats.totalHotspots, label: 'Signalements', suffix: '' },
-  { value: dashboardStats.activeInterventions, label: 'Interventions actives', suffix: '' },
-  { value: totalResolved, label: 'Résolus', suffix: '' },
-  { value: dashboardStats.weeklyTrend, label: 'Tendance', suffix: '%' },
-];
+import { usePublicStats } from '@/hooks/queries/usePublicStats';
 
 export function StatsBar() {
+  const { data } = usePublicStats();
+
+  const stats = [
+    { value: data?.totalReports ?? 0, label: 'Signalements', suffix: '' },
+    { value: data?.resolvedReports ?? 0, label: 'Résolus', suffix: '' },
+    { value: data?.activeSmes ?? 0, label: 'PMEs actives', suffix: '' },
+    { value: data?.totalCampaigns ?? 0, label: 'Campagnes', suffix: '' },
+  ];
+
   return (
     <section className="bg-card border-b border-border">
       <div className="max-w-7xl mx-auto px-5 py-6">
@@ -18,7 +19,7 @@ export function StatsBar() {
           {stats.map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-3xl font-bold text-primary font-mono">
-                {s.label === 'Tendance' ? '+' : ''}{s.value}{s.suffix}
+                {s.value}{s.suffix}
               </p>
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mt-1">
                 {s.label}
