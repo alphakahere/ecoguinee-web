@@ -2,12 +2,11 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { cn, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { useAgentOverview } from '@/hooks/queries/useAgentDashboard';
 import { REPORT_STATUS_META, SEVERITY_META_API, INTERVENTION_STATUS_META } from '@/types/api';
-
-const SEV_COLOR: Record<string, string> = { LOW: '#6B7280', MODERATE: '#E8A020', CRITICAL: '#D94035' };
 
 export function RecentReports() {
   const { data, isLoading } = useAgentOverview();
@@ -32,34 +31,32 @@ export function RecentReports() {
             Voir tous <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-muted/20 border-b border-border">
-                {['ID', 'Gravité', 'Zone', 'Statut', 'Date'].map((h) => (
-                  <th key={h} className="text-left px-4 py-2.5 text-xs font-mono text-muted-foreground font-semibold uppercase tracking-wide">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {recentReports.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-sm font-mono text-muted-foreground">Aucun signalement</td></tr>
-              ) : recentReports.map((r) => {
-                const sevMeta = SEVERITY_META_API[r.severity as keyof typeof SEVERITY_META_API];
-                const stMeta = REPORT_STATUS_META[r.status as keyof typeof REPORT_STATUS_META];
-                return (
-                  <tr key={r.id} className="border-b border-border hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 text-[10px] font-mono text-muted-foreground">{r.id.slice(0, 8)}</td>
-                    <td className="px-4 py-3">{sevMeta && <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0`}>{sevMeta.label}</Badge>}</td>
-                    <td className="px-4 py-3 text-xs font-mono">{r.zone?.name ?? '—'}</td>
-                    <td className="px-4 py-3">{stMeta && <Badge className={`${stMeta.bg} ${stMeta.color} border-0`}>{stMeta.label}</Badge>}</td>
-                    <td className="px-4 py-3 text-[10px] font-mono text-muted-foreground">{formatDate(r.createdAt)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent bg-muted/20">
+              {['ID', 'Gravité', 'Zone', 'Statut', 'Date'].map((h) => (
+                <TableHead key={h} className="text-xs font-mono text-muted-foreground font-semibold uppercase tracking-wide">{h}</TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {recentReports.length === 0 ? (
+              <TableRow><TableCell colSpan={5} className="py-8 text-center text-sm font-mono text-muted-foreground">Aucun signalement</TableCell></TableRow>
+            ) : recentReports.map((r) => {
+              const sevMeta = SEVERITY_META_API[r.severity as keyof typeof SEVERITY_META_API];
+              const stMeta = REPORT_STATUS_META[r.status as keyof typeof REPORT_STATUS_META];
+              return (
+                <TableRow key={r.id}>
+                  <TableCell className="text-[10px] font-mono text-muted-foreground">{r.id.slice(0, 8)}</TableCell>
+                  <TableCell>{sevMeta && <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0`}>{sevMeta.label}</Badge>}</TableCell>
+                  <TableCell className="text-xs font-mono">{r.zone?.name ?? '—'}</TableCell>
+                  <TableCell>{stMeta && <Badge className={`${stMeta.bg} ${stMeta.color} border-0`}>{stMeta.label}</Badge>}</TableCell>
+                  <TableCell className="text-[10px] font-mono text-muted-foreground">{formatDate(r.createdAt)}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Assigned interventions */}
