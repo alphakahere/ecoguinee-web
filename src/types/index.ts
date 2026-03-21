@@ -77,6 +77,8 @@ export interface CampaignFilters {
 /** Mirrors backend QueryUserDto (GET /users) */
 export interface UserFilters {
   role?: string;
+  /** Maps to backend roleGroup: admin | superviseur | agent | public */
+  roleGroup?: 'admin' | 'superviseur' | 'agent' | 'public';
   status?: string;
   smeId?: string;
   search?: string;

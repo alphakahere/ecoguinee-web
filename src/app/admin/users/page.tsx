@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   Plus,
   Download,
@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils';
 import {
   formatDateShort,
   initials,
-  matchesRoleTab,
   type RoleTab,
 } from '@/lib/user-utils';
 import { ROLE_META } from '@/lib/types';
@@ -76,28 +75,44 @@ export default function AdminUsersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
 
-  const { data, isLoading, isError } = useUsers({ page: 1, limit: 200 });
-  const usersList = useMemo(() => data?.data ?? [], [data]);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [roleTab, setRoleTab] = useState<RoleTab>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const filters = {
+    search: debouncedSearch || undefined,
+    roleGroup: roleTab !== 'all' ? (roleTab as 'admin' | 'superviseur' | 'agent' | 'public') : undefined,
+    status: statusFilter || undefined,
+    page,
+    limit: PAGE_SIZE,
+  };
+
+  const { data, isLoading, isError } = useUsers(filters);
+  const usersList = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const updateUserStatus = useUpdateUserStatus();
   const deleteUser = useDeleteUser();
 
-  const [search, setSearch] = useState('');
-  const [roleTab, setRoleTab] = useState<RoleTab>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [page, setPage] = useState(0);
-
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
   const isAdmin = currentUser?.role === 'ADMIN';
 
-  const modalVariant = useMemo((): 'full' | 'statusOnly' => {
-    if (!editUser) return 'full';
-    if (isSuperAdmin) return 'full';
-    if (isAdmin && editUser.role === 'ADMIN') return 'full';
-    return 'statusOnly';
-  }, [editUser, isSuperAdmin, isAdmin]);
+  const modalVariant = (() => {
+    if (!editUser) return 'full' as const;
+    if (isSuperAdmin) return 'full' as const;
+    if (isAdmin && editUser.role === 'ADMIN') return 'full' as const;
+    return 'statusOnly' as const;
+  })();
 
   const roleLockedToAdmin = Boolean(isAdmin && (!editUser || editUser.role === 'ADMIN'));
   const canDelete = Boolean(editUser && editUser.id !== currentUser?.id);
@@ -107,24 +122,6 @@ export default function AdminUsersPage() {
     updateUser.isPending ||
     updateUserStatus.isPending ||
     deleteUser.isPending;
-
-  const filtered = useMemo(() => {
-    let result = usersList;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter((u) =>
-        `${u.name} ${u.email ?? ''} ${u.phone} ${u.territoire ?? ''} ${u.id}`.toLowerCase().includes(q),
-      );
-    }
-    result = result.filter((u) => matchesRoleTab(u, roleTab));
-    if (statusFilter) {
-      result = result.filter((u) => u.status === statusFilter);
-    }
-    return result;
-  }, [usersList, search, roleTab, statusFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const openCreate = () => {
     setEditUser(null);
@@ -221,8 +218,8 @@ export default function AdminUsersPage() {
   };
 
   const onExportCsv = useCallback(() => {
-    exportUsersCsv(filtered);
-  }, [filtered]);
+    exportUsersCsv(usersList);
+  }, [usersList]);
 
   const roleTabs: { id: RoleTab; label: string }[] = [
     { id: 'all', label: 'Tous' },
@@ -232,6 +229,21 @@ export default function AdminUsersPage() {
     { id: 'public', label: 'Public' },
   ];
 
+  const handleRoleTabChange = (tab: RoleTab) => {
+    setRoleTab(tab);
+    setPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -240,7 +252,7 @@ export default function AdminUsersPage() {
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Gestion des Utilisateurs</h2>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {filtered.length} / {usersList.length} utilisateurs
+              {total} utilisateur{total !== 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -259,10 +271,7 @@ export default function AdminUsersPage() {
         <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
           <SearchInput
             value={search}
-            onChange={(v) => {
-              setSearch(v);
-              setPage(0);
-            }}
+            onChange={handleSearchChange}
             placeholder="Nom, email, territoire…"
             className="w-full max-w-md"
           />
@@ -271,10 +280,7 @@ export default function AdminUsersPage() {
               <button
                 key={t.id}
                 type="button"
-                onClick={() => {
-                  setRoleTab(t.id);
-                  setPage(0);
-                }}
+                onClick={() => handleRoleTabChange(t.id)}
                 className={cn(
                   'rounded-full px-3 py-1.5 text-xs font-mono transition-colors',
                   roleTab === t.id
@@ -289,10 +295,7 @@ export default function AdminUsersPage() {
           <div className="lg:ml-auto">
             <Select
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(0);
-              }}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="min-w-[180px]"
             >
               <option value="">Tous les statuts</option>
@@ -345,14 +348,14 @@ export default function AdminUsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paged.length === 0 ? (
+                  {usersList.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
                         Aucun résultat
                       </TableCell>
                     </TableRow>
                   ) : (
-                    paged.map((u) => {
+                    usersList.map((u) => {
                       const m = ROLE_META[u.role];
                       return (
                         <TableRow key={u.id}>
@@ -450,24 +453,24 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mt-4">
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    disabled={page === 0}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
                     className="rounded-lg p-1.5 hover:bg-muted disabled:opacity-50"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <span className="font-mono text-xs">
-                    {page + 1} / {totalPages}
+                    {page} / {totalPages}
                   </span>
                   <button
                     type="button"
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    disabled={page >= totalPages - 1}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
                     className="rounded-lg p-1.5 hover:bg-muted disabled:opacity-50"
                   >
                     <ChevronRight className="h-4 w-4" />
