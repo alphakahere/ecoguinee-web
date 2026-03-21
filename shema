@@ -1,0 +1,267 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ──────────────────────────────────────────────────────────────────────
+
+enum ZoneType {
+  REGION
+  PREFECTURE
+  SUB_PREFECTURE
+  MUNICIPALITY
+  NEIGHBORHOOD
+  DISTRICT
+  SECTOR
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  SUPERVISOR
+  AGENT
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum WasteType {
+  LIQUID
+  SOLID
+}
+
+enum Severity {
+  LOW
+  MODERATE
+  CRITICAL
+}
+
+enum ReportStatus {
+  PENDING_VALIDATION
+  REPORTED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ReportSource {
+  AGENT
+  CITIZEN
+}
+
+enum InterventionStatus {
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  FAILED
+}
+
+enum CampaignStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignType {
+  AWARENESS
+  PROMOTION
+  TRAINING
+}
+
+// ─── GEOGRAPHIC ZONE ────────────────────────────────────────────────────────────
+
+model Zone {
+  id       String   @id @default(cuid())
+  name     String
+  type     ZoneType
+  parentId String?
+  parent   Zone?    @relation("ZoneHierarchy", fields: [parentId], references: [id])
+  children Zone[]   @relation("ZoneHierarchy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, parentId])
+  @@index([parentId])
+
+  // Business relations
+  smes      SME[]        @relation("ZoneSME")
+  reports   Report[]
+  campaigns Campaign[]
+}
+
+// ─── USERS ──────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String  @id @default(cuid())
+  name      String
+  email     String?  @unique
+  password  String
+  role      Role     @default(USER)
+  status    UserStatus @default(ACTIVE)
+  phone     String  @unique
+  address   String?
+  lastLogin DateTime?
+
+  // Manager / Supervisor → primary SME
+  sme   SME?    @relation("SupervisorSME", fields: [smeId], references: [id])
+  smeId String?
+
+  // All members of an SME (agents + managers / supervisors)
+  memberSme   SME?    @relation("SMEMembers", fields: [memberSmeId], references: [id])
+  memberSmeId String?
+
+  // Business relations
+  reports            Report[]       @relation("AgentReports")
+  interventions      Intervention[] @relation("AgentInterventions")
+  createdCampaigns   Campaign[]     @relation("CampaignCreator")
+  assignedCampaigns  Campaign[]     @relation("CampaignAgent")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── SME (Small & Medium Enterprise) ────────────────────────────────────────────
+
+model SME {
+  id           String  @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  address      String?
+  description  String?
+  logo         String?
+  activityType String?
+  active       Boolean @default(true)
+
+  // Sectors covered by this SME
+  zones Zone[] @relation("ZoneSME")
+
+  // Primary managers (and org hierarchy) of the SME
+  supervisors User[] @relation("SupervisorSME")
+
+  // All SME members (agents + supervisors)
+  members User[] @relation("SMEMembers")
+
+  interventions Intervention[]
+  campaigns     Campaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── REPORTS ────────────────────────────────────────────────────────────────────
+
+model Report {
+  id          String       @id @default(cuid())
+  type        WasteType
+  severity    Severity
+  status      ReportStatus @default(REPORTED)
+  source      ReportSource
+  description String?
+  address     String?
+
+  // GPS location
+  latitude  Float
+  longitude Float
+
+  // Territory
+  zone   Zone   @relation(fields: [zoneId], references: [id])
+  zoneId String
+
+  // Creator (null if citizen)
+  agent   User?   @relation("AgentReports", fields: [agentId], references: [id])
+  agentId String?
+
+  // Citizen contact (optional — anonymous by default)
+  contactName  String?
+  contactPhone String?
+
+  photos        String[]
+  interventions Intervention[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+// ─── INTERVENTIONS ──────────────────────────────────────────────────────────────
+
+model Intervention {
+  id     String             @id @default(cuid())
+  status InterventionStatus @default(ASSIGNED)
+  notes  String?
+
+  // Linked report
+  report   Report @relation(fields: [reportId], references: [id])
+  reportId String
+
+  // Assigned agent
+  agent   User   @relation("AgentInterventions", fields: [agentId], references: [id])
+  agentId String
+
+  // Responsible SME
+  sme   SME    @relation(fields: [smeId], references: [id])
+  smeId String
+
+  assignedDate   DateTime?
+  resolutionDate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── AWARENESS CAMPAIGNS ────────────────────────────────────────────────────────
+
+model Campaign {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  type        CampaignType
+  status      CampaignStatus @default(PLANNED)
+
+  // Location
+  zone   Zone?   @relation(fields: [zoneId], references: [id])
+  zoneId String?
+
+  // Scheduling (created by admin or supervisor)
+  scheduledDate DateTime
+  endDate       DateTime?
+
+  // Field collection (filled by the agent)
+  participantCount Int?
+  observations     String?
+  actualDate       DateTime?
+
+  // Creator (admin or supervisor)
+  creator   User   @relation("CampaignCreator", fields: [creatorId], references: [id])
+  creatorId String
+
+  // Assigned agent for field collection
+  agent   User?   @relation("CampaignAgent", fields: [agentId], references: [id])
+  agentId String?
+
+  // Organizing SME
+  sme   SME?    @relation(fields: [smeId], references: [id])
+  smeId String?
+
+  documents String[]
+  photos    String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

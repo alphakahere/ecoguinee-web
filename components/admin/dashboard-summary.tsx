@@ -18,10 +18,10 @@ const territoireChartData = territoires.map((c) => ({
 }));
 
 const roleCounts = [
-  { name: 'Admin', value: users.filter((u) => u.role === 'admin').length, color: '#D94035' },
-  { name: 'Superviseur', value: users.filter((u) => u.role === 'supervisor').length, color: '#E8A020' },
-  { name: 'Agent', value: users.filter((u) => u.role === 'agent').length, color: '#2D7D46' },
-  { name: 'Public', value: users.filter((u) => u.role === 'public').length, color: '#6B7280' },
+  { name: 'Admin', value: users.filter((u) => u.role === 'ADMIN' || u.role === 'SUPER_ADMIN').length, color: '#D94035' },
+  { name: 'Superviseur', value: users.filter((u) => u.role === 'SUPERVISOR' || u.role === 'MANAGER').length, color: '#E8A020' },
+  { name: 'Agent', value: users.filter((u) => u.role === 'AGENT').length, color: '#2D7D46' },
+  { name: 'Citoyen', value: users.filter((u) => u.role === 'USER').length, color: '#6B7280' },
 ];
 
 const recentHotspots = hotspots.slice(0, 5);

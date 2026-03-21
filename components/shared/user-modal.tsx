@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X, User as UserIcon, Mail, Phone, Shield, MapPin, ToggleLeft } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ROLE_META } from '@/lib/types';
 import type { User, UserRole, UserStatus } from '@/lib/types';
 
 interface UserModalProps {
@@ -13,19 +14,15 @@ interface UserModalProps {
 }
 
 const COMMUNES = ['Kaloum', 'Dixinn', 'Matam', 'Ratoma', 'Matoto'];
-const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
-  { value: 'admin', label: 'Administrateur' },
-  { value: 'supervisor', label: 'Superviseur' },
-  { value: 'agent', label: 'Agent' },
-  { value: 'public', label: 'Public' },
-];
+const ROLE_OPTIONS: { value: UserRole; label: string }[] =
+  (Object.entries(ROLE_META) as [UserRole, { label: string }][]).map(([value, m]) => ({ value, label: m.label }));
 const STATUS_OPTIONS: { value: UserStatus; label: string }[] = [
   { value: 'active', label: 'Actif' },
   { value: 'inactive', label: 'Inactif' },
   { value: 'suspended', label: 'Suspendu' },
 ];
 
-const empty = { name: '', email: '', phone: '', role: 'agent' as UserRole, territoire: '', status: 'active' as UserStatus };
+const empty = { name: '', email: '', phone: '', role: 'AGENT' as UserRole, territoire: '', status: 'active' as UserStatus };
 
 export function UserModal({ open, user, onClose, onSave }: UserModalProps) {
   const [form, setForm] = useState(empty);
@@ -33,7 +30,7 @@ export function UserModal({ open, user, onClose, onSave }: UserModalProps) {
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (user) setForm({ name: user.name, email: user.email, phone: user.phone, role: user.role, territoire: user.territoire ?? '', status: user.status });
+    if (user) setForm({ name: user.name, email: user.email ?? '', phone: user.phone, role: user.role, territoire: user.territoire ?? '', status: user.status });
     else setForm(empty);
     setErrors({});
   }, [user, open]);

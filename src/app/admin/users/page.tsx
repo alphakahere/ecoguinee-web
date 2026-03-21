@@ -9,10 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { users as initialUsers } from '@/lib/data/mock-data';
 import { formatDate } from '@/lib/utils';
+import { ROLE_META } from '@/lib/types';
 import type { User } from '@/lib/types';
 
-const ROLE_LABELS: Record<string, string> = { admin: 'Admin', supervisor: 'Superviseur', agent: 'Agent', public: 'Public' };
-const ROLE_COLORS: Record<string, string> = { admin: 'bg-[#D94035]/10 text-[#D94035]', supervisor: 'bg-[#E8A020]/10 text-[#E8A020]', agent: 'bg-[#2D7D46]/10 text-[#2D7D46]', public: 'bg-muted text-muted-foreground' };
 const STATUS_COLORS: Record<string, string> = { active: 'bg-[#6FCF4A]/10 text-[#6FCF4A]', inactive: 'bg-[#E8A020]/10 text-[#E8A020]', suspended: 'bg-[#D94035]/10 text-[#D94035]' };
 const STATUS_LABELS: Record<string, string> = { active: 'Actif', inactive: 'Inactif', suspended: 'Suspendu' };
 
@@ -23,8 +22,8 @@ export default function AdminUsersPage() {
 
   const columns = [
     { key: 'name', label: 'Nom', render: (u: User) => <span className="text-sm font-semibold">{u.name}</span> },
-    { key: 'email', label: 'Email', render: (u: User) => <span className="text-xs font-mono text-muted-foreground">{u.email}</span> },
-    { key: 'role', label: 'Rôle', render: (u: User) => <Badge className={`${ROLE_COLORS[u.role]} border-0`}>{ROLE_LABELS[u.role]}</Badge> },
+    { key: 'email', label: 'Email', render: (u: User) => <span className="text-xs font-mono text-muted-foreground">{u.email ?? '—'}</span> },
+    { key: 'role', label: 'Rôle', render: (u: User) => { const m = ROLE_META[u.role]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'territoire', label: 'Territoire', render: (u: User) => <span className="text-sm font-mono">{u.territoire ?? '—'}</span> },
     { key: 'status', label: 'Statut', render: (u: User) => <Badge className={`${STATUS_COLORS[u.status]} border-0`}>{STATUS_LABELS[u.status]}</Badge> },
     { key: 'createdAt', label: 'Créé le', render: (u: User) => <span className="text-xs font-mono text-muted-foreground">{formatDate(u.createdAt)}</span> },
@@ -38,7 +37,7 @@ export default function AdminUsersPage() {
   ];
 
   const filters = [
-    { key: 'role', label: 'Rôle', options: [{ value: 'admin', label: 'Admin' }, { value: 'supervisor', label: 'Superviseur' }, { value: 'agent', label: 'Agent' }, { value: 'public', label: 'Public' }] },
+    { key: 'role', label: 'Rôle', options: Object.entries(ROLE_META).map(([value, m]) => ({ value, label: m.label })) },
     { key: 'status', label: 'Statut', options: [{ value: 'active', label: 'Actif' }, { value: 'inactive', label: 'Inactif' }, { value: 'suspended', label: 'Suspendu' }] },
   ];
 

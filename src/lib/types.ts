@@ -2,7 +2,7 @@
 export type WasteType = 'solid' | 'liquid' | 'mixed';
 export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 export type InterventionStatus = 'reported' | 'in-progress' | 'resolved';
-export type UserRole = 'admin' | 'supervisor' | 'agent' | 'public';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'AGENT' | 'USER';
 export type UserStatus = 'active' | 'inactive' | 'suspended';
 export type CampaignStatus = 'planifiee' | 'en-cours' | 'terminee' | 'annulee';
 export type CampaignType = 'sensibilisation' | 'promotion' | 'formation';
@@ -75,7 +75,7 @@ export interface DashboardStats {
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   role: UserRole;
   territoire?: string;
@@ -163,3 +163,28 @@ export const STATUS_META: Record<InterventionStatus, { label: string; color: str
   'in-progress': { label: 'En cours',  color: 'text-[#E8A020]',  bg: 'bg-[#E8A020]/10' },
   resolved:      { label: 'Résolu',    color: 'text-[#6FCF4A]',  bg: 'bg-[#6FCF4A]/10' },
 };
+
+export const ROLE_META: Record<UserRole, { label: string; color: string; bg: string }> = {
+  SUPER_ADMIN: { label: 'Super Admin', color: 'text-[#D94035]', bg: 'bg-[#D94035]/10' },
+  ADMIN:       { label: 'Admin',       color: 'text-[#D94035]', bg: 'bg-[#D94035]/10' },
+  MANAGER:     { label: 'Manager',     color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10' },
+  SUPERVISOR:  { label: 'Superviseur', color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10' },
+  AGENT:       { label: 'Agent',       color: 'text-[#2D7D46]', bg: 'bg-[#2D7D46]/10' },
+  USER:        { label: 'Citoyen',     color: 'text-muted-foreground', bg: 'bg-muted' },
+};
+
+export function redirectForRole(role: UserRole): string {
+  switch (role) {
+    case 'SUPER_ADMIN':
+    case 'ADMIN':
+      return '/admin';
+    case 'MANAGER':
+    case 'SUPERVISOR':
+      return '/superviseur';
+    case 'AGENT':
+      return '/agent';
+    case 'USER':
+    default:
+      return '/';
+  }
+}

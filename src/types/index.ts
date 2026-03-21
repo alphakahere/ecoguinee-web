@@ -25,6 +25,8 @@ export {
   CAMP_TYPE_META,
   SEVERITY_META,
   STATUS_META,
+  ROLE_META,
+  redirectForRole,
 } from '@/lib/types';
 
 // ── API-layer aliases ──────────────────────────────────────────────────────

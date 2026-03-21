@@ -3,41 +3,52 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { MapPin, Mail, Lock, Eye, EyeOff, ArrowRight, Leaf } from 'lucide-react';
+import { MapPin, Mail, Phone, Lock, Eye, EyeOff, ArrowRight, Leaf } from 'lucide-react';
 import { toast } from 'sonner';
+import { loginSchema, type LoginInput } from '@/lib/validations/auth.schema';
+import { authService } from '@/services/auth';
+import { useAuthStore } from '@/stores/auth.store';
+import { redirectForRole } from '@/lib/types';
 
-const MOCK_USERS = [
-  { email: 'agent@ecoguinee.gn', password: 'agent123', role: 'agent' },
-  { email: 'superviseur@ecoguinee.gn', password: 'super123', role: 'superviseur' },
-  { email: 'admin@ecoguinee.gn', password: 'admin123', role: 'admin' },
-];
+function looksLikePhone(value: string) {
+  return /^[+\d]/.test(value.trim()) && /\d{6,}/.test(value.replace(/\s/g, ''));
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const setUser = useAuthStore((s) => s.setUser);
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { emailOrPhone: '', password: '' },
+  });
 
-    setTimeout(() => {
-      const user = MOCK_USERS.find(
-        (u) => u.email === email && u.password === password,
-      );
+  // eslint-disable-next-line react-hooks/incompatible-library -- idiomatic RHF pattern
+  const emailOrPhoneValue = watch('emailOrPhone');
+  const isPhone = looksLikePhone(emailOrPhoneValue);
 
-      if (user) {
-        toast.success(`Bienvenue ! Redirection vers l'espace ${user.role}…`);
-        router.push(`/${user.role}`);
-      } else {
-        toast.error('Email ou mot de passe incorrect.');
-        setLoading(false);
-      }
-    }, 800);
+  async function onSubmit(data: LoginInput) {
+    try {
+      const { user, token } = await authService.login(data.emailOrPhone, data.password);
+      setUser(user, token);
+      toast.success(`Bienvenue, ${user.name} !`);
+      router.push(redirectForRole(user.role));
+    } catch {
+      toast.error('Identifiants incorrects. Veuillez réessayer.');
+    }
   }
+
+  const inputCls =
+    'flex h-11 w-full rounded-xl border border-input bg-input-background pl-10 pr-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
   return (
     <div className="min-h-screen flex">
@@ -137,23 +148,29 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Adresse email
+              <label htmlFor="emailOrPhone" className="text-sm font-medium">
+                Email ou téléphone
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                {isPhone ? (
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                )}
                 <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nom@ecoguinee.gn"
-                  className="flex h-11 w-full rounded-xl border border-input bg-input-background pl-10 pr-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  id="emailOrPhone"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="nom@ecoguinee.gn ou +224 6XX…"
+                  className={`${inputCls} ${errors.emailOrPhone ? 'border-[#D94035] focus-visible:ring-[#D94035]' : ''}`}
+                  {...register('emailOrPhone')}
                 />
               </div>
+              {errors.emailOrPhone && (
+                <p className="text-xs text-[#D94035]">{errors.emailOrPhone.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -173,11 +190,10 @@ export default function LoginPage() {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   placeholder="••••••••"
-                  className="flex h-11 w-full rounded-xl border border-input bg-input-background pl-10 pr-10 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className={`${inputCls} pr-10 ${errors.password ? 'border-[#D94035] focus-visible:ring-[#D94035]' : ''}`}
+                  {...register('password')}
                 />
                 <button
                   type="button"
@@ -187,14 +203,17 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-xs text-[#D94035]">{errors.password.message}</p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isSubmitting}
               className="group w-full h-11 rounded-xl bg-primary text-white font-mono text-sm flex items-center justify-center gap-2 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 disabled:opacity-60 disabled:pointer-events-none"
             >
-              {loading ? (
+              {isSubmitting ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
@@ -204,40 +223,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo credentials */}
-          <div className="mt-8 p-4 rounded-xl border border-border bg-muted/30">
-            <p className="text-xs font-mono text-muted-foreground mb-3 uppercase tracking-widest">
-              Comptes de démonstration
-            </p>
-            <div className="space-y-2">
-              {MOCK_USERS.map((u) => (
-                <button
-                  key={u.role}
-                  type="button"
-                  onClick={() => { setEmail(u.email); setPassword(u.password); }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono hover:bg-muted/50 transition-colors text-left"
-                >
-                  <span className="text-foreground">{u.email}</span>
-                  <span
-                    className="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider font-semibold"
-                    style={{
-                      background: u.role === 'admin' ? 'rgba(232,160,32,0.12)' : u.role === 'superviseur' ? 'rgba(45,125,70,0.12)' : 'rgba(111,207,74,0.12)',
-                      color: u.role === 'admin' ? '#E8A020' : u.role === 'superviseur' ? '#2D7D46' : '#6FCF4A',
-                    }}
-                  >
-                    {u.role}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="mt-6 text-center text-xs font-mono text-muted-foreground">
-            <Link href="/" className="text-primary hover:underline">
-              ← Retour à l&apos;accueil
-            </Link>
-          </p>
         </motion.div>
       </div>
     </div>

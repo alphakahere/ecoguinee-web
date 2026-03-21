@@ -6,6 +6,7 @@ import { MapPin, Plus, Bell, Activity, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileBottomTabs } from '@/components/layouts/mobile-bottom-tabs';
+import { AuthGuard } from '@/components/shared/auth-guard';
 import { AGENT_NAV } from '@/lib/constants';
 
 const TABS = AGENT_NAV.map((n) => ({ ...n, exact: n.href === '/agent' }));
@@ -21,6 +22,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
   const isRoot = pathname === '/agent';
 
   return (
+    <AuthGuard allowedRoles={['AGENT']}>
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-56 shrink-0 flex-col h-full">
@@ -82,5 +84,6 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
       {/* Mobile bottom tabs */}
       <MobileBottomTabs tabs={TABS} layoutId="agentMobileTab" />
     </div>
+    </AuthGuard>
   );
 }

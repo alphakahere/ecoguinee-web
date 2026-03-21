@@ -7,6 +7,7 @@ import { Building2, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
+import { AuthGuard } from '@/components/shared/auth-guard';
 import { SUPERVISEUR_NAV } from '@/lib/constants';
 import { PME_PROFILE } from '@/lib/data/superviseur-data';
 
@@ -35,6 +36,7 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
   const pageLabel = findLabel(pathname);
 
   return (
+    <AuthGuard allowedRoles={['MANAGER', 'SUPERVISOR']}>
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop sidebar */}
       <motion.aside
@@ -96,5 +98,6 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
         />
       </MobileDrawer>
     </div>
+    </AuthGuard>
   );
 }

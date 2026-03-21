@@ -6,6 +6,7 @@ import { ShieldCheck } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
+import { AuthGuard } from '@/components/shared/auth-guard';
 import { ADMIN_NAV } from '@/lib/constants';
 
 const TABS = ADMIN_NAV.map((n) => ({ ...n, exact: n.href === '/admin' }));
@@ -25,44 +26,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pageLabel = findLabel(pathname);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col h-full">
-        <SidebarNav
-          items={TABS}
-          userInfo={{ name: 'Amadou Kouyaté', initials: 'AK', subtitle: 'Administrateur' }}
-          roleLabel="Admin Panel"
-          roleIcon="ShieldCheck"
-          layoutId="adminActiveTab"
-        />
-      </aside>
+    <AuthGuard allowedRoles={['SUPER_ADMIN', 'ADMIN']}>
+      <div className="flex h-screen overflow-hidden bg-background">
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:flex w-64 shrink-0 flex-col h-full">
+          <SidebarNav
+            items={TABS}
+            userInfo={{ name: 'Amadou Kouyaté', initials: 'AK', subtitle: 'Administrateur' }}
+            roleLabel="Admin Panel"
+            roleIcon="ShieldCheck"
+            layoutId="adminActiveTab"
+          />
+        </aside>
 
-      {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <HeaderBar
-          roleIcon={<ShieldCheck className="w-3 h-3 text-primary" />}
-          roleLabel="Admin"
-          pageLabel={pageLabel}
+        {/* Main area */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          <HeaderBar
+            roleIcon={<ShieldCheck className="w-3 h-3 text-primary" />}
+            roleLabel="Admin"
+            pageLabel={pageLabel}
+            onMobileMenuOpen={() => setMobileOpen(true)}
+            notifications={3}
+          />
+          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 topo-pattern">
+            {children}
+          </main>
+        </div>
 
-          onMobileMenuOpen={() => setMobileOpen(true)}
-          notifications={3}
-        />
-        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 topo-pattern">
-          {children}
-        </main>
+        {/* Mobile drawer */}
+        <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
+          <SidebarNav
+            items={TABS}
+            userInfo={{ name: 'Amadou Kouyaté', initials: 'AK', subtitle: 'Administrateur' }}
+            roleLabel="Admin Panel"
+            roleIcon="ShieldCheck"
+            layoutId="adminActiveTabMobile"
+            onNavigate={() => setMobileOpen(false)}
+          />
+        </MobileDrawer>
       </div>
-
-      {/* Mobile drawer */}
-      <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
-        <SidebarNav
-          items={TABS}
-          userInfo={{ name: 'Amadou Kouyaté', initials: 'AK', subtitle: 'Administrateur' }}
-          roleLabel="Admin Panel"
-          roleIcon="ShieldCheck"
-          layoutId="adminActiveTabMobile"
-          onNavigate={() => setMobileOpen(false)}
-        />
-      </MobileDrawer>
-    </div>
+    </AuthGuard>
   );
 }
