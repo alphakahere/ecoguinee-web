@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { loginSchema, type LoginInput } from '@/lib/validations/auth.schema';
 import { authService } from '@/services/auth';
 import { useAuthStore } from '@/stores/auth.store';
-import { redirectForRole } from '@/lib/types';
+import { redirectByRole } from '@/lib/types';
 
 function looksLikePhone(value: string) {
   return /^[+\d]/.test(value.trim()) && /\d{6,}/.test(value.replace(/\s/g, ''));
@@ -19,8 +19,12 @@ function looksLikePhone(value: string) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const setUser = useAuthStore((s) => s.setUser);
+  const { user, token, setUser } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (token && user) router.replace(redirectByRole(user.role));
+  }, [token, user, router]);
 
   const {
     register,
@@ -41,7 +45,7 @@ export default function LoginPage() {
       const { user, token } = await authService.login(data.emailOrPhone, data.password);
       setUser(user, token);
       toast.success(`Bienvenue, ${user.name} !`);
-      router.push(redirectForRole(user.role));
+      router.push(redirectByRole(user.role));
     } catch {
       toast.error('Identifiants incorrects. Veuillez réessayer.');
     }

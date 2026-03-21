@@ -3,7 +3,7 @@ export type WasteType = 'solid' | 'liquid' | 'mixed';
 export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 export type InterventionStatus = 'reported' | 'in-progress' | 'resolved';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'AGENT' | 'USER';
-export type UserStatus = 'active' | 'inactive' | 'suspended';
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 export type CampaignStatus = 'planifiee' | 'en-cours' | 'terminee' | 'annulee';
 export type CampaignType = 'sensibilisation' | 'promotion' | 'formation';
 
@@ -78,9 +78,13 @@ export interface User {
   email?: string;
   phone: string;
   role: UserRole;
-  territoire?: string;
   status: UserStatus;
+  address?: string;
+  smeId?: string;
+  memberSmeId?: string;
+  territoire?: string;
   createdAt: string;
+  updatedAt?: string;
   lastLogin?: string;
 }
 
@@ -173,7 +177,7 @@ export const ROLE_META: Record<UserRole, { label: string; color: string; bg: str
   USER:        { label: 'Citoyen',     color: 'text-muted-foreground', bg: 'bg-muted' },
 };
 
-export function redirectForRole(role: UserRole): string {
+export function redirectByRole(role: UserRole): string {
   switch (role) {
     case 'SUPER_ADMIN':
     case 'ADMIN':

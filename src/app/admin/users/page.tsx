@@ -12,8 +12,8 @@ import { formatDate } from '@/lib/utils';
 import { ROLE_META } from '@/lib/types';
 import type { User } from '@/lib/types';
 
-const STATUS_COLORS: Record<string, string> = { active: 'bg-[#6FCF4A]/10 text-[#6FCF4A]', inactive: 'bg-[#E8A020]/10 text-[#E8A020]', suspended: 'bg-[#D94035]/10 text-[#D94035]' };
-const STATUS_LABELS: Record<string, string> = { active: 'Actif', inactive: 'Inactif', suspended: 'Suspendu' };
+const STATUS_COLORS: Record<string, string> = { ACTIVE: 'bg-[#6FCF4A]/10 text-[#6FCF4A]', INACTIVE: 'bg-[#E8A020]/10 text-[#E8A020]', SUSPENDED: 'bg-[#D94035]/10 text-[#D94035]' };
+const STATUS_LABELS: Record<string, string> = { ACTIVE: 'Actif', INACTIVE: 'Inactif', SUSPENDED: 'Suspendu' };
 
 export default function AdminUsersPage() {
   const [usersList, setUsersList] = useState(initialUsers);
@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
 
   const filters = [
     { key: 'role', label: 'Rôle', options: Object.entries(ROLE_META).map(([value, m]) => ({ value, label: m.label })) },
-    { key: 'status', label: 'Statut', options: [{ value: 'active', label: 'Actif' }, { value: 'inactive', label: 'Inactif' }, { value: 'suspended', label: 'Suspendu' }] },
+    { key: 'status', label: 'Statut', options: [{ value: 'ACTIVE', label: 'Actif' }, { value: 'INACTIVE', label: 'Inactif' }, { value: 'SUSPENDED', label: 'Suspendu' }] },
   ];
 
   const handleSave = (data: Omit<User, 'id' | 'createdAt' | 'lastLogin'> & { id?: string }) => {

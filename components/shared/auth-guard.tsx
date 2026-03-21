@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
-import { redirectForRole } from '@/lib/types';
+import { redirectByRole } from '@/lib/types';
 import type { UserRole } from '@/lib/types';
 
 interface AuthGuardProps {
@@ -15,6 +15,7 @@ export function AuthGuard({ allowedRoles, children }: AuthGuardProps) {
   const router = useRouter();
   const { user, token } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  console.log({ user, token })
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount detection
   useEffect(() => { setMounted(true); }, []);
@@ -28,7 +29,7 @@ export function AuthGuard({ allowedRoles, children }: AuthGuardProps) {
     }
 
     if (user && !allowedRoles.includes(user.role)) {
-      router.replace(redirectForRole(user.role));
+      router.replace(redirectByRole(user.role));
     }
   }, [mounted, token, user, allowedRoles, router]);
 

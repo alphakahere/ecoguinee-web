@@ -17,12 +17,12 @@ const COMMUNES = ['Kaloum', 'Dixinn', 'Matam', 'Ratoma', 'Matoto'];
 const ROLE_OPTIONS: { value: UserRole; label: string }[] =
   (Object.entries(ROLE_META) as [UserRole, { label: string }][]).map(([value, m]) => ({ value, label: m.label }));
 const STATUS_OPTIONS: { value: UserStatus; label: string }[] = [
-  { value: 'active', label: 'Actif' },
-  { value: 'inactive', label: 'Inactif' },
-  { value: 'suspended', label: 'Suspendu' },
+  { value: 'ACTIVE', label: 'Actif' },
+  { value: 'INACTIVE', label: 'Inactif' },
+  { value: 'SUSPENDED', label: 'Suspendu' },
 ];
 
-const empty = { name: '', email: '', phone: '', role: 'AGENT' as UserRole, territoire: '', status: 'active' as UserStatus };
+const empty = { name: '', email: '', phone: '', role: 'AGENT' as UserRole, territoire: '', status: 'ACTIVE' as UserStatus };
 
 export function UserModal({ open, user, onClose, onSave }: UserModalProps) {
   const [form, setForm] = useState(empty);
@@ -128,8 +128,8 @@ export function UserModal({ open, user, onClose, onSave }: UserModalProps) {
                       <button key={s.value} type="button" onClick={() => setForm((f) => ({ ...f, status: s.value }))}
                         className={`flex-1 py-2 px-3 rounded-lg text-xs font-mono border transition-all ${
                           form.status === s.value
-                            ? s.value === 'active' ? 'bg-[#6FCF4A]/20 border-[#6FCF4A] text-[#6FCF4A]'
-                            : s.value === 'suspended' ? 'bg-[#D94035]/20 border-[#D94035] text-[#D94035]'
+                            ? s.value === 'ACTIVE' ? 'bg-[#6FCF4A]/20 border-[#6FCF4A] text-[#6FCF4A]'
+                            : s.value === 'SUSPENDED' ? 'bg-[#D94035]/20 border-[#D94035] text-[#D94035]'
                             : 'bg-[#E8A020]/20 border-[#E8A020] text-[#E8A020]'
                           : 'border-border text-muted-foreground hover:bg-muted/50'
                         }`}>

@@ -128,13 +128,13 @@ export const dashboardStats: DashboardStats = {
 };
 
 export const users: User[] = [
-  { id: 'usr-001', name: 'Amadou Kouyaté',    email: 'amadou.kouyate@ecoguinee.gn',  phone: '+224 620 11 22 33', role: 'ADMIN',       status: 'active',    createdAt: '2025-01-15', lastLogin: '2026-03-12T08:45:00' },
-  { id: 'usr-002', name: 'Mariama Diallo',     email: 'mariama.diallo@ecoguinee.gn',  phone: '+224 625 44 55 66', role: 'SUPERVISOR',  territoire: 'Kaloum',  status: 'active',    createdAt: '2025-02-20', lastLogin: '2026-03-11T14:30:00' },
-  { id: 'usr-003', name: 'Ibrahima Bah',       email: 'ibrahima.bah@ecoguinee.gn',    phone: '+224 628 77 88 99', role: 'SUPERVISOR',  territoire: 'Ratoma',  status: 'active',    createdAt: '2025-03-05', lastLogin: '2026-03-12T07:15:00' },
-  { id: 'usr-004', name: 'Fatoumata Camara',   email: 'fatoumata.camara@ecoguinee.gn', phone: '+224 622 10 20 30', role: 'AGENT',      territoire: 'Dixinn',  status: 'active',    createdAt: '2025-04-10', lastLogin: '2026-03-12T09:00:00' },
-  { id: 'usr-005', name: 'Mamadou Souaré',     email: 'mamadou.souare@ecoguinee.gn',  phone: '+224 620 40 50 60', role: 'AGENT',       territoire: 'Matam',   status: 'active',    createdAt: '2025-04-18', lastLogin: '2026-03-11T16:00:00' },
-  { id: 'usr-006', name: 'Aissatou Barry',     email: 'aissatou.barry@ecoguinee.gn',  phone: '+224 625 70 80 90', role: 'AGENT',       territoire: 'Matoto',  status: 'inactive',  createdAt: '2025-05-22', lastLogin: '2026-02-28T10:30:00' },
-  { id: 'usr-007', name: 'Oumar Condé',        email: 'oumar.conde@ecoguinee.gn',     phone: '+224 628 01 02 03', role: 'AGENT',       territoire: 'Kaloum',  status: 'active',    createdAt: '2025-06-01', lastLogin: '2026-03-10T11:45:00' },
-  { id: 'usr-008', name: 'Kadiatou Traoré',    email: 'kadiatou.traore@gmail.com',    phone: '+224 622 55 66 77', role: 'USER',        territoire: 'Ratoma',  status: 'active',    createdAt: '2025-08-14', lastLogin: '2026-03-09T20:10:00' },
-  { id: 'usr-009', name: 'Sory Sylla',         email: 'sory.sylla@gmail.com',         phone: '+224 620 99 88 77', role: 'USER',        territoire: 'Matam',   status: 'suspended', createdAt: '2025-09-30', lastLogin: '2026-01-15T08:00:00' },
+  { id: 'usr-001', name: 'Amadou Kouyaté',    email: 'amadou.kouyate@ecoguinee.gn',  phone: '+224 620 11 22 33', role: 'ADMIN',       status: 'ACTIVE',    createdAt: '2025-01-15', lastLogin: '2026-03-12T08:45:00' },
+  { id: 'usr-002', name: 'Mariama Diallo',     email: 'mariama.diallo@ecoguinee.gn',  phone: '+224 625 44 55 66', role: 'SUPERVISOR',  territoire: 'Kaloum',  status: 'ACTIVE',    createdAt: '2025-02-20', lastLogin: '2026-03-11T14:30:00' },
+  { id: 'usr-003', name: 'Ibrahima Bah',       email: 'ibrahima.bah@ecoguinee.gn',    phone: '+224 628 77 88 99', role: 'SUPERVISOR',  territoire: 'Ratoma',  status: 'ACTIVE',    createdAt: '2025-03-05', lastLogin: '2026-03-12T07:15:00' },
+  { id: 'usr-004', name: 'Fatoumata Camara',   email: 'fatoumata.camara@ecoguinee.gn', phone: '+224 622 10 20 30', role: 'AGENT',      territoire: 'Dixinn',  status: 'ACTIVE',    createdAt: '2025-04-10', lastLogin: '2026-03-12T09:00:00' },
+  { id: 'usr-005', name: 'Mamadou Souaré',     email: 'mamadou.souare@ecoguinee.gn',  phone: '+224 620 40 50 60', role: 'AGENT',       territoire: 'Matam',   status: 'ACTIVE',    createdAt: '2025-04-18', lastLogin: '2026-03-11T16:00:00' },
+  { id: 'usr-006', name: 'Aissatou Barry',     email: 'aissatou.barry@ecoguinee.gn',  phone: '+224 625 70 80 90', role: 'AGENT',       territoire: 'Matoto',  status: 'INACTIVE',  createdAt: '2025-05-22', lastLogin: '2026-02-28T10:30:00' },
+  { id: 'usr-007', name: 'Oumar Condé',        email: 'oumar.conde@ecoguinee.gn',     phone: '+224 628 01 02 03', role: 'AGENT',       territoire: 'Kaloum',  status: 'ACTIVE',    createdAt: '2025-06-01', lastLogin: '2026-03-10T11:45:00' },
+  { id: 'usr-008', name: 'Kadiatou Traoré',    email: 'kadiatou.traore@gmail.com',    phone: '+224 622 55 66 77', role: 'USER',        territoire: 'Ratoma',  status: 'ACTIVE',    createdAt: '2025-08-14', lastLogin: '2026-03-09T20:10:00' },
+  { id: 'usr-009', name: 'Sory Sylla',         email: 'sory.sylla@gmail.com',         phone: '+224 620 99 88 77', role: 'USER',        territoire: 'Matam',   status: 'SUSPENDED', createdAt: '2025-09-30', lastLogin: '2026-01-15T08:00:00' },
 ];

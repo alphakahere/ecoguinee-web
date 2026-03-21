@@ -7,7 +7,7 @@ import { BarChart } from '@/components/charts/bar-chart';
 import { PieChart } from '@/components/charts/pie-chart';
 import { users, hotspots, territoires, pmeList, dashboardStats } from '@/lib/data/mock-data';
 
-const activeUsers = users.filter((u) => u.status === 'active').length;
+const activeUsers = users.filter((u) => u.status === 'ACTIVE').length;
 const resolvedPct = Math.round((dashboardStats.resolvedCases / dashboardStats.totalHotspots) * 100);
 const activePMEs = pmeList.filter((p) => p.activeInterventions > 0).length;
 

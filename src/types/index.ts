@@ -26,7 +26,7 @@ export {
   SEVERITY_META,
   STATUS_META,
   ROLE_META,
-  redirectForRole,
+  redirectByRole,
 } from '@/lib/types';
 
 // ── API-layer aliases ──────────────────────────────────────────────────────
