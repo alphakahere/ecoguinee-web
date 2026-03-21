@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import {
-  Plus, ChevronRight, ChevronDown, Pencil, Trash2,
+  Plus, ChevronRight, ChevronDown, ChevronLeft, Pencil, Trash2,
   Search, MapPin, FileText, Megaphone, Building2, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -252,10 +252,10 @@ export default function AdminTerritoiresPage() {
       ) : isError ? (
         <p className="text-sm text-muted-foreground font-mono py-8">Impossible de charger les zones.</p>
       ) : (
-        <div className="flex gap-4 items-start">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
 
           {/* ── Left: tree panel ──────────────────────────────────────────── */}
-          <div className="w-72 shrink-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className={cn('lg:w-72 lg:shrink-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden', selectedId ? 'hidden lg:block' : 'block')}>
             {/* Search + type filter */}
             <div className="p-3 border-b border-border space-y-2">
               <div className="relative">
@@ -294,7 +294,7 @@ export default function AdminTerritoiresPage() {
             </div>
 
             {/* Tree */}
-            <div className="p-2 max-h-[calc(100vh-300px)] overflow-y-auto">
+            <div className="p-2 max-h-[50vh] lg:max-h-[calc(100vh-300px)] overflow-y-auto">
               {roots.length === 0 ? (
                 <p className="text-xs text-muted-foreground font-mono py-6 text-center">Aucune zone</p>
               ) : roots.filter(r => !visibleIds || visibleIds.has(r.id)).map(root => (
@@ -316,7 +316,7 @@ export default function AdminTerritoiresPage() {
           {/* ── Right: detail panel ───────────────────────────────────────── */}
           <div className="flex-1 min-w-0">
             {!selectedId ? (
-              <div className="rounded-2xl border border-border bg-card shadow-sm flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+              <div className="hidden lg:flex rounded-2xl border border-border bg-card shadow-sm flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
                 <MapPin className="w-8 h-8 opacity-30" />
                 <p className="text-sm font-mono">Sélectionnez une zone dans l'arbre</p>
               </div>
@@ -326,6 +326,14 @@ export default function AdminTerritoiresPage() {
                 {/* Zone header */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5 min-w-0">
+                    {/* Mobile back button */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(null)}
+                      className="lg:hidden flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground mb-1"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> Retour
+                    </button>
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-xl font-semibold tracking-tight">{selectedNode?.name}</h3>
                       {selectedNode && (
@@ -396,7 +404,8 @@ export default function AdminTerritoiresPage() {
                   </div>
                 )}
 
-                {/* Children */}
+                {/* Children — sectors are leaf nodes */}
+                {selectedNode?.type !== 'SECTOR' && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-semibold">
@@ -437,6 +446,7 @@ export default function AdminTerritoiresPage() {
                     </div>
                   )}
                 </div>
+                )}
 
               </div>
             )}

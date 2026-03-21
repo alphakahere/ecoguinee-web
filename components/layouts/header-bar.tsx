@@ -26,13 +26,14 @@ interface HeaderBarProps {
   rightSlot?: ReactNode;
   mobileLeftSlot?: ReactNode;
   profile?: ProfileInfo;
+  onLogout?: () => void;
 }
 
 export function HeaderBar({
   roleIcon, roleLabel, pageLabel,
   onMobileMenuOpen,
   notifications = 0, leftSlot, rightSlot, mobileLeftSlot,
-  profile,
+  profile, onLogout,
 }: HeaderBarProps) {
   const router = useRouter();
   const isRoot = pageLabel === 'Dashboard' || pageLabel === 'Tableau de bord' || pageLabel === 'Accueil';
@@ -142,7 +143,7 @@ export function HeaderBar({
                   {/* Logout */}
                   <div className="border-t border-border py-1.5">
                     <button
-                      onClick={() => { setProfileOpen(false); router.push('/'); }}
+                      onClick={() => { setProfileOpen(false); onLogout ? onLogout() : router.push('/'); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-mono text-destructive hover:bg-destructive/10 transition-colors text-left"
                     >
                       <LogOut className="w-4 h-4" />
