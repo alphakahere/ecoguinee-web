@@ -15,7 +15,6 @@ export function AuthGuard({ allowedRoles, children }: AuthGuardProps) {
   const router = useRouter();
   const { user, token } = useAuthStore();
   const [mounted, setMounted] = useState(false);
-  console.log({ user, token })
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount detection
   useEffect(() => { setMounted(true); }, []);

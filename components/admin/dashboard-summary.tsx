@@ -34,10 +34,10 @@ export function DashboardSummary() {
     <>
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard icon={Users} title="Utilisateurs actifs" value={activeUsers} color="primary" delay={0} />
-        <KPICard icon={AlertTriangle} title="Points noirs" value={dashboardStats.totalHotspots} color="warning" delay={0.06} />
-        <KPICard icon={CheckCircle} title="Taux de résolution" value={resolvedPct} color="success" delay={0.12} trend={dashboardStats.weeklyTrend} />
-        <KPICard icon={Building2} title="PMEs actives" value={activePMEs} color="neutral" delay={0.18} />
+        <KPICard icon={Users} title="Utilisateurs actifs" value={activeUsers} delay={0} />
+        <KPICard icon={AlertTriangle} title="Points noirs" value={dashboardStats.totalHotspots} delay={0.06} />
+        <KPICard icon={CheckCircle} title="Taux de résolution" value={resolvedPct} delay={0.12} trend={dashboardStats.weeklyTrend} />
+        <KPICard icon={Building2} title="PMEs actives" value={activePMEs} delay={0.18} />
       </div>
 
       {/* Charts */}

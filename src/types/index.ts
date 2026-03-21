@@ -74,10 +74,14 @@ export interface CampaignFilters {
   search?: string;
 }
 
+/** Mirrors backend QueryUserDto (GET /users) */
 export interface UserFilters {
   role?: string;
   status?: string;
+  smeId?: string;
   search?: string;
+  page?: number;
+  limit?: number;
 }
 
 // ── API responses ──────────────────────────────────────────────────────────
@@ -92,3 +96,17 @@ export interface AuthResponse {
   user: import('@/lib/types').User;
   token: string;
 }
+
+/** Payload for POST /users */
+export interface CreateUserPayload {
+  name: string;
+  email?: string;
+  phone: string;
+  role: import('@/lib/types').UserRole;
+  territoire?: string;
+  status?: import('@/lib/types').UserStatus;
+  password?: string;
+}
+
+/** Payload for PATCH /users/:id */
+export type UpdateUserPayload = Partial<CreateUserPayload>;
