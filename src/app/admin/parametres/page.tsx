@@ -1,19 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Globe, Database, Server } from 'lucide-react';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+const STORAGE_KEY = 'eco-settings';
+
+interface Settings {
+  platformName: string;
+  emailNotif: boolean;
+  autoAssign: boolean;
+  maintenanceMode: boolean;
+}
+
+const DEFAULTS: Settings = {
+  platformName: 'EcoGuinée',
+  emailNotif: true,
+  autoAssign: true,
+  maintenanceMode: false,
+};
+
+function loadSettings(): Settings {
+  if (typeof window === 'undefined') return DEFAULTS;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULTS;
+    return { ...DEFAULTS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULTS;
+  }
+}
+
 export default function AdminParametresPage() {
-  const [emailNotif, setEmailNotif] = useState(true);
-  const [autoAssign, setAutoAssign] = useState(true);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [settings, setSettings] = useState<Settings>(DEFAULTS);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setSettings(loadSettings());
+    setLoaded(true);
+  }, []);
+
+  const update = <K extends keyof Settings>(key: K, value: Settings[K]) => {
+    setSettings((s) => ({ ...s, [key]: value }));
+  };
 
   const handleSave = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     toast.success('Paramètres enregistrés avec succès !');
   };
+
+  if (!loaded) return null;
 
   return (
     <div className="space-y-6">
@@ -31,7 +69,11 @@ export default function AdminParametresPage() {
               <p className="text-sm font-semibold">Nom de la plateforme</p>
               <p className="text-xs font-mono text-muted-foreground">Affiché partout sur le site</p>
             </div>
-            <input defaultValue="EcoGuinée" className="px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono w-48 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input
+              value={settings.platformName}
+              onChange={(e) => update('platformName', e.target.value)}
+              className="px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono w-48 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
           </div>
           <div className="flex items-center justify-between">
             <div>
@@ -50,20 +92,20 @@ export default function AdminParametresPage() {
           <h3 className="font-semibold">Notifications</h3>
         </div>
         <div className="space-y-4">
-          {[
-            { label: 'Notifications par email', description: 'Envoyer des emails aux agents et superviseurs', value: emailNotif, onChange: setEmailNotif },
-            { label: 'Assignation automatique', description: 'Assigner automatiquement les signalements aux PME', value: autoAssign, onChange: setAutoAssign },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between">
+          {([
+            { key: 'emailNotif' as const, label: 'Notifications par email', description: 'Envoyer des emails aux agents et superviseurs' },
+            { key: 'autoAssign' as const, label: 'Assignation automatique', description: 'Assigner automatiquement les signalements aux PME' },
+          ]).map((item) => (
+            <div key={item.key} className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold">{item.label}</p>
                 <p className="text-xs font-mono text-muted-foreground">{item.description}</p>
               </div>
               <button
-                onClick={() => item.onChange(!item.value)}
-                className={`w-11 h-6 rounded-full transition-colors relative ${item.value ? 'bg-primary' : 'bg-muted'}`}
+                onClick={() => update(item.key, !settings[item.key])}
+                className={`w-11 h-6 rounded-full transition-colors relative ${settings[item.key] ? 'bg-primary' : 'bg-muted'}`}
               >
-                <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${item.value ? 'left-6' : 'left-1'}`} />
+                <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${settings[item.key] ? 'left-6' : 'left-1'}`} />
               </button>
             </div>
           ))}
@@ -83,10 +125,10 @@ export default function AdminParametresPage() {
               <p className="text-xs font-mono text-muted-foreground">Désactiver temporairement l&apos;accès public</p>
             </div>
             <button
-              onClick={() => setMaintenanceMode(!maintenanceMode)}
-              className={`w-11 h-6 rounded-full transition-colors relative ${maintenanceMode ? 'bg-[#D94035]' : 'bg-muted'}`}
+              onClick={() => update('maintenanceMode', !settings.maintenanceMode)}
+              className={`w-11 h-6 rounded-full transition-colors relative ${settings.maintenanceMode ? 'bg-[#D94035]' : 'bg-muted'}`}
             >
-              <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${maintenanceMode ? 'left-6' : 'left-1'}`} />
+              <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${settings.maintenanceMode ? 'left-6' : 'left-1'}`} />
             </button>
           </div>
           <div className="flex items-center justify-between">

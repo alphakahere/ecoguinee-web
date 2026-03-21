@@ -23,7 +23,8 @@ export const ADMIN_NAV: (NavItem & { count?: number; alert?: boolean })[] = [
   { label: 'Utilisateurs',    href: '/admin/users',       icon: 'Users',           count: 9 },
   { label: 'Territoires',     href: '/admin/territoires', icon: 'Map',             count: 5 },
   { label: 'PME',             href: '/admin/pme',         icon: 'Building2',       count: 4 },
-  { label: 'Signalements',    href: '/admin/hotspots',    icon: 'AlertTriangle',   count: 8, alert: true },
-  { label: 'Campagnes',       href: '/admin/campagnes',   icon: 'Megaphone',       count: 10 },
+  { label: 'Signalements',    href: '/admin/hotspots',        icon: 'AlertTriangle',   count: 8, alert: true },
+  { label: 'Interventions',   href: '/admin/interventions',   icon: 'Wrench' },
+  { label: 'Campagnes',       href: '/admin/campagnes',       icon: 'Megaphone',       count: 10 },
   { label: 'Paramètres',      href: '/admin/parametres',  icon: 'Settings' },
 ];

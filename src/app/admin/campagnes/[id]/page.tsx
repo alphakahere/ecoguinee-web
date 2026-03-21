@@ -1,10 +1,13 @@
-import { CampaignDetailView } from '@/components/campagnes/campaign-detail-view';
+'use client';
+
+import { use } from 'react';
+import { AdminCampaignDetail } from '@/components/admin/admin-campaign-detail';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default async function AdminCampaignDetailPage({ params }: Props) {
-  const { id } = await params;
-  return <CampaignDetailView id={id} basePath="/admin/campagnes" />;
+export default function AdminCampaignDetailPage({ params }: Props) {
+  const { id } = use(params);
+  return <AdminCampaignDetail id={id} />;
 }

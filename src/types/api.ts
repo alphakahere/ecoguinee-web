@@ -94,8 +94,11 @@ export interface ApiIntervention {
   status: ApiInterventionStatus;
   notes?: string | null;
   reportId: string;
+  report?: { id: string; address?: string | null };
   agentId: string;
+  agent?: { id: string; name: string };
   smeId: string;
+  sme?: { id: string; name: string };
   assignedDate?: string | null;
   resolutionDate?: string | null;
   createdAt: string;
@@ -255,6 +258,13 @@ export const API_CAMPAIGN_TYPE_META: Record<ApiCampaignType, { label: string; co
   AWARENESS: { label: 'Sensibilisation', color: 'text-[#2D7D46]', bg: 'bg-[#2D7D46]/10' },
   PROMOTION: { label: 'Promotion',       color: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10' },
   TRAINING:  { label: 'Formation',       color: 'text-blue-500',  bg: 'bg-blue-500/10' },
+};
+
+export const INTERVENTION_STATUS_META: Record<ApiInterventionStatus, { label: string; color: string; bg: string }> = {
+  ASSIGNED:    { label: 'Assignée',  color: 'text-blue-500',         bg: 'bg-blue-500/10' },
+  IN_PROGRESS: { label: 'En cours',  color: 'text-[#E8A020]',        bg: 'bg-[#E8A020]/10' },
+  RESOLVED:    { label: 'Résolue',   color: 'text-[#6FCF4A]',        bg: 'bg-[#6FCF4A]/10' },
+  FAILED:      { label: 'Échouée',   color: 'text-[#D94035]',        bg: 'bg-[#D94035]/10' },
 };
 
 export { type UserRole, type UserStatus };

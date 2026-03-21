@@ -64,7 +64,11 @@ export interface ReportFilters {
 export interface InterventionFilters {
   status?: string;
   assignedTo?: string;
+  reportId?: string;
+  smeId?: string;
   search?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface CampaignFilters {

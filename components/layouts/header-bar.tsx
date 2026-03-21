@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, ChevronRight, Menu, User, Settings, LogOut, Shield } from 'lucide-react';
+import { ChevronRight, Menu, User, Settings, LogOut, Shield } from 'lucide-react';
+import { NotificationsPanel } from './notifications-panel';
 import type { ReactNode } from 'react';
 
 interface ProfileInfo {
@@ -77,14 +78,7 @@ export function HeaderBar({
 
       <div className="flex items-center gap-2">
         {rightSlot}
-        <button className="relative w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors">
-          <Bell className="w-4 h-4" />
-          {notifications > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-white text-[9px] font-bold flex items-center justify-center">
-              {notifications}
-            </span>
-          )}
-        </button>
+        <NotificationsPanel count={notifications} />
 
         {profile && (
           <div ref={profileRef} className="relative">
