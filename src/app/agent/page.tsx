@@ -1,11 +1,17 @@
+'use client';
+
 import { DashboardStats } from '@/components/agent/dashboard-stats';
 import { RecentReports } from '@/components/agent/recent-reports';
+import { useAuthStore } from '@/stores/auth.store';
 
 export default function AgentDashboardPage() {
+  const currentUser = useAuthStore((s) => s.user);
+  const firstName = currentUser?.name?.split(' ')[0] ?? 'Agent';
+
   return (
     <div className="space-y-5 max-w-5xl">
       <div>
-        <h2 className="font-bold text-xl sm:text-2xl mb-1">Bonjour, Fatoumata</h2>
+        <h2 className="font-bold text-xl sm:text-2xl mb-1">Bonjour, {firstName}</h2>
         <p className="text-muted-foreground font-mono text-sm">
           {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>

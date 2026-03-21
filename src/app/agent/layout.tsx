@@ -1,13 +1,17 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Plus, Bell, Activity, ChevronRight } from 'lucide-react';
+import { MapPin, Plus, Activity, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileBottomTabs } from '@/components/layouts/mobile-bottom-tabs';
+import { NotificationsPanel } from '@/components/layouts/notifications-panel';
 import { AuthGuard } from '@/components/shared/auth-guard';
+import { NewReportModal } from '@/components/agent/new-report-modal';
 import { AGENT_NAV } from '@/lib/constants';
+import { useAuthStore } from '@/stores/auth.store';
 
 const TABS = AGENT_NAV.map((n) => ({ ...n, exact: n.href === '/agent' }));
 
@@ -16,26 +20,40 @@ function findLabel(pathname: string) {
   return found?.label ?? 'Tableau de bord';
 }
 
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const pageLabel = findLabel(pathname);
   const isRoot = pathname === '/agent';
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+
+  const currentUser = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  const userName = currentUser?.name ?? 'Agent';
+  const userInitials = initials(userName);
+  const territoire = currentUser?.territoire ?? '';
 
   return (
-    <AuthGuard allowedRoles={['AGENT']}>
+    <AuthGuard allowedRoles={['AGENT']} requireSme>
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-56 shrink-0 flex-col h-full">
         <SidebarNav
           items={TABS}
-          userInfo={{ name: 'Fatoumata Camara', initials: 'FC', subtitle: 'Agent · Dixinn' }}
+          userInfo={{ name: userName, initials: userInitials, subtitle: `Agent${territoire ? ` · ${territoire}` : ''}` }}
           roleLabel="Espace Agent"
           roleIcon="Activity"
           layoutId="agentActiveTabDesktop"
         />
       </aside>
 
-      {/* Main column */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="shrink-0 h-14 flex items-center justify-between px-4 border-b border-border bg-card/95 backdrop-blur-md z-20">
           <div className="flex items-center gap-3 lg:hidden">
@@ -58,12 +76,11 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
             <h1 className="font-bold text-lg leading-none">{pageLabel}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button className="relative w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors">
-              <Bell className="w-4 h-4" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-white text-[9px] font-bold flex items-center justify-center">2</span>
-            </button>
+            <NotificationsPanel count={0} />
             <Link href="/agent/profil" className="lg:hidden">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">FC</div>
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+                {userInitials}
+              </div>
             </Link>
           </div>
         </header>
@@ -75,14 +92,17 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile FAB */}
       <motion.button
-        whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        onClick={() => setReportModalOpen(true)}
         className="fixed bottom-[76px] right-4 z-40 lg:hidden w-14 h-14 rounded-full bg-primary text-white shadow-xl flex items-center justify-center shadow-[0_4px_20px_rgba(45,125,70,0.4)]"
       >
         <Plus className="w-7 h-7" />
       </motion.button>
 
-      {/* Mobile bottom tabs */}
       <MobileBottomTabs tabs={TABS} layoutId="agentMobileTab" />
+
+      <NewReportModal open={reportModalOpen} onClose={() => setReportModalOpen(false)} />
     </div>
     </AuthGuard>
   );

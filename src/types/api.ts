@@ -163,6 +163,8 @@ export interface ApiCampaignFilters {
   status?: ApiCampaignStatus;
   type?: ApiCampaignType;
   zoneId?: string;
+  smeId?: string;
+  agentId?: string;
   search?: string;
   page?: number;
   limit?: number;
