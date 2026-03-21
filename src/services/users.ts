@@ -42,4 +42,17 @@ export const usersService = {
   async delete(id: string): Promise<void> {
     await api.delete(`/users/${id}`);
   },
+
+  async exportCsv(filters?: Omit<UserFilters, 'page' | 'limit'>): Promise<void> {
+    const { data } = await api.get<Blob>('/users/export', {
+      params: filters,
+      responseType: 'blob',
+    });
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'utilisateurs-ecoguinee.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };

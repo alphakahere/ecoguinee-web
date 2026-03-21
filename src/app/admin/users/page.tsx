@@ -28,6 +28,7 @@ import { ROLE_META } from '@/lib/types';
 import type { User } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth.store';
 import { useUsers } from '@/hooks/queries/useUsers';
+import { usersService } from '@/services/users';
 import { useCreateUser } from '@/hooks/mutations/useCreateUser';
 import { useUpdateUser } from '@/hooks/mutations/useUpdateUser';
 import { useUpdateUserStatus } from '@/hooks/mutations/useUpdateUserStatus';
@@ -43,30 +44,6 @@ const STATUS_LABELS: Record<string, string> = {
   INACTIVE: 'Inactif',
   SUSPENDED: 'Suspendu',
 };
-
-function exportUsersCsv(users: User[]) {
-  const headers = ['id', 'nom', 'email', 'telephone', 'role', 'territoire', 'statut', 'cree_le', 'derniere_connexion'];
-  const rows = users.map((u) => [
-    u.id,
-    u.name,
-    u.email ?? '',
-    u.phone,
-    u.role,
-    u.territoire ?? '',
-    u.status,
-    u.createdAt,
-    u.lastLogin ?? '',
-  ]);
-  const escape = (c: string) => `"${String(c).replace(/"/g, '""')}"`;
-  const csv = [headers.join(','), ...rows.map((r) => r.map(escape).join(','))].join('\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'utilisateurs-ecoguinee.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 const PAGE_SIZE = 10;
 
@@ -218,8 +195,12 @@ export default function AdminUsersPage() {
   };
 
   const onExportCsv = useCallback(() => {
-    exportUsersCsv(usersList);
-  }, [usersList]);
+    usersService.exportCsv({
+      search: debouncedSearch || undefined,
+      roleGroup: roleTab !== 'all' ? (roleTab as 'admin' | 'superviseur' | 'agent' | 'public') : undefined,
+      status: statusFilter || undefined,
+    });
+  }, [debouncedSearch, roleTab, statusFilter]);
 
   const roleTabs: { id: RoleTab; label: string }[] = [
     { id: 'all', label: 'Tous' },
@@ -331,9 +312,6 @@ export default function AdminUsersPage() {
                       Rôle
                     </TableHead>
                     <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Territoire
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Statut
                     </TableHead>
                     <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -350,7 +328,7 @@ export default function AdminUsersPage() {
                 <TableBody>
                   {usersList.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                         Aucun résultat
                       </TableCell>
                     </TableRow>
@@ -383,15 +361,6 @@ export default function AdminUsersPage() {
                               <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: m.dot }} />
                               {m.label}
                             </span>
-                          </TableCell>
-                          <TableCell>
-                            {u.territoire ? (
-                              <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-1 font-mono text-xs">
-                                {u.territoire}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">—</span>
-                            )}
                           </TableCell>
                           <TableCell>
                             <span
