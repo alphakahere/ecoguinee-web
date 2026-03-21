@@ -152,6 +152,7 @@ export interface ApiReportFilters {
   severity?: ApiSeverity;
   type?: ApiWasteType;
   zoneId?: string;
+  smeId?: string;
   source?: ReportSource;
   search?: string;
   page?: number;

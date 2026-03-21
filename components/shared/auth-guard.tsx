@@ -8,10 +8,12 @@ import type { UserRole } from '@/lib/types';
 
 interface AuthGuardProps {
   allowedRoles: UserRole[];
+  /** Require the user to be linked to an SME (smeId or memberSmeId). Shows an error if not. */
+  requireSme?: boolean;
   children: React.ReactNode;
 }
 
-export function AuthGuard({ allowedRoles, children }: AuthGuardProps) {
+export function AuthGuard({ allowedRoles, requireSme = false, children }: AuthGuardProps) {
   const router = useRouter();
   const { user, token } = useAuthStore();
   const [mounted, setMounted] = useState(false);
@@ -42,6 +44,25 @@ export function AuthGuard({ allowedRoles, children }: AuthGuardProps) {
 
   if (!token) return null;
   if (user && !allowedRoles.includes(user.role)) return null;
+
+  if (requireSme && user && !user.smeId && !user.memberSmeId) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center max-w-sm space-y-3">
+          <p className="text-sm font-semibold">Accès refusé</p>
+          <p className="text-xs font-mono text-muted-foreground">
+            Votre compte n'est associé à aucune PME. Contactez un administrateur pour être rattaché à une PME.
+          </p>
+          <button
+            onClick={() => router.replace('/')}
+            className="text-xs font-mono text-primary hover:underline"
+          >
+            Retour à l'accueil
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

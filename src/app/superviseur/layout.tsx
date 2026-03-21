@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Building2, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
@@ -9,7 +9,7 @@ import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
 import { AuthGuard } from '@/components/shared/auth-guard';
 import { SUPERVISEUR_NAV } from '@/lib/constants';
-import { PME_PROFILE } from '@/lib/data/superviseur-data';
+import { useAuthStore } from '@/stores/auth.store';
 
 const TABS = SUPERVISEUR_NAV.map((n) => ({ ...n, exact: n.href === '/superviseur' }));
 
@@ -18,10 +18,26 @@ function findLabel(pathname: string) {
   return found?.label ?? 'Dashboard';
 }
 
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  MANAGER: 'Manager',
+  SUPERVISOR: 'Superviseur',
+};
+
 export default function SuperviseurLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const currentUser = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- close drawer on navigation
   useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -34,11 +50,18 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
   }, []);
 
   const pageLabel = findLabel(pathname);
+  const userName = currentUser?.name ?? 'Superviseur';
+  const userInitials = initials(userName);
+  const roleBadge = ROLE_LABELS[currentUser?.role ?? ''] ?? 'Superviseur';
+  const pmeSubtitle = currentUser?.email ?? currentUser?.phone ?? '';
+
+  const handleLogout = () => { logout(); router.push('/'); };
+
+  const sidebarUser = { name: userName, initials: userInitials, subtitle: roleBadge };
 
   return (
-    <AuthGuard allowedRoles={['MANAGER', 'SUPERVISOR']}>
+    <AuthGuard allowedRoles={['MANAGER', 'SUPERVISOR']} requireSme>
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 56 : 224 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -47,7 +70,7 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
       >
         <SidebarNav
           items={TABS}
-          userInfo={{ name: 'Amadou Diallo', initials: 'AD', subtitle: PME_PROFILE.name }}
+          userInfo={sidebarUser}
           roleLabel="Superviseur Panel"
           roleIcon="Building2"
           layoutId="supActiveTab"
@@ -55,14 +78,13 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
         />
       </motion.aside>
 
-      {/* Main column */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <HeaderBar
           roleIcon={<Building2 className="w-3 h-3 text-primary" />}
           roleLabel="Superviseur"
           pageLabel={pageLabel}
           onMobileMenuOpen={() => setMobileOpen(true)}
-          notifications={3}
+          notifications={0}
           leftSlot={
             <button
               onClick={() => setCollapsed((v) => !v)}
@@ -72,13 +94,14 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
             </button>
           }
           profile={{
-            name: 'Amadou Diallo',
-            initials: 'AD',
-            subtitle: PME_PROFILE.name,
-            roleBadge: 'Superviseur',
+            name: userName,
+            initials: userInitials,
+            subtitle: pmeSubtitle,
+            roleBadge,
             profileHref: '/superviseur/parametres',
             settingsHref: '/superviseur/parametres',
           }}
+          onLogout={handleLogout}
         />
 
         <main className="flex-1 overflow-auto p-4 sm:p-5 lg:p-7 topo-pattern">
@@ -86,11 +109,10 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
         </main>
       </div>
 
-      {/* Mobile drawer */}
       <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
         <SidebarNav
           items={TABS}
-          userInfo={{ name: 'Amadou Diallo', initials: 'AD', subtitle: PME_PROFILE.name }}
+          userInfo={sidebarUser}
           roleLabel="Superviseur"
           roleIcon="Building2"
           layoutId="supActiveTabMobile"
