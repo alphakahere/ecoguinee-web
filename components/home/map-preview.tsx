@@ -1,11 +1,45 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { hotspots } from '@/lib/data/mock-data';
 import { MapLoader } from '@/components/maps/map-loader';
+import { useReports } from '@/hooks/queries/useReports';
+import type { Hotspot, SeverityLevel, WasteType, InterventionStatus } from '@/lib/types';
+
+const SEV_MAP: Record<string, SeverityLevel> = { LOW: 'low', MODERATE: 'medium', CRITICAL: 'critical' };
+const TYPE_MAP: Record<string, WasteType> = { SOLID: 'solid', LIQUID: 'liquid' };
+const STATUS_MAP: Record<string, InterventionStatus> = {
+  PENDING_VALIDATION: 'reported',
+  REPORTED: 'reported',
+  IN_PROGRESS: 'in-progress',
+  RESOLVED: 'resolved',
+};
 
 export function MapPreview() {
+  const { data } = useReports({ page: 1, limit: 50 });
+  const reports = data?.data ?? [];
+
+  const hotspots: Hotspot[] = useMemo(() =>
+    reports.map((r) => ({
+      id: r.id,
+      location: {
+        lat: r.latitude,
+        lng: r.longitude,
+        address: r.address ?? '—',
+        territoire: r.zone?.name ?? '—',
+        sector: r.zone?.name ?? '—',
+      },
+      wasteType: TYPE_MAP[r.type] ?? 'solid',
+      severity: SEV_MAP[r.severity] ?? 'medium',
+      description: r.description ?? '',
+      reportedBy: r.contactName ?? 'Citoyen',
+      reportedAt: r.createdAt,
+      status: STATUS_MAP[r.status] ?? 'reported',
+    })),
+    [reports],
+  );
+
   return (
     <section className="py-20" style={{ background: '#0A1A10' }}>
       <div className="max-w-7xl mx-auto px-5">

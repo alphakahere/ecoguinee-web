@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FileText, ArrowRight, LogIn, Leaf } from 'lucide-react';
-import { dashboardStats, territoires } from '@/lib/data/mock-data';
+import { usePublicStats } from '@/hooks/queries/usePublicStats';
 
 function useCountUp(target: number, duration = 1500, delay = 0) {
   const [count, setCount] = useState(0);
@@ -48,11 +48,6 @@ function CounterItem({ value, label, suffix = '', delay = 0 }: {
   );
 }
 
-const totalResolved = territoires.reduce((s, t) => s + t.resolvedCount, 0);
-const citizensK = Math.round(
-  territoires.reduce((s, t) => s + t.sectors.reduce((ss, sec) => ss + (sec.population ?? 0), 0), 0) / 1000
-);
-
 function TopoSVG() {
   return (
     <svg
@@ -62,28 +57,17 @@ function TopoSVG() {
       viewBox="0 0 1200 700"
     >
       <g fill="none" stroke="rgba(111,207,74,0.13)" strokeWidth="1">
-        {/* Topographic contours — nested ellipses */}
         {[280, 240, 200, 162, 126, 92, 60, 34].map((r, i) => (
           <ellipse key={i} cx="600" cy="350" rx={r * 2.2} ry={r * 1.3} />
         ))}
-        {/* Second cluster offset */}
         {[180, 148, 118, 90, 64, 42].map((r, i) => (
           <ellipse key={`b${i}`} cx="200" cy="150" rx={r * 2} ry={r * 1.2} />
         ))}
-        {/* Third cluster */}
         {[160, 128, 98, 72].map((r, i) => (
           <ellipse key={`c${i}`} cx="1050" cy="580" rx={r * 1.8} ry={r} />
         ))}
-        {/* Horizontal contour lines */}
         {Array.from({ length: 14 }, (_, i) => (
-          <line
-            key={`h${i}`}
-            x1="0"
-            y1={i * 52}
-            x2="1200"
-            y2={i * 52 + 18}
-            strokeOpacity="0.06"
-          />
+          <line key={`h${i}`} x1="0" y1={i * 52} x2="1200" y2={i * 52 + 18} strokeOpacity="0.06" />
         ))}
       </g>
     </svg>
@@ -91,15 +75,14 @@ function TopoSVG() {
 }
 
 export function HeroSection() {
+  const { data: stats } = usePublicStats();
+
   return (
     <section
       className="relative flex flex-col justify-center overflow-hidden min-h-[calc(100vh-4rem)]"
       style={{ background: '#0A1A10' }}
     >
-      {/* Topo SVG lines */}
       <TopoSVG />
-
-      {/* Green radial glow */}
       <div
         className="absolute pointer-events-none"
         style={{
@@ -115,7 +98,6 @@ export function HeroSection() {
 
       <div className="relative max-w-7xl mx-auto px-5 py-24 md:py-32 w-full">
         <div className="max-w-5xl">
-          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -128,7 +110,6 @@ export function HeroSection() {
             </span>
           </motion.div>
 
-          {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -140,7 +121,6 @@ export function HeroSection() {
             <span style={{ color: '#6FCF4A' }}>plus propre</span>
           </motion.h1>
 
-          {/* Sub-headline */}
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -151,7 +131,6 @@ export function HeroSection() {
             pour éliminer les points noirs environnementaux à travers tout le pays.
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -180,7 +159,6 @@ export function HeroSection() {
             </Link>
           </motion.div>
 
-          {/* Counter strip */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -192,10 +170,10 @@ export function HeroSection() {
               backdropFilter: 'blur(12px)',
             }}
           >
-            <CounterItem value={dashboardStats.totalHotspots} label="Points noirs signalés" delay={0} />
-            <CounterItem value={totalResolved} label="Interventions résolues" delay={150} />
-            <CounterItem value={5} label="Communes couvertes" delay={300} />
-            <CounterItem value={citizensK} label="Citoyens actifs" suffix="k" delay={450} />
+            <CounterItem value={stats?.totalReports ?? 0} label="Points noirs signalés" delay={0} />
+            <CounterItem value={stats?.resolvedReports ?? 0} label="Interventions résolues" delay={150} />
+            <CounterItem value={stats?.communes ?? 0} label="Communes couvertes" delay={300} />
+            <CounterItem value={stats?.activeSmes ?? 0} label="PMEs partenaires" delay={450} />
           </motion.div>
         </div>
       </div>

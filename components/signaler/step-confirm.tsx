@@ -1,6 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { ChevronRight, CheckCircle, Info } from 'lucide-react';
+import { useZoneTree } from '@/hooks/queries/useZones';
+import type { ApiZone } from '@/types/api';
 import type { ReportData, Step } from './report-wizard';
 
 const GRAVITE_LABEL: Record<string, string> = { faible: 'Faible', modere: 'Modéré', critique: 'Critique' };
@@ -11,9 +14,22 @@ interface Props {
   goTo: (step: Step) => void;
 }
 
+function flattenTree(nodes: ApiZone[]): ApiZone[] {
+  const result: ApiZone[] = [];
+  function walk(n: ApiZone) { result.push(n); n.children?.forEach(walk); }
+  nodes.forEach(walk);
+  return result;
+}
+
 export function StepConfirm({ data, goTo }: Props) {
+  const { data: tree = [] } = useZoneTree();
+  const flat = useMemo(() => flattenTree(tree), [tree]);
+
+  const communeName = flat.find(z => z.id === data.commune)?.name ?? data.commune;
+  const secteurName = flat.find(z => z.id === data.secteur)?.name ?? data.secteur;
+
   const summary = [
-    { label: `${data.commune} — ${data.secteur}`, step: 1 as Step },
+    { label: `${communeName} — ${secteurName}`, step: 1 as Step },
     { label: data.wasteType === 'liquid' ? 'Déchets Liquides' : 'Déchets Solides', step: 2 as Step },
     { label: `Gravité ${GRAVITE_LABEL[data.gravite ?? 'faible']}`, step: 2 as Step },
     { label: data.photos.length > 0 ? `${data.photos.length} photo(s)` : 'Aucune photo', step: 3 as Step },
@@ -43,12 +59,11 @@ export function StepConfirm({ data, goTo }: Props) {
         ))}
       </div>
 
-      {data.wasteType === 'solid' && (
-        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-[#6FCF4A]/10 border border-[#6FCF4A]/30">
-          <CheckCircle className="w-4 h-4 text-[#6FCF4A] shrink-0 mt-0.5" />
-          <p className="text-sm font-mono text-[#6FCF4A]">
-            <span className="font-semibold">PME Vert Guinée</span> sera notifiée — responsable de ce secteur.
-          </p>
+      {data.latitude > 0 && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border">
+          <span className="text-[10px] font-mono text-muted-foreground">
+            GPS : {data.latitude.toFixed(5)}, {data.longitude.toFixed(5)}
+          </span>
         </div>
       )}
 

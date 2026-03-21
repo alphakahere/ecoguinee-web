@@ -1,50 +1,76 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MapPin, ChevronDown, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { useZoneTree } from '@/hooks/queries/useZones';
+import type { ApiZone } from '@/types/api';
 import type { ReportData } from './report-wizard';
-
-const COMMUNES_SECTEURS: Record<string, string[]> = {
-  'Kaloum':     ['Centre Administratif', 'Port de Conakry', 'Tombo', 'Boulbinet'],
-  'Dixinn':     ['Hamdallaye', 'Coleah', 'Landréah', 'Cameroun', 'Camayenne'],
-  'Matam':      ['Almamya', 'Madina', 'Dabondy', 'Enta', 'Bonfi'],
-  'Ratoma':     ['Ratoma Centre', 'Cosa', 'Kipé', 'Bambéto', 'Sonfonia'],
-  'Matoto':     ['Kagbelen', 'Yattaya', 'Kobaya', 'Gbessia', 'Tombolia', 'Matoto Centre'],
-  'Kindia':     ['Kindia Centre', 'Bangouyah', 'Molota'],
-  'Labé':       ['Labé Centre', 'Kouramangui', 'Kaalan'],
-  'Kankan':     ['Kankan Centre', 'Koura', 'Sabadou'],
-  "N'Zérékoré": ["N'Zérékoré Centre", 'Bossou', 'Lainé'],
-  'Faranah':    ['Faranah Centre', 'Baro', 'Tiro'],
-  'Mamou':      ['Mamou Centre', 'Timbo', 'Pita'],
-  'Boké':       ['Boké Centre', 'Kamsar', 'Sangarédi'],
-  'Siguiri':    ['Siguiri Centre', 'Doko', 'Norassoba'],
-};
 
 interface Props {
   data: ReportData;
   update: (d: Partial<ReportData>) => void;
 }
 
+function flattenTree(nodes: ApiZone[]): ApiZone[] {
+  const result: ApiZone[] = [];
+  function walk(n: ApiZone) { result.push(n); n.children?.forEach(walk); }
+  nodes.forEach(walk);
+  return result;
+}
+
 export function StepLocation({ data, update }: Props) {
   const [gpsState, setGpsState] = useState<'idle' | 'loading' | 'success' | 'denied'>('idle');
+  const { data: tree = [] } = useZoneTree();
+
+  const flat = useMemo(() => flattenTree(tree), [tree]);
+
+  // Build commune (MUNICIPALITY/REGION) → secteur (NEIGHBORHOOD/SECTOR) mapping from zone tree
+  const communeZones = useMemo(() => flat.filter(z =>
+    z.type === 'MUNICIPALITY' || z.type === 'REGION',
+  ), [flat]);
+
+  const secteurZones = useMemo(() => {
+    if (!data.commune) return [];
+    const communeZone = flat.find(z => z.id === data.commune);
+    if (!communeZone) return [];
+    // Get all descendants (neighborhoods + sectors)
+    const descendants: ApiZone[] = [];
+    function walk(n: ApiZone) { descendants.push(n); n.children?.forEach(walk); }
+    communeZone.children?.forEach(walk);
+    return descendants;
+  }, [flat, data.commune]);
 
   const handleGPS = () => {
     if (!navigator.geolocation) { setGpsState('denied'); return; }
     setGpsState('loading');
     navigator.geolocation.getCurrentPosition(
-      () => {
-        setTimeout(() => {
-          setGpsState('success');
-          update({ commune: 'Ratoma', secteur: 'Bambéto' });
-        }, 1400);
+      (pos) => {
+        setGpsState('success');
+        update({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
       },
       () => setGpsState('denied'),
-      { timeout: 6000 },
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   };
 
-  const communes = Object.keys(COMMUNES_SECTEURS);
-  const secteurs = data.commune ? COMMUNES_SECTEURS[data.commune] ?? [] : [];
+  const handleCommuneChange = (zoneId: string) => {
+    update({ commune: zoneId, secteur: '', zoneId: '' });
+  };
+
+  const handleSecteurChange = (zoneId: string) => {
+    update({ secteur: zoneId, zoneId });
+    // Find the zone name for display
+    const zone = flat.find(z => z.id === zoneId);
+    if (zone) {
+      // Also set secteur name for display in confirm step
+    }
+  };
+
+  const selectedCommune = flat.find(z => z.id === data.commune);
+  const selectedSecteur = flat.find(z => z.id === data.secteur);
   const hasLocation = !!(data.commune && data.secteur);
 
   return (
@@ -80,7 +106,7 @@ export function StepLocation({ data, update }: Props) {
           {gpsState === 'loading' ? (
             <><Loader2 className="w-5 h-5 animate-spin text-primary" /><span className="text-primary">Localisation en cours...</span></>
           ) : gpsState === 'success' ? (
-            <><CheckCircle className="w-5 h-5" /><span>Position détectée</span></>
+            <><CheckCircle className="w-5 h-5" /><span>Position détectée ({data.latitude.toFixed(4)}, {data.longitude.toFixed(4)})</span></>
           ) : (
             <><MapPin className="w-5 h-5 text-primary" /><span>Utiliser ma position actuelle</span></>
           )}
@@ -102,7 +128,7 @@ export function StepLocation({ data, update }: Props) {
           <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-white/90 rounded-lg px-2.5 py-1.5 shadow-sm border border-border">
             <MapPin className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-mono font-semibold text-foreground">
-              {data.commune} — {data.secteur}
+              {selectedCommune?.name ?? data.commune} — {selectedSecteur?.name ?? data.secteur}
             </span>
           </div>
         </div>
@@ -123,11 +149,11 @@ export function StepLocation({ data, update }: Props) {
             <div className="relative">
               <select
                 value={data.commune}
-                onChange={(e) => update({ commune: e.target.value, secteur: '' })}
+                onChange={(e) => handleCommuneChange(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-base font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none pr-10"
               >
                 <option value="">Choisir une commune...</option>
-                {communes.map((c) => <option key={c} value={c}>{c}</option>)}
+                {communeZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
             </div>
@@ -139,11 +165,11 @@ export function StepLocation({ data, update }: Props) {
               <div className="relative">
                 <select
                   value={data.secteur}
-                  onChange={(e) => update({ secteur: e.target.value })}
+                  onChange={(e) => handleSecteurChange(e.target.value)}
                   className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-base font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none pr-10"
                 >
                   <option value="">Choisir un secteur...</option>
-                  {secteurs.map((s) => <option key={s} value={s}>{s}</option>)}
+                  {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
               </div>

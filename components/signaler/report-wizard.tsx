@@ -8,6 +8,7 @@ import { StepLocation } from './step-location';
 import { StepDetails } from './step-details';
 import { StepPhoto } from './step-photo';
 import { StepConfirm } from './step-confirm';
+import { useCreatePublicReport } from '@/hooks/mutations/useCreatePublicReport';
 
 export type Step = 1 | 2 | 3 | 4;
 export type WasteType = 'liquid' | 'solid';
@@ -16,6 +17,9 @@ export type Gravite = 'faible' | 'modere' | 'critique';
 export interface ReportData {
   commune: string;
   secteur: string;
+  zoneId: string;
+  latitude: number;
+  longitude: number;
   wasteType: WasteType | null;
   gravite: Gravite | null;
   photos: { url: string; name: string }[];
@@ -25,22 +29,27 @@ export interface ReportData {
 }
 
 const INITIAL: ReportData = {
-  commune: '', secteur: '', wasteType: null, gravite: null,
+  commune: '', secteur: '', zoneId: '', latitude: 0, longitude: 0,
+  wasteType: null, gravite: null,
   photos: [], description: '', prenom: '', telephone: '',
 };
+
+const WASTE_MAP: Record<string, string> = { liquid: 'LIQUID', solid: 'SOLID' };
+const SEVERITY_MAP: Record<string, string> = { faible: 'LOW', modere: 'MODERATE', critique: 'CRITICAL' };
 
 const STEP_LABELS = ['Localisation', 'Type & Gravité', 'Photos & Description', 'Confirmation'];
 
 export function ReportWizard() {
   const [step, setStep] = useState<Step>(1);
   const [data, setData] = useState<ReportData>(INITIAL);
-  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  const createReport = useCreatePublicReport();
 
   const update = (d: Partial<ReportData>) => setData((prev) => ({ ...prev, ...d }));
 
   const canNext = (): boolean => {
-    if (step === 1) return !!(data.commune && data.secteur);
+    if (step === 1) return !!(data.commune && data.secteur && data.zoneId);
     if (step === 2) return !!(data.wasteType && data.gravite);
     return true;
   };
@@ -54,13 +63,26 @@ export function ReportWizard() {
     if (step > 1) { setStep((step - 1) as Step); window.scrollTo(0, 0); }
   };
 
-  const handleSubmit = () => {
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+  const handleSubmit = async () => {
+    if (!data.zoneId || !data.wasteType || !data.gravite) return;
+
+    try {
+      await createReport.mutateAsync({
+        type: WASTE_MAP[data.wasteType] ?? 'SOLID',
+        severity: SEVERITY_MAP[data.gravite] ?? 'MODERATE',
+        description: data.description.trim() || undefined,
+        address: `${data.commune}, ${data.secteur}`,
+        latitude: data.latitude || 9.5370,
+        longitude: data.longitude || -13.6785,
+        zoneId: data.zoneId,
+        contactName: data.prenom.trim() || undefined,
+        contactPhone: data.telephone.trim() || undefined,
+      });
       setSubmitted(true);
       toast.success('Signalement envoyé avec succès !', { description: 'Les autorités ont été notifiées.' });
-    }, 1800);
+    } catch {
+      toast.error('Impossible d\'envoyer le signalement. Réessayez.');
+    }
   };
 
   const handleReset = () => {
@@ -117,31 +139,28 @@ export function ReportWizard() {
         </div>
       </div>
 
-      {/* Back button */}
       {step > 1 && (
         <button onClick={handleBack} className="flex items-center gap-1.5 mb-6 text-sm font-mono text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" /> Étape précédente
         </button>
       )}
 
-      {/* Step content */}
       {step === 1 && <StepLocation data={data} update={update} />}
       {step === 2 && <StepDetails data={data} update={update} />}
       {step === 3 && <StepPhoto data={data} update={update} />}
       {step === 4 && <StepConfirm data={data} goTo={setStep} />}
 
-      {/* Bottom CTA */}
       <div className="mt-8">
         <button
           onClick={handleNext}
-          disabled={!canNext() || submitting}
+          disabled={!canNext() || createReport.isPending}
           className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-base font-mono font-semibold transition-all ${
             step === 4
               ? 'bg-[#2D7D46] text-white hover:bg-[#2D7D46]/90 disabled:opacity-40'
               : 'bg-primary text-white hover:bg-primary/90 disabled:opacity-40'
           } disabled:cursor-not-allowed`}
         >
-          {submitting ? (
+          {createReport.isPending ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Envoi en cours...</>
           ) : step === 4 ? 'Envoyer le signalement' : 'Continuer'}
         </button>

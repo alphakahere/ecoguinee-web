@@ -2,16 +2,8 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import {
-  MapPin,
-  Activity,
-  Users,
-  CheckCircle,
-  Megaphone,
-  UsersRound,
-} from 'lucide-react';
-import { territoires, pmeList, dashboardStats } from '@/lib/data/mock-data';
-import { CAMPAIGNS } from '@/lib/data/campaigns-data';
+import { MapPin, Activity, Users, CheckCircle, Megaphone } from 'lucide-react';
+import { usePublicStats } from '@/hooks/queries/usePublicStats';
 
 function useScrollCountUp(target: number, duration = 1500, delay = 0, started = false) {
   const [count, setCount] = useState(0);
@@ -37,9 +29,7 @@ function useScrollCountUp(target: number, duration = 1500, delay = 0, started = 
 }
 
 function StatCard({
-  stat,
-  index,
-  started,
+  stat, index, started,
 }: {
   stat: { icon: React.ElementType; color: string; value: number; suffix?: string; label: string };
   index: number;
@@ -59,30 +49,18 @@ function StatCard({
         backdropFilter: 'blur(8px)',
       }}
     >
-      <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center"
-        style={{ background: `${stat.color}14` }}
-      >
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${stat.color}14` }}>
         <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
       </div>
       <div>
-        <p
-          className="font-bold text-white"
-          style={{ fontSize: 'clamp(2rem,4vw,2.8rem)', lineHeight: 1 }}
-        >
+        <p className="font-bold text-white" style={{ fontSize: 'clamp(2rem,4vw,2.8rem)', lineHeight: 1 }}>
           {count}{stat.suffix ?? ''}
         </p>
-        <p
-          className="text-xs font-mono mt-1"
-          style={{ color: 'rgba(245,240,232,0.45)' }}
-        >
+        <p className="text-xs font-mono mt-1" style={{ color: 'rgba(245,240,232,0.45)' }}>
           {stat.label}
         </p>
       </div>
-      <div
-        className="h-0.5 rounded-full mt-auto"
-        style={{ background: stat.color, opacity: 0.2 }}
-      />
+      <div className="h-0.5 rounded-full mt-auto" style={{ background: stat.color, opacity: 0.2 }} />
     </motion.div>
   );
 }
@@ -90,21 +68,14 @@ function StatCard({
 export function KeyFigures() {
   const gridRef = useRef<HTMLDivElement>(null);
   const inView = useInView(gridRef, { once: true, margin: '-80px' });
-
-  const totalSectors = territoires.reduce((s, t) => s + t.sectors.length, 0);
-  const resolvedCases = dashboardStats.resolvedCases;
-
-  const terminee = CAMPAIGNS.filter((c) => c.statut === 'terminee');
-  const campCount = terminee.length;
-  const campPeople = terminee.reduce((s, c) => s + (c.participants ?? 0), 0);
+  const { data: publicStats } = usePublicStats();
 
   const stats = [
-    { icon: MapPin,      color: '#6FCF4A', value: 13,            label: 'Communes couvertes' },
-    { icon: Activity,    color: '#E8A020', value: totalSectors,   label: 'Secteurs cartographiés' },
-    { icon: Users,       color: '#2D7D46', value: pmeList.length, label: 'PMEs partenaires' },
-    { icon: CheckCircle, color: '#D94035', value: resolvedCases,  label: 'Signalements traités', suffix: '+' },
-    { icon: Megaphone,   color: '#6FCF4A', value: campCount,      label: 'Campagnes réalisées' },
-    { icon: UsersRound,  color: '#2D7D46', value: campPeople,     label: 'Personnes sensibilisées' },
+    { icon: MapPin,      color: '#6FCF4A', value: publicStats?.communes ?? 0,        label: 'Communes couvertes' },
+    { icon: Users,       color: '#2D7D46', value: publicStats?.activeSmes ?? 0,      label: 'PMEs partenaires' },
+    { icon: Activity,    color: '#E8A020', value: publicStats?.totalReports ?? 0,     label: 'Signalements reçus' },
+    { icon: CheckCircle, color: '#D94035', value: publicStats?.resolvedReports ?? 0,  label: 'Signalements traités', suffix: '+' },
+    { icon: Megaphone,   color: '#6FCF4A', value: publicStats?.totalCampaigns ?? 0,   label: 'Campagnes réalisées' },
   ];
 
   return (
@@ -117,21 +88,15 @@ export function KeyFigures() {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mb-12 text-center"
         >
-          <p
-            className="text-xs font-mono uppercase tracking-widest mb-3"
-            style={{ color: '#6FCF4A' }}
-          >
+          <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: '#6FCF4A' }}>
             Notre impact
           </p>
-          <h2
-            className="font-bold text-white"
-            style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}
-          >
+          <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
             Des chiffres qui parlent
           </h2>
         </motion.div>
 
-        <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-3 gap-5">
+        <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
           {stats.map((s, i) => (
             <StatCard key={s.label} stat={s} index={i} started={inView} />
           ))}
