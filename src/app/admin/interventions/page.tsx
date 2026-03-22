@@ -8,7 +8,6 @@ import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { formatDate } from '@/lib/utils';
-import { usePagination } from '@/hooks/usePagination';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import { useSMEs } from '@/hooks/queries/useSMEs';
@@ -20,19 +19,23 @@ export default function AdminInterventionsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [smeFilter, setSmeFilter] = useState('');
   const [editIntervention, setEditIntervention] = useState<ApiIntervention | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
+  const resetPage = () => setPage(1);
 
   const filters = {
     status: statusFilter || undefined,
     smeId: smeFilter || undefined,
-    page: 1,
-    limit: 15,
+    page,
+    limit: pageSize,
   };
 
   const { data, isLoading, isError } = useInterventions(filters);
   const interventions = data?.data ?? (Array.isArray(data) ? data as ApiIntervention[] : []);
   const total = data && 'total' in data ? data.total : interventions.length;
-  const pagination = usePagination(total);
-  filters.page = pagination.page;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const canNext = page < totalPages;
+  const canPrev = page > 1;
 
   const { data: smesData } = useSMEs({ page: 1, limit: 100 });
   const smes = smesData?.data ?? [];
@@ -68,11 +71,11 @@ export default function AdminInterventionsPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{total} intervention{total !== 1 ? 's' : ''}</p>
       </div>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); pagination.reset(); }} className="min-w-[160px]">
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px] max-w-[160px]">
           <option value="">Tous les statuts</option>
           {Object.entries(INTERVENTION_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={smeFilter} onChange={(e) => { setSmeFilter(e.target.value); pagination.reset(); }} className="min-w-[180px]">
+        <Select value={smeFilter} onChange={(e) => { setSmeFilter(e.target.value); resetPage(); }} className="min-w-[180px] max-w-[180px]">
           <option value="">Toutes les PME</option>
           {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>
@@ -86,11 +89,11 @@ export default function AdminInterventionsPage() {
         data={interventions}
         columns={columns}
         total={total}
-        page={pagination.page}
-        totalPages={pagination.totalPages}
-        onPageChange={pagination.setPage}
-        canPrev={pagination.canPrev}
-        canNext={pagination.canNext}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        canPrev={canPrev}
+        canNext={canNext}
         toolbar={toolbar}
         isLoading={isLoading}
         isError={isError}

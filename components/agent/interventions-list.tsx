@@ -6,7 +6,6 @@ import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { formatDate } from '@/lib/utils';
-import { usePagination } from '@/hooks/usePagination';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import { useAuthStore } from '@/stores/auth.store';
@@ -24,19 +23,23 @@ export function InterventionsList() {
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id;
   const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
+  const resetPage = () => setPage(1);
 
   const filters = {
     agentId: agentId || undefined,
     status: statusFilter || undefined,
-    page: 1,
-    limit: 15,
+    page,
+    limit: pageSize,
   };
 
   const { data, isLoading } = useInterventions(agentId ? filters : undefined);
   const interventions = data?.data ?? (Array.isArray(data) ? data : []);
   const total = data && 'total' in data ? data.total : interventions.length;
-  const pagination = usePagination(total);
-  if (agentId) filters.page = pagination.page;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const canNext = page < totalPages;
+  const canPrev = page > 1;
 
   const updateIntervention = useUpdateIntervention();
 
@@ -72,7 +75,7 @@ export function InterventionsList() {
 
   const toolbar = (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); pagination.reset(); }} className="min-w-[160px]">
+      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px]">
         <option value="">Tous les statuts</option>
         {Object.entries(INTERVENTION_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
       </Select>
@@ -84,11 +87,11 @@ export function InterventionsList() {
       data={interventions}
       columns={columns}
       total={total}
-      page={pagination.page}
-      totalPages={pagination.totalPages}
-      onPageChange={pagination.setPage}
-      canPrev={pagination.canPrev}
-      canNext={pagination.canNext}
+      page={page}
+      totalPages={totalPages}
+      onPageChange={setPage}
+      canPrev={canPrev}
+      canNext={canNext}
       toolbar={toolbar}
       isLoading={isLoading || !agentId}
       getRowKey={(iv) => iv.id}

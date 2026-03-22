@@ -83,11 +83,11 @@ export default function AdminCampagnesPage() {
       </div>
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
         <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Titre, zone, agent…" className="w-full max-w-md" />
-        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="min-w-[160px]">
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="min-w-[160px] max-w-[160px]">
           <option value="">Tous les statuts</option>
           {Object.entries(API_CAMPAIGN_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }} className="min-w-[160px]">
+        <Select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }} className="min-w-[160px] max-w-[160px]">
           <option value="">Tous les types</option>
           {Object.entries(API_CAMPAIGN_TYPE_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>

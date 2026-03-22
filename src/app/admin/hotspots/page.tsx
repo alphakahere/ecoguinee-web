@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { formatDate } from '@/lib/utils';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { usePagination } from '@/hooks/usePagination';
 import { useReports } from '@/hooks/queries/useReports';
 import { useDeleteReport } from '@/hooks/mutations/useDeleteReport';
 import type { ApiReport, ReportStatus, ApiSeverity, ApiWasteType } from '@/types/api';
@@ -22,20 +21,24 @@ export default function AdminHotspotsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
 
   const filters = {
     search: debouncedSearch || undefined,
     status: (statusFilter || undefined) as ReportStatus | undefined,
     severity: (severityFilter || undefined) as ApiSeverity | undefined,
     type: (typeFilter || undefined) as ApiWasteType | undefined,
-    page: 1,
-    limit: 15,
+    page,
+    limit: pageSize,
   };
 
   const { data, isLoading, isError } = useReports(filters);
   const total = data?.total ?? 0;
-  const pagination = usePagination(total, { pageSize: 15 });
-  filters.page = pagination.page;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const canNext = page < totalPages;
+  const canPrev = page > 1;
+  const resetPage = () => setPage(1);
 
   const deleteReport = useDeleteReport();
 
@@ -47,11 +50,6 @@ export default function AdminHotspotsPage() {
     } catch {
       toast.error('Suppression impossible');
     }
-  };
-
-  const resetFilters = () => {
-    setSearch(''); setStatusFilter(''); setSeverityFilter(''); setTypeFilter('');
-    pagination.reset();
   };
 
   const columns: Column<ApiReport>[] = [
@@ -83,16 +81,16 @@ export default function AdminHotspotsPage() {
         </div>
       </div>
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.reset(); }} placeholder="Adresse, zone, ID…" className="w-full max-w-md" />
-        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); pagination.reset(); }} className="min-w-[160px]">
+        <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Adresse, zone, ID…" className="w-full max-w-md" />
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px] max-w-[160px]">
           <option value="">Tous les statuts</option>
           {Object.entries(REPORT_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); pagination.reset(); }} className="min-w-[140px]">
+        <Select value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); resetPage(); }} className="min-w-[140px] max-w-[160px]">
           <option value="">Toutes gravités</option>
           {Object.entries(SEVERITY_META_API).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); pagination.reset(); }} className="min-w-[130px]">
+        <Select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); resetPage(); }} className="min-w-[130px] max-w-[130px]">
           <option value="">Tous types</option>
           {Object.entries(WASTE_TYPE_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
@@ -105,11 +103,11 @@ export default function AdminHotspotsPage() {
       data={data?.data ?? []}
       columns={columns}
       total={total}
-      page={pagination.page}
-      totalPages={pagination.totalPages}
-      onPageChange={pagination.setPage}
-      canPrev={pagination.canPrev}
-      canNext={pagination.canNext}
+      page={page}
+      totalPages={totalPages}
+      onPageChange={setPage}
+      canPrev={canPrev}
+      canNext={canNext}
       toolbar={toolbar}
       isLoading={isLoading}
       isError={isError}
