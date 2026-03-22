@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ChevronLeft, Calendar, MapPin, User, Building2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';

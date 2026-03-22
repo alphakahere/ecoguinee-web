@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ShieldCheck, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileDrawer } from '@/components/layouts/mobile-drawer';
 import { HeaderBar } from '@/components/layouts/header-bar';
@@ -36,6 +37,7 @@ const ROLE_LABELS: Record<string, string> = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const currentUser = useAuthStore((s) => s.user);
@@ -43,6 +45,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- close drawer on navigation
   useEffect(() => { setMobileOpen(false); }, [pathname]);
+
+  useEffect(() => {
+    const check = () => setCollapsed(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const pageLabel = findLabel(pathname);
 
@@ -71,15 +80,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <AuthGuard allowedRoles={['SUPER_ADMIN', 'ADMIN']}>
       <div className="flex h-screen overflow-hidden bg-background">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:flex w-64 shrink-0 flex-col h-full">
+        <motion.aside
+          animate={{ width: collapsed ? 56 : 224 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="hidden md:flex flex-col shrink-0 h-full overflow-hidden"
+          style={{ width: collapsed ? 56 : 224 }}
+        >
           <SidebarNav
             items={TABS}
             userInfo={sidebarUserInfo}
             roleLabel="Admin Panel"
             roleIcon="ShieldCheck"
             layoutId="adminActiveTab"
+            collapsed={collapsed}
           />
-        </aside>
+        </motion.aside>
 
         {/* Main area */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -89,6 +104,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             pageLabel={pageLabel}
             onMobileMenuOpen={() => setMobileOpen(true)}
             notifications={3}
+            leftSlot={
+              <button
+                onClick={() => setCollapsed((v) => !v)}
+                className="hidden md:flex w-7 h-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 transition-colors"
+              >
+                {collapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
+              </button>
+            }
             profile={profile}
             onLogout={handleLogout}
           />
