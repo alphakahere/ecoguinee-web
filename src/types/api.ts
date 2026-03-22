@@ -201,6 +201,8 @@ export interface CreateCampaignPayload {
   creatorId: string;
   agentId?: string;
   smeId?: string;
+  photos?: string[];
+  documents?: string[];
 }
 export type UpdateCampaignPayload = Partial<CreateCampaignPayload> & {
   status?: ApiCampaignStatus;

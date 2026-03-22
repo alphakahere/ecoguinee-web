@@ -19,6 +19,7 @@ export function StepPhoto({ data, update }: Props) {
     const toAdd = files.slice(0, remaining).map((f) => ({
       url: URL.createObjectURL(f),
       name: f.name,
+      file: f,
     }));
     update({ photos: [...data.photos, ...toAdd] });
     e.target.value = '';

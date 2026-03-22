@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import { useZones } from '@/hooks/queries/useZones';
 import { useSMEs } from '@/hooks/queries/useSMEs';
+import { FileUploadZone } from '@/components/shared/file-upload-zone';
+import { uploadFiles } from '@/services/uploads';
 import type { ApiCampaign, ApiCampaignType } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META } from '@/types/api';
 
@@ -26,6 +28,10 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
   const [smeId, setSmeId] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [existingDocs, setExistingDocs] = useState<string[]>([]);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
+  const [newDocFiles, setNewDocFiles] = useState<File[]>([]);
 
   const updateCampaign = useUpdateCampaign();
   const { data: zonesData } = useZones({ page: 1, limit: 200 });
@@ -42,6 +48,10 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
       setSmeId(campaign.smeId ?? '');
       setScheduledDate(campaign.scheduledDate ? campaign.scheduledDate.slice(0, 16) : '');
       setEndDate(campaign.endDate ? campaign.endDate.slice(0, 16) : '');
+      setExistingPhotos(campaign.photos ?? []);
+      setExistingDocs(campaign.documents ?? []);
+      setNewPhotoFiles([]);
+      setNewDocFiles([]);
     }
   }, [open, campaign]);
 
@@ -49,6 +59,10 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
     e.preventDefault();
     if (!title.trim()) { toast.error('Le titre est requis'); return; }
     try {
+      const [uploadedPhotos, uploadedDocs] = await Promise.all([
+        uploadFiles(newPhotoFiles),
+        uploadFiles(newDocFiles),
+      ]);
       await updateCampaign.mutateAsync({
         id: campaign.id,
         payload: {
@@ -59,6 +73,8 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
           smeId: smeId || undefined,
           scheduledDate: scheduledDate ? new Date(scheduledDate).toISOString() : undefined,
           endDate: endDate ? new Date(endDate).toISOString() : undefined,
+          photos: [...existingPhotos, ...uploadedPhotos],
+          documents: [...existingDocs, ...uploadedDocs],
         },
       });
       toast.success('Campagne mise à jour');
@@ -138,6 +154,28 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
                     <input type="datetime-local" className={inputCls} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                   </div>
                 </div>
+
+                <FileUploadZone
+                  files={newPhotoFiles}
+                  existingUrls={existingPhotos}
+                  onAddFiles={(f) => setNewPhotoFiles((prev) => [...prev, ...f])}
+                  onRemoveFile={(i) => setNewPhotoFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                  onRemoveExisting={(i) => setExistingPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                  accept="image/*"
+                  max={5}
+                  label="Photos"
+                />
+
+                <FileUploadZone
+                  files={newDocFiles}
+                  existingUrls={existingDocs}
+                  onAddFiles={(f) => setNewDocFiles((prev) => [...prev, ...f])}
+                  onRemoveFile={(i) => setNewDocFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                  onRemoveExisting={(i) => setExistingDocs((prev) => prev.filter((_, idx) => idx !== i))}
+                  accept=".pdf,.doc,.docx"
+                  max={5}
+                  label="Documents"
+                />
 
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
                   <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>

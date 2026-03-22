@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useZones } from '@/hooks/queries/useZones';
 import { useSMEs } from '@/hooks/queries/useSMEs';
 import { useCreateCampaign } from '@/hooks/mutations/useCreateCampaign';
+import { FileUploadZone } from '@/components/shared/file-upload-zone';
+import { uploadFiles } from '@/services/uploads';
 import type { ApiCampaignType } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META } from '@/types/api';
 
@@ -35,6 +37,8 @@ export default function AdminCampagneNouvellePage() {
     scheduledDate: '',
     endDate: '',
   });
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [docFiles, setDocFiles] = useState<File[]>([]);
 
   const update = (key: string, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -46,6 +50,10 @@ export default function AdminCampagneNouvellePage() {
       return;
     }
     try {
+      const [photoUrls, docUrls] = await Promise.all([
+        uploadFiles(photoFiles),
+        uploadFiles(docFiles),
+      ]);
       await createCampaign.mutateAsync({
         title: form.title,
         description: form.description || undefined,
@@ -54,7 +62,9 @@ export default function AdminCampagneNouvellePage() {
         smeId: form.smeId || undefined,
         scheduledDate: new Date(form.scheduledDate).toISOString(),
         endDate: form.endDate ? new Date(form.endDate).toISOString() : undefined,
-        creatorId: currentUser!.id,
+        creatorId: currentUser?.id ?? '',
+        photos: photoUrls.length > 0 ? photoUrls : undefined,
+        documents: docUrls.length > 0 ? docUrls : undefined,
       });
       toast.success('Campagne créée avec succès !');
       router.push('/admin/campagnes');
@@ -67,7 +77,7 @@ export default function AdminCampagneNouvellePage() {
     'w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30';
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <Link
         href="/admin/campagnes"
         className="inline-flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground transition-colors mb-4"
@@ -190,6 +200,24 @@ export default function AdminCampagneNouvellePage() {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
         </div>
+
+        <FileUploadZone
+          files={photoFiles}
+          onAddFiles={(f) => setPhotoFiles((prev) => [...prev, ...f])}
+          onRemoveFile={(i) => setPhotoFiles((prev) => prev.filter((_, idx) => idx !== i))}
+          accept="image/*"
+          max={5}
+          label="Photos"
+        />
+
+        <FileUploadZone
+          files={docFiles}
+          onAddFiles={(f) => setDocFiles((prev) => [...prev, ...f])}
+          onRemoveFile={(i) => setDocFiles((prev) => prev.filter((_, idx) => idx !== i))}
+          accept=".pdf,.doc,.docx"
+          max={5}
+          label="Documents"
+        />
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Link href="/admin/campagnes">

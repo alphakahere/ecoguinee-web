@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
+import { authService } from '@/services/auth';
 import { redirectByRole } from '@/lib/types';
 import type { UserRole } from '@/lib/types';
 
@@ -15,11 +16,22 @@ interface AuthGuardProps {
 
 export function AuthGuard({ allowedRoles, requireSme = false, children }: AuthGuardProps) {
   const router = useRouter();
-  const { user, token } = useAuthStore();
+  const { user, token, setUser, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [rehydrating, setRehydrating] = useState(false);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount detection
   useEffect(() => { setMounted(true); }, []);
+
+  // Rehydrate user from token when user is null (e.g. after page refresh)
+  useEffect(() => {
+    if (!mounted || !token || user || rehydrating) return;
+    setRehydrating(true);
+    authService.me()
+      .then((me) => { setUser(me, token); })
+      .catch(() => { logout(); })
+      .finally(() => { setRehydrating(false); });
+  }, [mounted, token, user, rehydrating, setUser, logout]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -34,7 +46,7 @@ export function AuthGuard({ allowedRoles, requireSme = false, children }: AuthGu
     }
   }, [mounted, token, user, allowedRoles, router]);
 
-  if (!mounted) {
+  if (!mounted || rehydrating) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <span className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />

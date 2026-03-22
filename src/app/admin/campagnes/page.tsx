@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Plus, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { formatDate } from '@/lib/utils';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { usePagination } from '@/hooks/usePagination';
 import { useCampaigns } from '@/hooks/queries/useCampaigns';
 import { useDeleteCampaign } from '@/hooks/mutations/useDeleteCampaign';
 import type { ApiCampaign, ApiCampaignStatus, ApiCampaignType } from '@/types/api';
@@ -22,19 +21,26 @@ export default function AdminCampagnesPage() {
   const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
 
-  const filters = {
-    search: debouncedSearch || undefined,
-    status: (statusFilter || undefined) as ApiCampaignStatus | undefined,
-    type: (typeFilter || undefined) as ApiCampaignType | undefined,
-    page: 1,
-    limit: 15,
-  };
+  const filters = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      status: (statusFilter || undefined) as ApiCampaignStatus | undefined,
+      type: (typeFilter || undefined) as ApiCampaignType | undefined,
+      page,
+      limit: pageSize,
+    }),
+    [debouncedSearch, statusFilter, typeFilter, page],
+  );
 
   const { data, isLoading, isError } = useCampaigns(filters);
   const total = data?.total ?? 0;
-  const pagination = usePagination(total);
-  filters.page = pagination.page;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const canNext = page < totalPages;
+  const canPrev = page > 1;
+  const goToPage = (p: number) => setPage(Math.min(totalPages, Math.max(1, p)));
 
   const deleteCampaign = useDeleteCampaign();
 
@@ -76,12 +82,12 @@ export default function AdminCampagnesPage() {
         <Link href="/admin/campagnes/nouvelle"><Button className="font-mono text-xs"><Plus className="w-4 h-4 mr-2" /> Nouvelle campagne</Button></Link>
       </div>
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.reset(); }} placeholder="Titre, zone, agent…" className="w-full max-w-md" />
-        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); pagination.reset(); }} className="min-w-[160px]">
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Titre, zone, agent…" className="w-full max-w-md" />
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="min-w-[160px]">
           <option value="">Tous les statuts</option>
           {Object.entries(API_CAMPAIGN_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); pagination.reset(); }} className="min-w-[160px]">
+        <Select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }} className="min-w-[160px]">
           <option value="">Tous les types</option>
           {Object.entries(API_CAMPAIGN_TYPE_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
@@ -94,11 +100,11 @@ export default function AdminCampagnesPage() {
       data={data?.data ?? []}
       columns={columns}
       total={total}
-      page={pagination.page}
-      totalPages={pagination.totalPages}
-      onPageChange={pagination.setPage}
-      canPrev={pagination.canPrev}
-      canNext={pagination.canNext}
+      page={page}
+      totalPages={totalPages}
+      onPageChange={goToPage}
+      canPrev={canPrev}
+      canNext={canNext}
       toolbar={toolbar}
       isLoading={isLoading}
       isError={isError}

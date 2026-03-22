@@ -11,6 +11,7 @@ export interface PublicReportPayload {
   zoneId: string;
   contactName?: string;
   contactPhone?: string;
+  photos?: string[];
 }
 
 export function useCreatePublicReport() {

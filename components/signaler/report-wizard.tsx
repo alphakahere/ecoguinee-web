@@ -9,6 +9,7 @@ import { StepDetails } from './step-details';
 import { StepPhoto } from './step-photo';
 import { StepConfirm } from './step-confirm';
 import { useCreatePublicReport } from '@/hooks/mutations/useCreatePublicReport';
+import { uploadFiles } from '@/services/uploads';
 
 export type Step = 1 | 2 | 3 | 4;
 export type WasteType = 'liquid' | 'solid';
@@ -22,7 +23,7 @@ export interface ReportData {
   longitude: number;
   wasteType: WasteType | null;
   gravite: Gravite | null;
-  photos: { url: string; name: string }[];
+  photos: { url: string; name: string; file?: File }[];
   description: string;
   prenom: string;
   telephone: string;
@@ -67,6 +68,9 @@ export function ReportWizard() {
     if (!data.zoneId || !data.wasteType || !data.gravite) return;
 
     try {
+      const photoFiles = data.photos.map((p) => p.file).filter(Boolean) as File[];
+      const photoUrls = await uploadFiles(photoFiles);
+
       await createReport.mutateAsync({
         type: WASTE_MAP[data.wasteType] ?? 'SOLID',
         severity: SEVERITY_MAP[data.gravite] ?? 'MODERATE',
@@ -77,6 +81,7 @@ export function ReportWizard() {
         zoneId: data.zoneId,
         contactName: data.prenom.trim() || undefined,
         contactPhone: data.telephone.trim() || undefined,
+        photos: photoUrls.length > 0 ? photoUrls : undefined,
       });
       setSubmitted(true);
       toast.success('Signalement envoyé avec succès !', { description: 'Les autorités ont été notifiées.' });

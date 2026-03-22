@@ -5,9 +5,11 @@ import { X, MapPin, Navigation } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import { useCreateReport } from '@/hooks/mutations/useCreateReport';
 import { useAgentOverview } from '@/hooks/queries/useAgentDashboard';
 import { useAuthStore } from '@/stores/auth.store';
+import { uploadFiles } from '@/services/uploads';
 
 interface Props {
   open: boolean;
@@ -40,6 +42,7 @@ export function NewReportModal({ open, onClose }: Props) {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -50,6 +53,7 @@ export function NewReportModal({ open, onClose }: Props) {
       setAddress('');
       setLatitude(0);
       setLongitude(0);
+      setPhotoFiles([]);
     }
   }, [open, zones]);
 
@@ -79,6 +83,7 @@ export function NewReportModal({ open, onClose }: Props) {
     if (!zoneId) { toast.error('Sélectionnez une zone'); return; }
     if (!latitude || !longitude) { toast.error('Position GPS requise'); return; }
     try {
+      const photoUrls = await uploadFiles(photoFiles);
       await createReport.mutateAsync({
         type: wasteType,
         severity,
@@ -89,6 +94,7 @@ export function NewReportModal({ open, onClose }: Props) {
         longitude,
         zoneId,
         agentId: currentUser?.id,
+        photos: photoUrls.length > 0 ? photoUrls : undefined,
       });
       toast.success('Signalement créé');
       onClose();
@@ -175,6 +181,15 @@ export function NewReportModal({ open, onClose }: Props) {
                     )}
                   </div>
                 </div>
+
+                <FileUploadZone
+                  files={photoFiles}
+                  onAddFiles={(f) => setPhotoFiles((prev) => [...prev, ...f])}
+                  onRemoveFile={(i) => setPhotoFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                  accept="image/*"
+                  max={5}
+                  label="Photos"
+                />
 
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Description</label>
