@@ -127,8 +127,24 @@ export default function AdminTerritoiresPage() {
   const flat = useMemo(() => flattenTree(roots), [roots]);
   const byId = useMemo(() => new Map(flat.map(z => [z.id, z])), [flat]);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  /** `undefined` = use default root (Conakry) when present; explicit `null` = user cleared selection */
+  const [selectionOverride, setSelectionOverride] = useState<string | null | undefined>(undefined);
+  /** `undefined` = expand default root only; once user toggles, full Set is stored */
+  const [expandOverride, setExpandOverride] = useState<Set<string> | undefined>(undefined);
+
+  const defaultConakryId = useMemo(
+    () => roots.find((r) => r.name.toLowerCase() === 'conakry')?.id ?? null,
+    [roots],
+  );
+
+  const selectedId =
+    selectionOverride !== undefined ? selectionOverride : (defaultConakryId ?? null);
+
+  const defaultExpandedIds = useMemo(
+    () => new Set(defaultConakryId ? [defaultConakryId] : []),
+    [defaultConakryId],
+  );
+  const expandedIds = expandOverride ?? defaultExpandedIds;
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<ZoneType | ''>('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -181,12 +197,21 @@ export default function AdminTerritoiresPage() {
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleToggle = useCallback((id: string) => {
-    setExpandedIds(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
-  }, []);
+    setExpandOverride((prev) => {
+      const base = prev ?? new Set(defaultConakryId ? [defaultConakryId] : []);
+      const next = new Set(base);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, [defaultConakryId]);
 
   const handleSelect = useCallback((id: string) => {
-    setSelectedId(prev => (prev === id ? null : id));
-  }, []);
+    setSelectionOverride((prev) => {
+      const current = prev !== undefined ? prev : (defaultConakryId ?? null);
+      return current === id ? null : id;
+    });
+  }, [defaultConakryId]);
 
   const openCreate = (parentId = '') => {
     setEditZone(null);
@@ -208,7 +233,7 @@ export default function AdminTerritoiresPage() {
       } else {
         const created = await createZone.mutateAsync(payload as CreateZonePayload);
         toast.success('Zone créée');
-        setSelectedId(created.id);
+        setSelectionOverride(created.id);
       }
       setModalOpen(false);
       setEditZone(null);
@@ -222,7 +247,7 @@ export default function AdminTerritoiresPage() {
     try {
       await deleteZone.mutateAsync(z.id);
       toast.success('Zone supprimée');
-      if (selectedId === z.id) setSelectedId(null);
+      if (selectedId === z.id) setSelectionOverride(null);
     } catch {
       toast.error('Suppression impossible — la zone a des sous-zones ou des signalements');
     }
@@ -318,7 +343,7 @@ export default function AdminTerritoiresPage() {
             {!selectedId ? (
               <div className="hidden lg:flex rounded-2xl border border-border bg-card shadow-sm flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
                 <MapPin className="w-8 h-8 opacity-30" />
-                <p className="text-sm font-mono">Sélectionnez une zone dans l'arbre</p>
+                <p className="text-sm font-mono">Sélectionnez une zone dans l&apos;arbre</p>
               </div>
             ) : (
               <div className="rounded-2xl border border-border bg-card shadow-sm p-5 space-y-5">
@@ -329,7 +354,7 @@ export default function AdminTerritoiresPage() {
                     {/* Mobile back button */}
                     <button
                       type="button"
-                      onClick={() => setSelectedId(null)}
+                      onClick={() => setSelectionOverride(null)}
                       className="lg:hidden flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground mb-1"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" /> Retour
@@ -432,7 +457,12 @@ export default function AdminTerritoiresPage() {
                           key={child.id}
                           type="button"
                           onClick={() => {
-                            setExpandedIds(prev => new Set([...prev, selectedId!]));
+                            setExpandOverride((prev) => {
+                              const base = prev ?? new Set(defaultConakryId ? [defaultConakryId] : []);
+                              const next = new Set(base);
+                              if (selectedId) next.add(selectedId);
+                              return next;
+                            });
                             handleSelect(child.id);
                           }}
                           className="flex items-center gap-2 p-2.5 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors text-left group"

@@ -40,7 +40,7 @@ const emptyFull: UserSaveFullPayload = {
   email: '',
   phone: '',
   role: 'AGENT',
-  territoire: '',
+  territoire: 'Conakry',
   status: 'ACTIVE',
 };
 
@@ -287,6 +287,7 @@ export function UserModal({
                         )}
                       </div>
                     </div>
+
                   </>
                 )}
 

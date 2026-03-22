@@ -96,22 +96,27 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
 
                 <Field label="Type">
                   <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <select className={`${inputCls} appearance-none`} value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as ZoneType }))}>
+                  <select className={`${inputCls} appearance-none`} value={form.type} onChange={(e) => {
+                    const newType = e.target.value as ZoneType;
+                    setForm((f) => ({ ...f, type: newType, parentId: newType === 'REGION' ? '' : f.parentId }));
+                  }}>
                     {ZONE_TYPES.map(([val, m]) => (
                       <option key={val} value={val}>{m.label}</option>
                     ))}
                   </select>
                 </Field>
 
-                <Field label="Zone parente">
-                  <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <select className={`${inputCls} appearance-none`} value={form.parentId} onChange={(e) => setForm((f) => ({ ...f, parentId: e.target.value }))}>
-                    <option value="">— Aucune (racine) —</option>
-                    {parentOptions.map((z) => (
-                      <option key={z.id} value={z.id}>{z.name} ({ZONE_TYPE_META[z.type].label})</option>
-                    ))}
-                  </select>
-                </Field>
+                {form.type !== 'REGION' && (
+                  <Field label="Zone parente">
+                    <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <select className={`${inputCls} appearance-none`} value={form.parentId} onChange={(e) => setForm((f) => ({ ...f, parentId: e.target.value }))}>
+                      <option value="">— Aucune (racine) —</option>
+                      {parentOptions.map((z) => (
+                        <option key={z.id} value={z.id}>{z.name} ({ZONE_TYPE_META[z.type].label})</option>
+                      ))}
+                    </select>
+                  </Field>
+                )}
 
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
                   <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>

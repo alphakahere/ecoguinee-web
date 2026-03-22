@@ -18,7 +18,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      useAuthStore.getState().logout();
+      const url = error.config?.url ?? '';
+      const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/forgot-password');
+      if (!isAuthRoute) {
+        useAuthStore.getState().logout();
+      }
     }
     return Promise.reject(error);
   },
