@@ -115,7 +115,7 @@ export function ReportWizard() {
   }
 
   return (
-    <div className="max-w-[580px] mx-auto px-5 py-10">
+    <div className="max-w-[580px] mx-auto px-5 py-10 bg-white rounded-2xl my-10">
       {/* Progress bar */}
       <div className="mb-8">
         <div className="flex gap-1 mb-2.5">

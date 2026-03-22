@@ -3,7 +3,7 @@
 import { usePublicStats } from '@/hooks/queries/usePublicStats';
 
 export function StatsBar() {
-  const { data } = usePublicStats();
+  const { data, isLoading } = usePublicStats();
 
   const stats = [
     { value: data?.totalReports ?? 0, label: 'Signalements', suffix: '' },
@@ -19,7 +19,7 @@ export function StatsBar() {
           {stats.map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-3xl font-bold text-primary font-mono">
-                {s.value}{s.suffix}
+                {isLoading ? '—' : `${s.value}${s.suffix}`}
               </p>
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mt-1">
                 {s.label}

@@ -17,11 +17,10 @@ const STATUS_MAP: Record<string, InterventionStatus> = {
 };
 
 export function MapPreview() {
-  const { data } = useReports({ page: 1, limit: 50 });
-  const reports = data?.data ?? [];
+  const { data = { data: [] } } = useReports({ page: 1, limit: 50 });
 
   const hotspots: Hotspot[] = useMemo(() =>
-    reports.map((r) => ({
+    data.data.map((r) => ({
       id: r.id,
       location: {
         lat: r.latitude,
@@ -37,7 +36,7 @@ export function MapPreview() {
       reportedAt: r.createdAt,
       status: STATUS_MAP[r.status] ?? 'reported',
     })),
-    [reports],
+    [data],
   );
 
   return (

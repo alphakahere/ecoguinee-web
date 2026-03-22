@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FileText, ArrowRight, LogIn, Leaf } from 'lucide-react';
@@ -8,7 +8,10 @@ import { usePublicStats } from '@/hooks/queries/usePublicStats';
 
 function useCountUp(target: number, duration = 1500, delay = 0) {
   const [count, setCount] = useState(0);
+  const hasRun = useRef(false);
   useEffect(() => {
+    if (target === 0 || hasRun.current) return;
+    hasRun.current = true;
     const t = setTimeout(() => {
       const startTime = performance.now();
       const tick = (now: number) => {
@@ -163,7 +166,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="inline-flex flex-wrap md:flex-nowrap rounded-2xl overflow-hidden divide-x"
+            className="inline-flex flex-col md:flex-row flex-wrap md:flex-nowrap rounded-2xl overflow-hidden divide-x w-full md:w-auto"
             style={{
               border: '1px solid rgba(111,207,74,0.18)',
               background: 'rgba(15,31,21,0.7)',

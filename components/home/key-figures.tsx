@@ -10,7 +10,7 @@ function useScrollCountUp(target: number, duration = 1500, delay = 0, started = 
   const hasStarted = useRef(false);
 
   useEffect(() => {
-    if (!started || hasStarted.current) return;
+    if (!started || hasStarted.current || target === 0) return;
     hasStarted.current = true;
     const t = setTimeout(() => {
       const startTime = performance.now();
