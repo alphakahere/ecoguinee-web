@@ -92,7 +92,7 @@ export default function AdminProfilPage() {
     'w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40';
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold">Mon Profil</h1>
 
       {/* User info card */}
