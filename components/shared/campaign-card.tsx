@@ -9,7 +9,7 @@ import { formatDate, cn } from '@/lib/utils';
 
 /** Shared pill style for type + status — only semantic colors differ */
 const tagClass =
-  'z-10 inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold tracking-wide shadow-md bg-warning text-white';
+  'z-10 inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold tracking-wide shadow-sm bg-primary text-white';
 
 interface Props {
   campaign: ApiCampaign;
