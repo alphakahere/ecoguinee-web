@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Plus, Activity, ChevronRight } from 'lucide-react';
@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { SidebarNav } from '@/components/layouts/sidebar-nav';
 import { MobileBottomTabs } from '@/components/layouts/mobile-bottom-tabs';
 import { NotificationsPanel } from '@/components/layouts/notifications-panel';
+import { HeaderProfileMenu } from '@/components/layouts/header-bar';
 import { AuthGuard } from '@/components/shared/auth-guard';
 import { NewReportModal } from '@/components/agent/new-report-modal';
 import { AGENT_NAV } from '@/lib/constants';
@@ -40,6 +41,21 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
   const userName = currentUser?.name ?? 'Agent';
   const userInitials = initials(userName);
   const territoire = currentUser?.territoire ?? '';
+  const profileSubtitle = territoire || currentUser?.email || currentUser?.phone || '';
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
+
+  const headerProfile = {
+    name: userName,
+    initials: userInitials,
+    subtitle: profileSubtitle,
+    roleBadge: 'Agent',
+    profileHref: '/agent/profil',
+    settingsHref: '/agent/profil',
+  };
 
   return (
     <AuthGuard allowedRoles={['AGENT']} requireSme>
@@ -75,8 +91,11 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
             </div>
             <h1 className="font-bold text-lg leading-none">{pageLabel}</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <NotificationsPanel count={0} />
+            <div className="hidden lg:block">
+              <HeaderProfileMenu profile={headerProfile} onLogout={handleLogout} />
+            </div>
             <Link href="/agent/profil" className="lg:hidden">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
                 {userInitials}

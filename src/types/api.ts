@@ -94,7 +94,7 @@ export interface ApiIntervention {
   status: ApiInterventionStatus;
   notes?: string | null;
   reportId: string;
-  report?: { id: string; address?: string | null };
+  report?: { id: string; address?: string | null; severity?: ApiSeverity };
   agentId: string;
   agent?: { id: string; name: string };
   smeId: string;

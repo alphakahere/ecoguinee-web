@@ -8,6 +8,8 @@ import { SearchInput } from '@/components/shared/search-input';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type Column } from '@/components/shared/data-table';
+import { ViewModeTabs, type ViewMode } from '@/components/shared/view-mode-tabs';
+import { ReportsMapView } from '@/components/maps/reports-map-view';
 import { formatDate } from '@/lib/utils';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useReports } from '@/hooks/queries/useReports';
@@ -15,7 +17,10 @@ import { useDeleteReport } from '@/hooks/mutations/useDeleteReport';
 import type { ApiReport, ReportStatus, ApiSeverity, ApiWasteType } from '@/types/api';
 import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META, REPORT_SOURCE_META } from '@/types/api';
 
+const MAP_PAGE_SIZE = 200;
+
 export default function AdminHotspotsPage() {
+  const [view, setView] = useState<ViewMode>('table');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('');
@@ -29,12 +34,15 @@ export default function AdminHotspotsPage() {
     status: (statusFilter || undefined) as ReportStatus | undefined,
     severity: (severityFilter || undefined) as ApiSeverity | undefined,
     type: (typeFilter || undefined) as ApiWasteType | undefined,
-    page,
-    limit: pageSize,
   };
 
-  const { data, isLoading, isError } = useReports(filters);
-  const total = data?.total ?? 0;
+  const tableFilters = { ...filters, page, limit: pageSize };
+  const mapFilters = { ...filters, page: 1, limit: MAP_PAGE_SIZE };
+
+  const tableQuery = useReports(tableFilters, { enabled: view === 'table' });
+  const mapQuery = useReports(mapFilters, { enabled: view === 'map' });
+
+  const total = mapQuery.data?.total ?? tableQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const canNext = page < totalPages;
   const canPrev = page > 1;
@@ -74,11 +82,12 @@ export default function AdminHotspotsPage() {
 
   const toolbar = (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Signalements</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">{total} signalement{total !== 1 ? 's' : ''}</p>
         </div>
+        <ViewModeTabs value={view} onChange={setView} />
       </div>
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
         <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Adresse, zone, ID…" className="w-full max-w-md" />
@@ -98,9 +107,22 @@ export default function AdminHotspotsPage() {
     </div>
   );
 
+  if (view === 'map') {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        {toolbar}
+        <ReportsMapView
+          reports={mapQuery.data?.data ?? []}
+          isLoading={mapQuery.isLoading}
+          className="mt-4"
+        />
+      </div>
+    );
+  }
+
   return (
     <DataTable
-      data={data?.data ?? []}
+      data={tableQuery.data?.data ?? []}
       columns={columns}
       total={total}
       page={page}
@@ -109,8 +131,8 @@ export default function AdminHotspotsPage() {
       canPrev={canPrev}
       canNext={canNext}
       toolbar={toolbar}
-      isLoading={isLoading}
-      isError={isError}
+      isLoading={tableQuery.isLoading}
+      isError={tableQuery.isError}
       getRowKey={(r) => r.id}
     />
   );

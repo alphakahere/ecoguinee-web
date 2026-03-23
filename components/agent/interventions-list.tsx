@@ -35,7 +35,7 @@ export function InterventionsList() {
   };
 
   const { data, isLoading } = useInterventions(agentId ? filters : undefined);
-  const interventions = data?.data ?? (Array.isArray(data) ? data : []);
+  const interventions = data?.data ?? [];
   const total = data && 'total' in data ? data.total : interventions.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const canNext = page < totalPages;
@@ -54,7 +54,11 @@ export function InterventionsList() {
 
   const columns: Column<ApiIntervention>[] = [
     { key: 'address', label: 'Adresse', render: (iv) => <span className="text-sm font-mono">{iv.report?.address ?? iv.reportId.slice(0, 8)}</span> },
-    { key: 'severity', label: 'Gravité', render: (iv) => { const m = iv.report ? SEVERITY_META_API[iv.report.severity as keyof typeof SEVERITY_META_API] : null; return m ? <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge> : <span>—</span>; } },
+    { key: 'severity', label: 'Gravité', render: (iv) => {
+      const sev = iv.report?.severity;
+      const m = sev ? SEVERITY_META_API[sev] : null;
+      return m ? <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge> : <span>—</span>;
+    } },
     { key: 'sme', label: 'PME', render: (iv) => <span className="text-xs font-mono">{iv.sme?.name ?? '—'}</span> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'date', label: 'Date', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : formatDate(iv.createdAt)}</span> },

@@ -5,17 +5,9 @@ import { PublicNavbar } from '@/components/layouts/public-navbar';
 import { MapLoader } from '@/components/maps/map-loader';
 import { MapFilters } from '@/components/carte/map-filters';
 import { useReports } from '@/hooks/queries/useReports';
-import type { Hotspot, SeverityLevel, WasteType, InterventionStatus } from '@/lib/types';
+import { apiReportsToHotspots } from '@/lib/reports-to-hotspots';
+import type { SeverityLevel, WasteType, InterventionStatus } from '@/lib/types';
 import type { ApiSeverity, ApiWasteType, ReportStatus } from '@/types/api';
-
-const SEV_MAP: Record<string, SeverityLevel> = { LOW: 'low', MODERATE: 'medium', CRITICAL: 'critical' };
-const TYPE_MAP: Record<string, WasteType> = { SOLID: 'solid', LIQUID: 'liquid' };
-const STATUS_MAP: Record<string, InterventionStatus> = {
-  PENDING_VALIDATION: 'reported',
-  REPORTED: 'reported',
-  IN_PROGRESS: 'in-progress',
-  RESOLVED: 'resolved',
-};
 
 // Reverse maps: frontend filter values → API query params
 const SEV_TO_API: Record<SeverityLevel, ApiSeverity> = { low: 'LOW', medium: 'MODERATE', high: 'CRITICAL', critical: 'CRITICAL' };
@@ -41,26 +33,8 @@ export default function CartePage() {
   const hasFilters = severity !== 'all' || wasteType !== 'all' || status !== 'all';
   const activeData = hasFilters ? filteredData : allData;
 
-  // Map ApiReport[] → Hotspot[] for MapLoader
-  const hotspots: Hotspot[] = useMemo(() =>
-    activeData?.data?.map((r) => ({
-      id: r.id,
-      location: {
-        lat: r.latitude,
-        lng: r.longitude,
-        address: r.address ?? '—',
-        territoire: r.zone?.name ?? '—',
-        sector: r.zone?.name ?? '—',
-      },
-      wasteType: TYPE_MAP[r.type] ?? 'solid',
-      severity: SEV_MAP[r.severity] ?? 'medium',
-      description: r.description ?? '',
-      photoUrl: r.photos?.[0],
-      reportedBy: r.agent?.name ?? r.contactName ?? 'Citoyen',
-      reportedAt: r.createdAt,
-      status: STATUS_MAP[r.status] ?? 'reported',
-      assignedTo: undefined,
-    })),
+  const hotspots = useMemo(
+    () => apiReportsToHotspots(activeData?.data ?? []),
     [activeData],
   );
 

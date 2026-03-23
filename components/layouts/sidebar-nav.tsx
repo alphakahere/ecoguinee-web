@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   Home, Flag, Wrench, User, MapPin, Activity, LogOut,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { NavItem } from '@/lib/types';
 import { isActivePath } from '@/lib/utils';
+import { useAuthStore } from '@/stores/auth.store';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Home, Flag, Wrench, User, LayoutDashboard, Users, BarChart3,
@@ -31,7 +32,10 @@ export function SidebarNav({
   collapsed = false, onNavigate,
 }: SidebarNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const logout = useAuthStore((s) => s.logout);
+  const handleLogout = () => {
+    logout();
+  };
   const RoleIcon = ICON_MAP[roleIcon] ?? Activity;
 
   return (
@@ -132,7 +136,8 @@ export function SidebarNav({
               </div>
             </div>
             <button
-              onClick={() => router.push('/')}
+              type="button"
+              onClick={handleLogout}
               className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-mono text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
               <LogOut className="w-3.5 h-3.5" /><span>Déconnexion</span>
@@ -144,7 +149,8 @@ export function SidebarNav({
               {userInfo.initials}
             </div>
               <button
-                onClick={() => router.push('/')}
+                type="button"
+                onClick={handleLogout}
                 title="Se déconnecter"
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-sidebar-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
               >

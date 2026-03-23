@@ -26,7 +26,7 @@ export function StepLocation({ data, update }: Props) {
 
   // Build commune (MUNICIPALITY/REGION) → secteur (NEIGHBORHOOD/SECTOR) mapping from zone tree
   const communeZones = useMemo(() => flat.filter(z =>
-    z.type === 'MUNICIPALITY' || z.type === 'REGION',
+    z.type === 'MUNICIPALITY',
   ), [flat]);
 
   const secteurZones = useMemo(() => {

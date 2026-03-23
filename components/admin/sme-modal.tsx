@@ -21,7 +21,6 @@ interface FormState {
   address: string;
   description: string;
   activityType: string;
-  active: boolean;
   zoneIds: string[];
 }
 
@@ -32,7 +31,6 @@ const empty: FormState = {
   address: '',
   description: '',
   activityType: '',
-  active: true,
   zoneIds: [],
 };
 
@@ -50,7 +48,6 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
         address: sme.address ?? '',
         description: sme.description ?? '',
         activityType: sme.activityType ?? '',
-        active: sme.active,
         zoneIds: (sme.zones ?? []).map((z) => z.id),
       });
     } else {
@@ -79,7 +76,6 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
       address: form.address.trim() || undefined,
       description: form.description.trim() || undefined,
       activityType: form.activityType.trim() || undefined,
-      active: form.active,
       zoneIds: form.zoneIds.length > 0 ? form.zoneIds : undefined,
     };
     await onSave(payload, sme?.id);
@@ -186,27 +182,6 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">Statut</label>
-                  <div className="flex gap-2">
-                    {[{ value: true, label: 'Active' }, { value: false, label: 'Inactive' }].map((opt) => (
-                      <button
-                        key={String(opt.value)}
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, active: opt.value }))}
-                        className={`flex-1 py-2 px-3 rounded-lg text-xs font-mono border transition-all ${
-                          form.active === opt.value
-                            ? opt.value
-                              ? 'bg-[#6FCF4A]/20 border-[#6FCF4A] text-[#6FCF4A]'
-                              : 'bg-muted border-border text-muted-foreground'
-                            : 'border-border text-muted-foreground hover:bg-muted/50'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
                   <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>

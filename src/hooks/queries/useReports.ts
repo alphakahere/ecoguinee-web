@@ -3,12 +3,16 @@ import { queryKeys } from '@/lib/query-keys';
 import { reportsService } from '@/services/reports';
 import type { ApiReportFilters } from '@/types/api';
 
-export function useReports(filters?: ApiReportFilters) {
+export function useReports(
+  filters?: ApiReportFilters,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: filters
       ? queryKeys.reports.filtered(filters)
       : queryKeys.reports.all,
     queryFn: () => reportsService.getAll(filters),
+    enabled: options?.enabled !== false,
   });
 }
 

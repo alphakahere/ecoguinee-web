@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { PageHeader } from '@/components/shared/page-header';
 import { DataTable, type Column } from '@/components/shared/data-table';
 import { SearchInput } from '@/components/shared/search-input';
 import { Button } from '@/components/ui/button';
@@ -205,7 +204,7 @@ export default function AdminPMEPage() {
         <Select
           value={activeFilter}
           onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-          className="min-w-[160px]"
+          className="min-w-[160px] max-w-xs"
         >
           <option value="">Tous les statuts</option>
           <option value="true">Active</option>

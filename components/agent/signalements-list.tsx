@@ -5,6 +5,8 @@ import { SearchInput } from '@/components/shared/search-input';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type Column } from '@/components/shared/data-table';
+import { ViewModeTabs, type ViewMode } from '@/components/shared/view-mode-tabs';
+import { ReportsMapView } from '@/components/maps/reports-map-view';
 import { formatDate } from '@/lib/utils';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useReports } from '@/hooks/queries/useReports';
@@ -12,10 +14,13 @@ import { useAuthStore } from '@/stores/auth.store';
 import type { ApiReport, ReportStatus, ApiSeverity } from '@/types/api';
 import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META, REPORT_SOURCE_META } from '@/types/api';
 
+const MAP_PAGE_SIZE = 200;
+
 export function SignalementsList() {
   const currentUser = useAuthStore((s) => s.user);
   const smeId = currentUser?.memberSmeId;
 
+  const [view, setView] = useState<ViewMode>('table');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('');
@@ -29,12 +34,23 @@ export function SignalementsList() {
     search: debouncedSearch || undefined,
     status: (statusFilter || undefined) as ReportStatus | undefined,
     severity: (severityFilter || undefined) as ApiSeverity | undefined,
-    page,
-    limit: pageSize,
   };
 
-  const { data, isLoading } = useReports(smeId ? filters : undefined);
-  const total = data?.total ?? 0;
+  const tableFilters = smeId
+    ? { ...filters, page, limit: pageSize }
+    : undefined;
+  const mapFilters = smeId
+    ? { ...filters, page: 1, limit: MAP_PAGE_SIZE }
+    : undefined;
+
+  const tableQuery = useReports(tableFilters, {
+    enabled: !!smeId && view === 'table',
+  });
+  const mapQuery = useReports(mapFilters, {
+    enabled: !!smeId && view === 'map',
+  });
+
+  const total = tableQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const canNext = page < totalPages;
   const canPrev = page > 1;
@@ -63,18 +79,35 @@ export function SignalementsList() {
   );
 
   return (
-    <DataTable
-      data={data?.data ?? []}
-      columns={columns}
-      total={total}
-      page={page}
-      totalPages={totalPages}
-      onPageChange={setPage}
-      canPrev={canPrev}
-      canNext={canNext}
-      toolbar={toolbar}
-      isLoading={isLoading || !smeId}
-      getRowKey={(r) => r.id}
-    />
+    <div className={view === 'map' ? 'w-full' : 'max-w-5xl'}>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <ViewModeTabs value={view} onChange={setView} />
+      </div>
+
+      {view === 'table' ? (
+        <DataTable
+          data={tableQuery.data?.data ?? []}
+          columns={columns}
+          total={total}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          canPrev={canPrev}
+          canNext={canNext}
+          toolbar={toolbar}
+          isLoading={tableQuery.isLoading || !smeId}
+          isError={tableQuery.isError}
+          getRowKey={(r) => r.id}
+        />
+      ) : (
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="mb-4">{toolbar}</div>
+          <ReportsMapView
+            reports={mapQuery.data?.data ?? []}
+            isLoading={mapQuery.isLoading || !smeId}
+          />
+        </div>
+      )}
+    </div>
   );
 }

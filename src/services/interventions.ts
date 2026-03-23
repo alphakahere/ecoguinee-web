@@ -1,11 +1,12 @@
 import { api } from './api';
 import type { Intervention, InterventionFilters, PaginatedResponse } from '@/types';
+import type { ApiIntervention } from '@/types/api';
 
 export const interventionsService = {
   async getAll(
     filters?: InterventionFilters,
-  ): Promise<PaginatedResponse<Intervention>> {
-    const { data } = await api.get<PaginatedResponse<Intervention>>(
+  ): Promise<PaginatedResponse<ApiIntervention>> {
+    const { data } = await api.get<PaginatedResponse<ApiIntervention>>(
       '/interventions',
       { params: filters },
     );
