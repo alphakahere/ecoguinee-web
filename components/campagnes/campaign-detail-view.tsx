@@ -92,7 +92,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-5 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10">
-          <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-10 bg-white p-4 rounded-2xl border border-border">
             {campaign.description && (
               <section>
                 <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>À propos</h2>
