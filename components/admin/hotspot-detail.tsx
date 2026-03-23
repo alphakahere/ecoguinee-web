@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, MapPin, Calendar, User, Phone, FileText, Plus } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Phone, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
@@ -14,14 +14,20 @@ import {
   WASTE_TYPE_META,
   REPORT_SOURCE_META,
   INTERVENTION_STATUS_META,
+  type ApiIntervention,
 } from '@/types/api';
 import { CreateInterventionModal } from './create-intervention-modal';
+import Image from 'next/image';
 
 export function HotspotDetail({ id }: { id: string }) {
   const { data: report, isLoading, isError } = useReport(id);
   const { data: interventionsData } = useInterventions({ reportId: id });
-  const interventions = interventionsData?.data ?? (Array.isArray(interventionsData) ? interventionsData : []);
+  const interventions = (
+    interventionsData?.data ??
+    (Array.isArray(interventionsData) ? interventionsData : [])
+  ) as ApiIntervention[];
   const [modalOpen, setModalOpen] = useState(false);
+  console.log({ report });
 
   if (isLoading) {
     return (
@@ -54,7 +60,7 @@ export function HotspotDetail({ id }: { id: string }) {
           <ChevronLeft className="w-3.5 h-3.5" /> Signalements
         </Link>
         <span className="text-xs text-muted-foreground">/</span>
-        <span className="text-xs font-mono">{id.slice(0, 8)}…</span>
+        <span className="text-xs font-mono">#SIG-{id.slice(0, 6)}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -66,7 +72,14 @@ export function HotspotDetail({ id }: { id: string }) {
               <h3 className="text-sm font-semibold mb-3">Photos ({report.photos.length})</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {report.photos.map((url, i) => (
-                  <img key={i} src={url} alt={`Photo ${i + 1}`} className="rounded-xl border border-border object-cover aspect-video w-full" />
+                  <Image key={i} src={url} alt={`Photo ${i + 1}`} width={100}
+                    height={100}
+                    quality={100}
+                    priority
+                    loading="eager"
+                    unoptimized
+                    className="rounded-xl border border-border object-cover aspect-video w-full"
+                  />
                 ))}
               </div>
             </div>
