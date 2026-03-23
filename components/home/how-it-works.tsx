@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Camera, Bell, TrendingUp } from 'lucide-react';
+import { useScrollRevealMotion } from '@/lib/motion-prefs';
 
 const STEPS = [
   {
@@ -19,14 +20,16 @@ const STEPS = [
 ];
 
 export function HowItWorks() {
+  const { offscreen, onscreen, transition, reduced } = useScrollRevealMotion();
+
   return (
     <section className="py-24 bg-background topo-pattern">
       <div className="max-w-7xl mx-auto px-5">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={offscreen}
+          whileInView={onscreen}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={transition}
           className="mb-14 text-center"
         >
           <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: '#2D7D46' }}>
@@ -46,10 +49,10 @@ export function HowItWorks() {
           {STEPS.map((s, i) => (
             <motion.div
               key={s.step}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={offscreen}
+              whileInView={onscreen}
               viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ ...transition, delay: reduced ? 0 : i * 0.1 }}
               className="relative"
             >
               <div className="bg-card rounded-2xl p-7 border border-border h-full flex flex-col gap-5 hover:shadow-xl transition-shadow">

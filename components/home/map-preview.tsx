@@ -2,7 +2,9 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useScrollRevealMotion } from '@/lib/motion-prefs';
 import { MapLoader } from '@/components/maps/map-loader';
 import { useReports } from '@/hooks/queries/useReports';
 import type { Hotspot, SeverityLevel, WasteType, InterventionStatus } from '@/lib/types';
@@ -17,6 +19,7 @@ const STATUS_MAP: Record<string, InterventionStatus> = {
 };
 
 export function MapPreview() {
+  const { offscreen, onscreen, transition } = useScrollRevealMotion();
   const { data = { data: [] } } = useReports({ page: 1, limit: 50 });
 
   const hotspots: Hotspot[] = useMemo(() =>
@@ -40,18 +43,26 @@ export function MapPreview() {
   );
 
   return (
-    <section className="py-20" style={{ background: '#0A1A10' }}>
+    <section className="py-20 pb-8" style={{ background: '#0A1A10' }}>
       <div className="max-w-7xl mx-auto px-5">
-        <div className="mb-10 text-center">
+        <motion.div
+          className="mb-10 text-center"
+          initial={offscreen}
+          whileInView={onscreen}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={transition}
+        >
           <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: '#6FCF4A' }}>
             Carte interactive
           </p>
           <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
             Visualisez les points noirs en temps réel
           </h2>
-        </div>
+        </motion.div>
 
-        <div className="rounded-2xl overflow-hidden border border-border" style={{ height: 420 }}>
+        <div
+          className="rounded-2xl overflow-hidden border border-border min-h-[260px] h-[min(420px,55vh)] sm:h-[420px]"
+        >
           <MapLoader
             hotspots={hotspots}
             center={[9.5370, -13.6785]}

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -17,10 +17,22 @@ function looksLikePhone(value: string) {
   return /^[+\d]/.test(value.trim()) && /\d{6,}/.test(value.replace(/\s/g, ''));
 }
 
-export default function LoginPage() {
+/** Internal paths only — blocks open redirects */
+function safeInternalNext(raw: string | null): string | null {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return null;
+  return raw;
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, token, setUser } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+
+  const nextPath = useMemo(
+    () => safeInternalNext(searchParams.get('next')),
+    [searchParams],
+  );
 
   useEffect(() => {
     if (token && user) router.replace(redirectByRole(user.role));
@@ -45,7 +57,7 @@ export default function LoginPage() {
       const { user, token } = await authService.login(data.emailOrPhone, data.password);
       setUser(user, token);
       toast.success(`Bienvenue, ${user.name} !`);
-      router.push(redirectByRole(user.role));
+      router.push(nextPath ?? redirectByRole(user.role));
     } catch {
       toast.error('Identifiants incorrects. Veuillez réessayer.');
     }
@@ -230,5 +242,19 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <span className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }

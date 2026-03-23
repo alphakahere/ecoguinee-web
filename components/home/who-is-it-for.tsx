@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Users, Wrench, Landmark, ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useScrollRevealMotion } from '@/lib/motion-prefs';
 
 const audiences = [
   {
@@ -27,19 +29,21 @@ const audiences = [
     bg: 'rgba(232,160,32,0.1)',
     title: 'Autorités locales',
     desc: 'Pilotez les interventions, analysez les données par territoire et optimisez les ressources en temps réel.',
-    cta: { label: 'Administration', href: '/admin' },
+    cta: { label: 'Administration', href: '/login?next=%2Fadmin' },
   },
 ];
 
 export function WhoIsItFor() {
+  const { offscreen, onscreen, transition, reduced } = useScrollRevealMotion();
+
   return (
     <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-5">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={offscreen}
+          whileInView={onscreen}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={transition}
           className="mb-14 text-center"
         >
           <p
@@ -60,12 +64,17 @@ export function WhoIsItFor() {
           {audiences.map((a, i) => (
             <motion.div
               key={a.title}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={offscreen}
+              whileInView={onscreen}
               viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ ...transition, delay: reduced ? 0 : i * 0.1 }}
             >
-              <div className="bg-card rounded-2xl p-7 border border-border h-full flex flex-col gap-5 hover:-translate-y-1 hover:shadow-xl transition-all">
+              <div
+                className={cn(
+                  'bg-card rounded-2xl p-7 border border-border h-full flex flex-col gap-5 hover:shadow-xl transition-all',
+                  !reduced && 'hover:-translate-y-1',
+                )}
+              >
                 <div
                   className="w-13 h-13 rounded-2xl flex items-center justify-center"
                   style={{ background: a.bg }}

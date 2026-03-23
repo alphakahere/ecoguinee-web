@@ -4,12 +4,20 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { MapPin, Activity, Users, CheckCircle, Megaphone } from 'lucide-react';
 import { usePublicStats } from '@/hooks/queries/usePublicStats';
+import { useScrollRevealMotion } from '@/lib/motion-prefs';
 
-function useScrollCountUp(target: number, duration = 1500, delay = 0, started = false) {
+function useScrollCountUp(
+  target: number,
+  duration = 1500,
+  delay = 0,
+  started = false,
+  instant = false,
+) {
   const [count, setCount] = useState(0);
   const hasStarted = useRef(false);
 
   useEffect(() => {
+    if (instant) return;
     if (!started || hasStarted.current || target === 0) return;
     hasStarted.current = true;
     const t = setTimeout(() => {
@@ -23,25 +31,28 @@ function useScrollCountUp(target: number, duration = 1500, delay = 0, started = 
       requestAnimationFrame(tick);
     }, delay);
     return () => clearTimeout(t);
-  }, [target, duration, delay, started]);
+  }, [target, duration, delay, started, instant]);
 
+  if (instant) return started ? target : 0;
   return count;
 }
 
 function StatCard({
-  stat, index, started,
+  stat, index, started, reduced, transition,
 }: {
   stat: { icon: React.ElementType; color: string; value: number; suffix?: string; label: string };
   index: number;
   started: boolean;
+  reduced: boolean;
+  transition: { duration: number; ease?: readonly [number, number, number, number] };
 }) {
-  const count = useScrollCountUp(stat.value, 1500, index * 100, started);
+  const count = useScrollCountUp(stat.value, 1500, index * 100, started, reduced);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      animate={started ? { opacity: 1, y: 0 } : { opacity: reduced ? 1 : 0, y: reduced ? 0 : 20 }}
+      transition={{ ...transition, delay: reduced ? 0 : index * 0.08 }}
       className="rounded-2xl p-6 flex flex-col gap-4"
       style={{
         background: 'rgba(26,47,32,0.6)',
@@ -69,6 +80,7 @@ export function KeyFigures() {
   const gridRef = useRef<HTMLDivElement>(null);
   const inView = useInView(gridRef, { once: true, margin: '-80px' });
   const { data: publicStats } = usePublicStats();
+  const { offscreen, onscreen, transition, reduced } = useScrollRevealMotion();
 
   const stats = [
     { icon: MapPin,      color: '#6FCF4A', value: publicStats?.communes ?? 0,        label: 'Communes couvertes' },
@@ -79,26 +91,39 @@ export function KeyFigures() {
   ];
 
   return (
-    <section className="py-20" style={{ background: '#0A1A10' }}>
+    <section
+      id="impact"
+      className="scroll-mt-24 border-t border-[#6FCF4A]/15 bg-linear-to-b from-[#0A1A10] via-[#0c1e12] to-[#0A1A10] py-20"
+    >
       <div className="max-w-7xl mx-auto px-5">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={offscreen}
+          whileInView={onscreen}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-12 text-center"
+          transition={transition}
+          className="mb-12 text-center max-w-2xl mx-auto"
         >
           <p className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: '#6FCF4A' }}>
-            Notre impact
+            Impact mesuré
           </p>
           <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
-            Des chiffres qui parlent
+            Des chiffres agrégés sur la plateforme
           </h2>
+          <p className="mt-3 text-sm font-mono text-white/45 leading-relaxed">
+            Vue consolidée — suivi officiel des indicateurs EcoGuinée (pas seulement un aperçu en direct).
+          </p>
         </motion.div>
 
         <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
           {stats.map((s, i) => (
-            <StatCard key={s.label} stat={s} index={i} started={inView} />
+            <StatCard
+              key={s.label}
+              stat={s}
+              index={i}
+              started={inView}
+              reduced={!!reduced}
+              transition={transition}
+            />
           ))}
         </div>
       </div>

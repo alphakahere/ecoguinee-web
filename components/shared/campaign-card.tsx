@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, FileText } from 'lucide-react';
+import Image from 'next/image';
+import { Users, FileText, Megaphone } from 'lucide-react';
 import type { ApiCampaign } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 
-const TYPE_EMOJI: Record<string, string> = { AWARENESS: '📢', PROMOTION: '🎯', TRAINING: '📚' };
+/** Shared pill style for type + status — only semantic colors differ */
+const tagClass =
+  'z-10 inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold tracking-wide shadow-md bg-warning  text-white';
 
 interface Props {
   campaign: ApiCampaign;
@@ -17,49 +20,44 @@ interface Props {
 export function CampaignCard({ campaign, index = 0, basePath = '/campagnes' }: Props) {
   const tm = API_CAMPAIGN_TYPE_META[campaign.type];
   const sm = API_CAMPAIGN_STATUS_META[campaign.status];
-  const emoji = TYPE_EMOJI[campaign.type] ?? '📋';
   const heroPhoto = campaign.photos?.[0];
 
   return (
     <Link
       href={`${basePath}/${campaign.id}`}
-      className="group block bg-card rounded-2xl border border-border overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(45,125,70,0.15)] hover:border-primary/45 transition-all duration-250"
+      className="group bg-card rounded-2xl border border-border overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(45,125,70,0.15)] hover:border-primary/45 transition-all duration-250"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <div className="relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>
         {heroPhoto ? (
-          <img
+          <Image
             src={heroPhoto}
             alt={campaign.title}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
+            unoptimized
           />
         ) : (
           <div
-            className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
-            style={{ background: `linear-gradient(135deg, #0A1A10 0%, ${tm.color}44 55%, #0A1A10 100%)` }}
+              className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 bg-linear-to-br from-[#0A1A10] via-[#0f2415] to-[#0A1A10]"
           >
-            <span className="text-[3.2rem] drop-shadow-lg">{emoji}</span>
+              <Megaphone className="h-14 w-14 text-primary/25" strokeWidth={1.25} aria-hidden />
           </div>
         )}
 
         {heroPhoto && (
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,26,16,0.6) 0%, transparent 60%)' }} />
+          <div className="absolute inset-0 pointer-events-none z-1" style={{ background: 'linear-gradient(to top, rgba(10,26,16,0.6) 0%, transparent 60%)' }} />
         )}
 
-        <div
-          className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono"
-          style={{ background: 'rgba(10,26,16,0.85)', backdropFilter: 'blur(8px)', color: tm.color, border: `1px solid ${tm.color}40` }}
-        >
-          <span>{emoji}</span>
-          <span>{tm.label}</span>
+        <div className="flex items-center gap-2 absolute top-3 left-3">
+          <div className={cn(tagClass)}>
+            {tm.label}
         </div>
 
-        <div
-          className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono"
-          style={{ background: 'rgba(10,26,16,0.85)', backdropFilter: 'blur(8px)', color: sm.color.replace('text-', ''), border: `1px solid ${sm.color.replace('text-', '')}40` }}
-        >
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: sm.color.includes('#') ? sm.color.replace('text-', '') : undefined }} />
+          <div className={cn(tagClass)}>
           {sm.label}
+        </div>
         </div>
       </div>
 

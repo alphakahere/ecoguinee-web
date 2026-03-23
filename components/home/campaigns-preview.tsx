@@ -5,19 +5,21 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { CampaignCard } from '@/components/shared/campaign-card';
 import { useCampaigns } from '@/hooks/queries/useCampaigns';
+import { useScrollRevealMotion } from '@/lib/motion-prefs';
 
 export function CampaignsPreview() {
   const { data } = useCampaigns({ page: 1, limit: 3 });
   const campaigns = data?.data ?? [];
+  const { offscreen, onscreen, transition, reduced } = useScrollRevealMotion();
 
   return (
     <section className="py-20 bg-background topo-pattern">
       <div className="max-w-7xl mx-auto px-5">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={offscreen}
+          whileInView={onscreen}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={transition}
           className="flex items-end justify-between mb-10"
         >
           <div>
@@ -45,10 +47,10 @@ export function CampaignsPreview() {
             {campaigns.map((c, i) => (
               <motion.div
                 key={c.id}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={offscreen}
+                whileInView={onscreen}
                 viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ ...transition, delay: reduced ? 0 : i * 0.1 }}
               >
                 <CampaignCard campaign={c} index={i} />
               </motion.div>
@@ -57,10 +59,10 @@ export function CampaignsPreview() {
         )}
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={offscreen}
+          whileInView={onscreen}
           viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ ...transition, delay: reduced ? 0 : 0.3 }}
           className="mt-8 text-center md:hidden"
         >
           <Link

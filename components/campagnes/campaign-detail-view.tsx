@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, MapPin, Calendar, Building2, Users, FileText, Camera, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
@@ -55,7 +56,15 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
       {/* Hero */}
       <div className="relative overflow-hidden mt-5" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
         {heroPhoto ? (
-          <img src={heroPhoto} alt={campaign.title} className="w-full h-full object-cover" />
+          <Image
+            src={heroPhoto}
+            alt={campaign.title}
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority
+            unoptimized
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, #0F1F15 0%, #2D7D46 60%, #0F1F15 100%)` }}>
             <span style={{ fontSize: '6rem', opacity: 0.35 }}>{emoji}</span>
@@ -127,8 +136,15 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
               {campaign.photos && campaign.photos.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {campaign.photos.map((url, i) => (
-                    <button key={i} className="group relative overflow-hidden rounded-xl aspect-square cursor-pointer" onClick={() => setLightboxIdx(i)}>
-                      <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                    <button key={i} type="button" className="group relative overflow-hidden rounded-xl aspect-square cursor-pointer" onClick={() => setLightboxIdx(i)}>
+                      <Image
+                        src={url}
+                        alt={`Photo ${i + 1}`}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                        unoptimized
+                      />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(10,26,16,0.45)' }}>
                         <Camera className="w-6 h-6 text-white" />
                       </div>
@@ -177,7 +193,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
 
       {/* Lightbox */}
       {lightboxIdx !== null && campaign.photos && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.95)' }} onClick={closeLightbox}>
+        <div className="fixed inset-0 z-100 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.95)' }} onClick={closeLightbox}>
           <button className="absolute top-5 right-5 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={closeLightbox}>
             <X className="w-5 h-5 text-white" />
           </button>
@@ -194,7 +210,16 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
               <ChevronRight className="w-6 h-6 text-white" />
             </button>
           )}
-          <img src={campaign.photos[lightboxIdx]} alt={`Photo ${lightboxIdx + 1}`} className="object-contain rounded-xl max-w-[90vw] max-h-[80vh]" onClick={(e) => e.stopPropagation()} />
+          <div className="relative w-[min(90vw,1400px)] h-[min(80vh,900px)] max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
+            <Image
+              src={campaign.photos[lightboxIdx]}
+              alt={`Photo ${lightboxIdx + 1}`}
+              fill
+              className="object-contain rounded-xl"
+              sizes="90vw"
+              unoptimized
+            />
+          </div>
         </div>
       )}
     </>
