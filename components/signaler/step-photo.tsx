@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Camera, X } from 'lucide-react';
+import { Camera, X, Phone, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { ReportData } from './report-wizard';
 
 interface Props {
@@ -12,6 +13,9 @@ interface Props {
 
 export function StepPhoto({ data, update }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [contactOpen, setContactOpen] = useState(
+    () => Boolean(data.prenom?.trim() || data.telephone?.trim()),
+  );
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -106,25 +110,65 @@ export function StepPhoto({ data, update }: Props) {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-mono text-muted-foreground mb-2">Prénom (optionnel)</label>
-        <input
-          value={data.prenom}
-          onChange={(e) => update({ prenom: e.target.value })}
-          placeholder="Mamadou"
-          className="w-full px-4 py-3 rounded-xl border border-border bg-background text-base font-mono outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </div>
+      <div className="rounded-2xl border border-border  overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setContactOpen((o) => !o)}
+          className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-black/3 dark:hover:bg-white/4"
+          aria-expanded={contactOpen}
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Phone className="h-4 w-4" aria-hidden />
+          </span>
+          <span className="flex-1 min-w-0 text-sm font-semibold text-foreground tracking-tight">
+            Laisser vos coordonnées (optionnel)
+          </span>
+          {contactOpen ? (
+            <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+          ) : (
+            <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+          )}
+        </button>
 
-      <div>
-        <label className="block text-sm font-mono text-muted-foreground mb-2">Téléphone (optionnel)</label>
-        <input
-          value={data.telephone}
-          onChange={(e) => update({ telephone: e.target.value })}
-          placeholder="+224 6XX XX XX XX"
-          type="tel"
-          className="w-full px-4 py-3 rounded-xl border border-border bg-background text-base font-mono outline-none focus:ring-2 focus:ring-primary/30"
-        />
+        <div
+          className={cn(
+            'grid transition-[grid-template-rows] duration-200 ease-out',
+            contactOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+          )}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="border-t border-border px-4 pb-4 pt-1 space-y-4">
+              <div>
+                <label className="block text-sm font-mono text-muted-foreground mb-2">Prénom</label>
+                <input
+                  value={data.prenom}
+                  onChange={(e) => update({ prenom: e.target.value })}
+                  placeholder="Mamadou"
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-base font-mono outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-mono text-muted-foreground mb-2">Numéro de téléphone</label>
+                <input
+                  value={data.telephone}
+                  onChange={(e) => update({ telephone: e.target.value })}
+                  placeholder="+224 6XX XX XX XX"
+                  type="tel"
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-base font-mono outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+
+              <div className="flex gap-2.5 rounded-xl bg-background/80 dark:bg-background/40 border border-border/60 px-3 py-2.5">
+                <Info className="h-4 w-4 shrink-0 text-primary/70 mt-0.5" aria-hidden />
+                <p className="text-[11px] sm:text-xs font-mono text-muted-foreground leading-relaxed">
+                  Ces informations restent confidentielles et ne seront utilisées que pour le suivi de votre
+                  signalement.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

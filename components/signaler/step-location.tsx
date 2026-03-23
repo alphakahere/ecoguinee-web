@@ -92,25 +92,50 @@ export function StepLocation({ data, update }: Props) {
       )}
 
       {gpsState !== 'denied' && (
-        <button
-          onClick={handleGPS}
-          disabled={gpsState === 'loading' || gpsState === 'success'}
-          className={`w-full flex items-center justify-center gap-3 py-5 rounded-2xl border-2 transition-all font-mono text-base ${
-            gpsState === 'success'
-              ? 'border-[#6FCF4A] bg-[#6FCF4A]/10 text-[#6FCF4A] cursor-default'
-              : gpsState === 'loading'
+        gpsState === 'success' ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="w-full rounded-2xl border border-[#6FCF4A]/35 bg-linear-to-br from-[#6FCF4A]/12 to-[#6FCF4A]/4 p-4 sm:p-5"
+          >
+            <div className="flex gap-4 sm:items-center">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#6FCF4A]/20 text-[#2D7D46] ring-1 ring-[#6FCF4A]/25">
+                <CheckCircle className="h-6 w-6" strokeWidth={2} aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
+                <p className="text-base font-semibold tracking-tight text-foreground">
+                  Position détectée
+                </p>
+                <p className="text-[11px] sm:text-xs font-mono text-muted-foreground leading-snug tabular-nums">
+                  <span className="text-muted-foreground/80">Coordonnées GPS</span>
+                  <span className="mx-1.5 text-border">·</span>
+                  <span className="text-foreground/90">
+                    {data.latitude.toFixed(4)}
+                    <span className="text-muted-foreground/60">, </span>
+                    {data.longitude.toFixed(4)}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+            <button
+              type="button"
+              onClick={handleGPS}
+              disabled={gpsState === 'loading'}
+              className={`w-full flex items-center justify-center gap-3 py-5 rounded-2xl border-2 transition-all font-mono text-base ${
+                gpsState === 'loading'
                 ? 'border-primary/40 bg-primary/5 text-primary cursor-wait'
                 : 'border-dashed border-primary/40 hover:border-primary hover:bg-primary/5 text-foreground'
-          }`}
-        >
-          {gpsState === 'loading' ? (
-            <><Loader2 className="w-5 h-5 animate-spin text-primary" /><span className="text-primary">Localisation en cours...</span></>
-          ) : gpsState === 'success' ? (
-            <><CheckCircle className="w-5 h-5" /><span>Position détectée ({data.latitude.toFixed(4)}, {data.longitude.toFixed(4)})</span></>
-          ) : (
-            <><MapPin className="w-5 h-5 text-primary" /><span>Utiliser ma position actuelle</span></>
-          )}
-        </button>
+                }`}
+            >
+              {gpsState === 'loading' ? (
+                <><Loader2 className="w-5 h-5 animate-spin text-primary" /><span className="text-primary">Localisation en cours...</span></>
+              ) : (
+                <><MapPin className="w-5 h-5 text-primary" /><span>Utiliser ma position actuelle</span></>
+              )}
+            </button>
+          )
       )}
 
       {hasLocation && (
@@ -121,11 +146,11 @@ export function StepLocation({ data, update }: Props) {
             backgroundSize: '20px 20px',
           }} />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-10">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 border-2 border-white">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-white">
               <MapPin className="w-4 h-4 text-white" />
             </div>
           </div>
-          <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-white/90 rounded-lg px-2.5 py-1.5 shadow-sm border border-border">
+          <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-white/90 rounded-lg px-2.5 py-1.5 border border-border">
             <MapPin className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-mono font-semibold text-foreground">
               {selectedCommune?.name ?? data.commune} — {selectedSecteur?.name ?? data.secteur}

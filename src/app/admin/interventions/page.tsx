@@ -86,7 +86,7 @@ export default function AdminInterventionsPage() {
   return (
     <>
       <DataTable
-        data={interventions}
+        data={interventions as ApiIntervention[]}
         columns={columns}
         total={total}
         page={page}

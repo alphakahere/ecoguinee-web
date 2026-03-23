@@ -8,23 +8,46 @@ import { usePublicStats } from '@/hooks/queries/usePublicStats';
 
 function useCountUp(target: number, duration = 1500, delay = 0) {
   const [count, setCount] = useState(0);
-  const hasRun = useRef(false);
+  /** Last target we fully ran the count-up for (avoids blocking when stats load after first paint or refetch) */
+  const lastAnimatedTarget = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
+
   useEffect(() => {
-    if (target === 0 || hasRun.current) return;
-    hasRun.current = true;
+    if (target === 0) {
+      lastAnimatedTarget.current = null;
+      return;
+    }
+
+    // Skip only if we already finished animating to this value (not on every re-render before completion)
+    if (lastAnimatedTarget.current === target) return;
+
     const t = setTimeout(() => {
       const startTime = performance.now();
       const tick = (now: number) => {
         const p = Math.min((now - startTime) / duration, 1);
         const eased = 1 - Math.pow(1 - p, 3);
         setCount(Math.round(target * eased));
-        if (p < 1) requestAnimationFrame(tick);
+        if (p < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          lastAnimatedTarget.current = target;
+          rafRef.current = null;
+        }
       };
-      requestAnimationFrame(tick);
+      rafRef.current = requestAnimationFrame(tick);
     }, delay);
-    return () => clearTimeout(t);
+
+    return () => {
+      clearTimeout(t);
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
   }, [target, duration, delay]);
-  return count;
+
+  // While stats are loading (target 0), show 0 without syncing count in the effect (avoids cascading renders)
+  return target === 0 ? 0 : count;
 }
 
 function CounterItem({ value, label, suffix = '', delay = 0 }: {

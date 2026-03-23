@@ -8,7 +8,7 @@ export default function SignalerPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicNavbar />
-      <main className="flex-1">
+      <main className="flex-1 px-4">
         <ReportWizard />
       </main>
       <PublicFooter />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { ChevronRight, CheckCircle, Info } from 'lucide-react';
+import { ChevronRight, Info } from 'lucide-react';
 import { useZoneTree } from '@/hooks/queries/useZones';
 import type { ApiZone } from '@/types/api';
 import type { ReportData, Step } from './report-wizard';
