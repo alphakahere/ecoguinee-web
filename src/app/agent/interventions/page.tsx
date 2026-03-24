@@ -5,7 +5,7 @@ import { InterventionsList } from '@/components/agent/interventions-list';
 
 export default function AgentInterventionsPage() {
   return (
-    <div className="max-w-5xl">
+    <div>
       <PageHeader
         title="Mes Interventions"
         description="Interventions assignées à votre équipe"

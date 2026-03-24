@@ -38,7 +38,7 @@ export function KPICard({ title, value, trend, icon: Icon, delay = 0 }: KPICardP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="border border-border bg-card rounded-lg p-6 grain-overlay shadow-sm hover:shadow-md transition-shadow"
+      className="border border-border bg-card rounded-lg p-6"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +72,9 @@ export function InterventionsList() {
             {transitions.map((t) => (
               <button key={t.status} type="button" onClick={() => handleStatusChange(iv.id, t.status)} disabled={updateIntervention.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
             ))}
+            <Link href={`/agent/interventions/${iv.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">
+              Voir
+            </Link>
           </div>
         );
       },
@@ -79,7 +83,7 @@ export function InterventionsList() {
 
   const toolbar = (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px]">
+      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px] max-w-xs">
         <option value="">Tous les statuts</option>
         {Object.entries(INTERVENTION_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
       </Select>

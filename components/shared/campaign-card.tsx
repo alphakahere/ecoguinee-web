@@ -24,7 +24,7 @@ export function CampaignCard({ campaign, index = 0, basePath = '/campagnes' }: P
   return (
     <Link
       href={`${basePath}/${campaign.id}`}
-      className="group bg-card rounded-2xl border border-border overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(45,125,70,0.15)] hover:border-primary/45 transition-all duration-250"
+      className="group bg-card rounded-2xl border border-border overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(45,125,70,0.15)] hover:border-primary/45 transition-all duration-250 h-full"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <div className="relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>

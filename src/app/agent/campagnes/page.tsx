@@ -15,7 +15,7 @@ export default function AgentCampagnesPage() {
   const campaigns = data?.data ?? [];
 
   return (
-    <div className="max-w-5xl">
+    <div>
       <PageHeader
         title="Mes Campagnes"
         description="Campagnes de sensibilisation qui vous sont assignées"

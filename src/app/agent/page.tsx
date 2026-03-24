@@ -9,7 +9,7 @@ export default function AgentDashboardPage() {
   const firstName = currentUser?.name?.split(' ')[0] ?? 'Agent';
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div className="space-y-5">
       <div>
         <h2 className="font-bold text-xl sm:text-2xl mb-1">Bonjour, {firstName}</h2>
         <p className="text-muted-foreground font-mono text-sm">
