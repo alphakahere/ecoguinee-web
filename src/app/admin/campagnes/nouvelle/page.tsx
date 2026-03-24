@@ -18,6 +18,11 @@ import { API_CAMPAIGN_TYPE_META } from '@/types/api';
 
 const TYPES = Object.entries(API_CAMPAIGN_TYPE_META) as [ApiCampaignType, { label: string }][];
 
+function toDatetimeLocalValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export default function AdminCampagneNouvellePage() {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
@@ -75,6 +80,10 @@ export default function AdminCampagneNouvellePage() {
 
   const inputCls =
     'w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30';
+
+  const minScheduled = toDatetimeLocalValue(new Date());
+  const minEndDate =
+    form.scheduledDate && form.scheduledDate >= minScheduled ? form.scheduledDate : minScheduled;
 
   return (
     <div>
@@ -166,6 +175,7 @@ export default function AdminCampagneNouvellePage() {
               type="datetime-local"
               value={form.scheduledDate}
               onChange={(e) => update('scheduledDate', e.target.value)}
+              min={minScheduled}
               className={inputCls}
             />
           </div>
@@ -177,6 +187,7 @@ export default function AdminCampagneNouvellePage() {
               type="datetime-local"
               value={form.endDate}
               onChange={(e) => update('endDate', e.target.value)}
+              min={minEndDate}
               className={inputCls}
             />
           </div>

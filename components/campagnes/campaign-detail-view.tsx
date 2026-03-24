@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { ArrowLeft, MapPin, Calendar, Building2, Users, FileText, Camera, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
-import { formatDate } from '@/lib/utils';
+import { documentLabel, formatDate, getDocumentUrl, getImageUrl } from '@/lib/utils';
 
 const TYPE_EMOJI: Record<string, string> = { AWARENESS: '📢', PROMOTION: '🎯', TRAINING: '📚' };
 
@@ -40,7 +40,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
   const tm = API_CAMPAIGN_TYPE_META[campaign.type];
   const sm = API_CAMPAIGN_STATUS_META[campaign.status];
   const emoji = TYPE_EMOJI[campaign.type] ?? '📋';
-  const heroPhoto = campaign.photos?.[0];
+  const heroPhoto = getImageUrl(campaign.photos?.[0]);
   const isCompleted = campaign.status === 'COMPLETED';
 
   return (
@@ -138,7 +138,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                   {campaign.photos.map((url, i) => (
                     <button key={i} type="button" className="group relative overflow-hidden rounded-xl aspect-square cursor-pointer" onClick={() => setLightboxIdx(i)}>
                       <Image
-                        src={url}
+                        src={getImageUrl(url)}
                         alt={`Photo ${i + 1}`}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -155,6 +155,25 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                 <div className="flex flex-col items-center gap-3 py-12 rounded-xl border border-dashed border-border text-center">
                   <Camera className="w-10 h-10" style={{ color: 'rgba(45,125,70,0.2)' }} />
                   <p className="text-sm font-mono text-muted-foreground">Aucune photo disponible.</p>
+                </div>
+              )}
+            </section>
+            {/* Documents partagés */}
+            <section>
+              <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>Documents partagés</h2>
+              {campaign.documents && campaign.documents.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {campaign.documents.map((document, i) => (
+                    <a key={i} href={getDocumentUrl(document)} className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2.5">
+                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate font-mono text-foreground">{documentLabel(document, i)}</span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-12 rounded-xl border border-dashed border-border text-center">
+                  <FileText className="w-10 h-10" style={{ color: 'rgba(45,125,70,0.2)' }} />
+                  <p className="text-sm font-mono text-muted-foreground">Aucun document disponible.</p>
                 </div>
               )}
             </section>
@@ -212,7 +231,7 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
           )}
           <div className="relative w-[min(90vw,1400px)] h-[min(80vh,900px)] max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
             <Image
-              src={campaign.photos[lightboxIdx]}
+              src={getImageUrl(campaign.photos[lightboxIdx])}
               alt={`Photo ${lightboxIdx + 1}`}
               fill
               className="object-contain rounded-xl"

@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Calendar, MapPin, User, Building2, Pencil } from 'lucide-react';
+import { ChevronLeft, Calendar, MapPin, User, Building2, Pencil, FileText, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils';
+import { documentLabel, formatDate, getDocumentUrl, getImageUrl } from '@/lib/utils';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import type { ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
 import { CampaignEditModal } from './campaign-edit-modal';
+import Image from 'next/image';
 
 // Valid status transitions
 const TRANSITIONS: Record<string, { status: ApiCampaignStatus; label: string; color: string }[]> = {
@@ -30,7 +31,6 @@ export function AdminCampaignDetail({ id }: { id: string }) {
   const { data: campaign, isLoading, isError } = useCampaign(id);
   const updateCampaign = useUpdateCampaign();
   const [editOpen, setEditOpen] = useState(false);
-
   const handleTransition = async (status: ApiCampaignStatus) => {
     try {
       await updateCampaign.mutateAsync({ id, payload: { status } });
@@ -124,14 +124,37 @@ export function AdminCampaignDetail({ id }: { id: string }) {
           )}
 
           {/* Photos */}
-          {campaign.photos.length > 0 && (
+          {(campaign.photos ?? []).length > 0 && (
             <div className="rounded-2xl border border-border bg-card p-5">
-              <h3 className="text-sm font-semibold mb-3">Photos ({campaign.photos.length})</h3>
+              <h3 className="text-sm font-semibold mb-3">Photos ({(campaign.photos ?? []).length})</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {campaign.photos.map((url, i) => (
-                  <img key={i} src={url} alt={`Photo ${i + 1}`} className="rounded-xl border border-border object-cover aspect-video w-full" />
+                {(campaign.photos ?? []).map((url, i) => (
+                  <Image key={i} src={getImageUrl(url)} alt={`Photo ${i + 1}`} className="rounded-xl border border-border object-cover aspect-video w-full" width={100} height={100} />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Documents */}
+          {(campaign.documents ?? []).length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <h3 className="text-sm font-semibold mb-3">Documents ({(campaign.documents ?? []).length})</h3>
+              <ul className="space-y-2">
+                {(campaign.documents ?? []).map((url, i) => (
+                  <li key={`${url}-${i}`}>
+                    <a
+                      href={getDocumentUrl(url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2.5 text-sm transition-colors hover:bg-muted/40"
+                    >
+                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate font-mono text-foreground">{documentLabel(url, i)}</span>
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-70 group-hover:opacity-100" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 

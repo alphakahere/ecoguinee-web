@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Users, FileText, Megaphone } from 'lucide-react';
 import type { ApiCampaign } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
-import { formatDate, cn } from '@/lib/utils';
+import { formatDate, cn, getImageUrl } from '@/lib/utils';
 
 /** Shared pill style for type + status — only semantic colors differ */
 const tagClass =
@@ -20,8 +20,7 @@ interface Props {
 export function CampaignCard({ campaign, index = 0, basePath = '/campagnes' }: Props) {
   const tm = API_CAMPAIGN_TYPE_META[campaign.type];
   const sm = API_CAMPAIGN_STATUS_META[campaign.status];
-  const heroPhoto = campaign.photos?.[0];
-
+  const heroPhoto = getImageUrl(campaign.photos?.[0]);
   return (
     <Link
       href={`${basePath}/${campaign.id}`}
