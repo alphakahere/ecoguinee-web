@@ -138,20 +138,95 @@ export function SignalementsList() {
       </div>
 
       {view === 'table' ? (
-        <DataTable
-          data={tableQuery.data?.data ?? []}
-          columns={columns}
-          total={total}
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          canPrev={canPrev}
-          canNext={canNext}
-          toolbar={toolbar}
-          isLoading={tableQuery.isLoading || !smeId}
-          isError={tableQuery.isError}
-          getRowKey={(r) => r.id}
-        />
+        <>
+          {/* Mobile cards */}
+          <div className="lg:hidden">
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
+              <div className="mb-5">{toolbar}</div>
+              {(tableQuery.isLoading || !smeId) ? (
+                <div className="flex justify-center py-10">
+                  <span className="h-7 w-7 animate-spin rounded-full border-3 border-primary/30 border-t-primary" />
+                </div>
+              ) : tableQuery.isError ? (
+                <p className="py-8 text-sm font-mono text-muted-foreground text-center">Impossible de charger les données.</p>
+              ) : (tableQuery.data?.data ?? []).length === 0 ? (
+                <p className="py-8 text-sm font-mono text-muted-foreground text-center">Aucun résultat</p>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    {(tableQuery.data?.data ?? []).map((r) => {
+                      const typeMeta = WASTE_TYPE_META[r.type];
+                      const sevMeta = SEVERITY_META_API[r.severity];
+                      const statusMeta = REPORT_STATUS_META[r.status];
+                      const createdBy = r.source === 'AGENT' ? (r.agent?.name ?? '—') : (r.contactName ?? 'Citoyen');
+                      return (
+                        <div key={r.id} className="rounded-xl border border-border  p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge className={`${typeMeta.bg} ${typeMeta.color} border-0 text-[10px]`}>{typeMeta.label}</Badge>
+                              <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0 text-[10px]`}>{sevMeta.label}</Badge>
+                              <Badge className={`${statusMeta.bg} ${statusMeta.color} border-0 text-[10px]`}>{statusMeta.label}</Badge>
+                            </div>
+                            <span className="text-[10px] font-mono text-muted-foreground shrink-0">{formatDate(r.createdAt)}</span>
+                          </div>
+                          {(r.zone?.name || r.address) && (
+                            <p className="text-xs font-mono text-muted-foreground truncate">{r.zone?.name ?? r.address}</p>
+                          )}
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono text-muted-foreground truncate">{createdBy}</span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {r.status === 'REPORTED' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleTakeCharge(r)}
+                                  disabled={assignReport.isPending}
+                                  className="rounded-lg border border-primary px-2 py-1 text-[10px] font-mono text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50 transition-colors"
+                                >
+                                  Prendre en charge
+                                </button>
+                              )}
+                              <Link href={`/agent/signalements/${r.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">
+                                Voir
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <span className="text-xs font-mono text-muted-foreground">{total} résultat{total !== 1 ? 's' : ''}</span>
+                      <div className="flex items-center gap-2">
+                        <button type="button" onClick={() => setPage(page - 1)} disabled={!canPrev} className="rounded-lg px-2 py-1 text-xs font-mono border border-border hover:bg-muted disabled:opacity-50">←</button>
+                        <span className="text-xs font-mono">{page} / {totalPages}</span>
+                        <button type="button" onClick={() => setPage(page + 1)} disabled={!canNext} className="rounded-lg px-2 py-1 text-xs font-mono border border-border hover:bg-muted disabled:opacity-50">→</button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden lg:block">
+            <DataTable
+              data={tableQuery.data?.data ?? []}
+              columns={columns}
+              total={total}
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              canPrev={canPrev}
+              canNext={canNext}
+              toolbar={toolbar}
+              isLoading={tableQuery.isLoading || !smeId}
+              isError={tableQuery.isError}
+              getRowKey={(r) => r.id}
+            />
+          </div>
+        </>
       ) : (
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="mb-4">{toolbar}</div>

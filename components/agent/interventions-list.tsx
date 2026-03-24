@@ -91,18 +91,83 @@ export function InterventionsList() {
   );
 
   return (
-    <DataTable
-      data={interventions}
-      columns={columns}
-      total={total}
-      page={page}
-      totalPages={totalPages}
-      onPageChange={setPage}
-      canPrev={canPrev}
-      canNext={canNext}
-      toolbar={toolbar}
-      isLoading={isLoading || !agentId}
-      getRowKey={(iv) => iv.id}
-    />
+    <>
+      {/* Mobile cards */}
+      <div className="lg:hidden">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
+          <div className="mb-5">{toolbar}</div>
+          {(isLoading || !agentId) ? (
+            <div className="flex justify-center py-10">
+              <span className="h-7 w-7 animate-spin rounded-full border-3 border-primary/30 border-t-primary" />
+            </div>
+          ) : interventions.length === 0 ? (
+            <p className="py-8 text-sm font-mono text-muted-foreground text-center">Aucun résultat</p>
+          ) : (
+            <>
+              <div className="space-y-2">
+                {interventions.map((iv) => {
+                  const sMeta = INTERVENTION_STATUS_META[iv.status];
+                  const sev = iv.report?.severity;
+                  const sevMeta = sev ? SEVERITY_META_API[sev] : null;
+                  const transitions = NEXT_STATUS[iv.status] ?? [];
+                  return (
+                    <div key={iv.id} className="rounded-xl border border-border p-3 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Badge className={`${sMeta.bg} ${sMeta.color} border-0 text-[10px]`}>{sMeta.label}</Badge>
+                          {sevMeta && <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0 text-[10px]`}>{sevMeta.label}</Badge>}
+                        </div>
+                        <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                          {iv.assignedDate ? formatDate(iv.assignedDate) : formatDate(iv.createdAt)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-mono truncate">{iv.report?.address ?? `#${iv.reportId.slice(0, 8)}`}</span>
+                        {iv.sme && <span className="text-[10px] font-mono text-muted-foreground">{iv.sme.name}</span>}
+                      </div>
+                      <div className="flex items-center justify-end gap-1">
+                        {transitions.map((t) => (
+                          <button key={t.status} type="button" onClick={() => handleStatusChange(iv.id, t.status)} disabled={updateIntervention.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
+                        ))}
+                        <Link href={`/agent/interventions/${iv.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">
+                          Voir
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  <span className="text-xs font-mono text-muted-foreground">{total} résultat{total !== 1 ? 's' : ''}</span>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => setPage(page - 1)} disabled={!canPrev} className="rounded-lg px-2 py-1 text-xs font-mono border border-border hover:bg-muted disabled:opacity-50">←</button>
+                    <span className="text-xs font-mono">{page} / {totalPages}</span>
+                    <button type="button" onClick={() => setPage(page + 1)} disabled={!canNext} className="rounded-lg px-2 py-1 text-xs font-mono border border-border hover:bg-muted disabled:opacity-50">→</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden lg:block">
+        <DataTable
+          data={interventions}
+          columns={columns}
+          total={total}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          canPrev={canPrev}
+          canNext={canNext}
+          toolbar={toolbar}
+          isLoading={isLoading || !agentId}
+          getRowKey={(iv) => iv.id}
+        />
+      </div>
+    </>
   );
 }
