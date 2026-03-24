@@ -40,7 +40,6 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
         smeId,
         agentId,
         notes: notes.trim() || undefined,
-        status: 'ASSIGNED',
       } as never);
       toast.success('Intervention créée');
       onClose();

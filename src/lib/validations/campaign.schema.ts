@@ -22,3 +22,43 @@ export const submitCollecteSchema = z.object({
 });
 
 export type SubmitCollecteInput = z.infer<typeof submitCollecteSchema>;
+
+/** Formulaire création campagne (API) — superviseur / admin */
+export const createCampaignApiFormSchema = z
+  .object({
+    title: z.string().min(1, 'Titre requis').max(500),
+    description: z.string().max(8000).optional(),
+    type: z.enum(['AWARENESS', 'PROMOTION', 'TRAINING']),
+    zoneId: z.string().optional(),
+    scheduledDate: z.string().min(1, 'Date prévue requise'),
+    endDate: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const start = new Date(data.scheduledDate);
+    if (Number.isNaN(start.getTime())) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Date prévue invalide',
+        path: ['scheduledDate'],
+      });
+      return;
+    }
+    if (data.endDate && data.endDate.length > 0) {
+      const end = new Date(data.endDate);
+      if (Number.isNaN(end.getTime())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Date de fin invalide',
+          path: ['endDate'],
+        });
+      } else if (end < start) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'La date de fin doit être postérieure à la date prévue',
+          path: ['endDate'],
+        });
+      }
+    }
+  });
+
+export type CreateCampaignApiFormInput = z.infer<typeof createCampaignApiFormSchema>;

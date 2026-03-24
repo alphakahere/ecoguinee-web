@@ -11,6 +11,7 @@ export function useUpdateCampaign() {
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: queryKeys.campaigns.all });
       qc.invalidateQueries({ queryKey: queryKeys.campaigns.detail(id) });
+      qc.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
     },
   });
 }

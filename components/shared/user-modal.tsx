@@ -25,6 +25,10 @@ interface UserModalProps {
   variant: UserModalVariant;
   /** Role fixed to ADMIN (admin creating/editing only admin accounts) */
   roleLockedToAdmin?: boolean;
+  /** Role fixed to AGENT (superviseur gérant son équipe) */
+  roleLockedToAgent?: boolean;
+  /** Sous-titre contexte (ex. PME) */
+  contextSubtitle?: string;
   onClose: () => void;
   onSaveFull?: (payload: UserSaveFullPayload) => void | Promise<void>;
   onSaveStatus?: (id: string, status: UserStatus) => void | Promise<void>;
@@ -49,6 +53,8 @@ export function UserModal({
   user,
   variant,
   roleLockedToAdmin = false,
+  roleLockedToAgent = false,
+  contextSubtitle,
   onClose,
   onSaveFull,
   onSaveStatus,
@@ -78,13 +84,13 @@ export function UserModal({
     } else {
       setForm({
         ...emptyFull,
-        role: roleLockedToAdmin ? 'ADMIN' : 'AGENT',
+        role: roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : 'AGENT',
       });
     }
     setPassword('');
     setConfirmPassword('');
     setErrors({});
-  }, [user, open, roleLockedToAdmin, variant]);
+  }, [user, open, roleLockedToAdmin, roleLockedToAgent, variant]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const validateFull = () => {
@@ -120,7 +126,7 @@ export function UserModal({
       name: form.name.trim(),
       email: form.email?.trim() || undefined,
       phone: form.phone.trim(),
-      role: roleLockedToAdmin ? 'ADMIN' : form.role,
+      role: roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : form.role,
       territoire: form.territoire || undefined,
       status: form.status,
       ...(showPasswordFields && password ? { password } : {}),
@@ -174,8 +180,13 @@ export function UserModal({
                   <div>
                     <h2 className="font-semibold text-sm">{title}</h2>
                     <p className="text-xs text-muted-foreground font-mono">
-                      {user ? `ID: ${user.id}` : 'Remplir les informations'}
+                      {contextSubtitle ?? (user ? `ID: ${user.id}` : 'Remplir les informations')}
                     </p>
+                    {user && contextSubtitle && (
+                      <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                        ID: {user.id.slice(0, 8)}…
+                      </p>
+                    )}
                   </div>
                 </div>
                 <button
@@ -268,9 +279,9 @@ export function UserModal({
                         <div className="relative">
                           <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-1" />
                           <select
-                            className={`${inputCls} appearance-none ${roleLockedToAdmin ? 'opacity-70' : ''}`}
-                            value={roleLockedToAdmin ? 'ADMIN' : form.role}
-                            disabled={roleLockedToAdmin}
+                            className={`${inputCls} appearance-none ${roleLockedToAdmin || roleLockedToAgent ? 'opacity-70' : ''}`}
+                            value={roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : form.role}
+                            disabled={roleLockedToAdmin || roleLockedToAgent}
                             onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as UserRole }))}
                           >
                             {ROLE_OPTIONS.map((r) => (
@@ -283,6 +294,11 @@ export function UserModal({
                         {roleLockedToAdmin && (
                           <p className="text-[10px] text-muted-foreground mt-1 font-mono">
                             Compte administrateur uniquement
+                          </p>
+                        )}
+                        {roleLockedToAgent && (
+                          <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                            Agent rattaché à votre PME
                           </p>
                         )}
                       </div>

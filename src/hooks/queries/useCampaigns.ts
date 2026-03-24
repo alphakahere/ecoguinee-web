@@ -3,12 +3,16 @@ import { queryKeys } from '@/lib/query-keys';
 import { campaignsService } from '@/services/campaigns';
 import type { ApiCampaignFilters } from '@/types/api';
 
-export function useCampaigns(filters?: ApiCampaignFilters) {
+export function useCampaigns(
+  filters?: ApiCampaignFilters,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: filters
       ? queryKeys.campaigns.filtered(filters)
       : queryKeys.campaigns.all,
     queryFn: () => campaignsService.getAll(filters),
+    enabled: options?.enabled !== false,
   });
 }
 

@@ -112,6 +112,8 @@ export interface CreateUserPayload {
   territoire?: string;
   status?: import('@/lib/types').UserStatus;
   password?: string;
+  /** Lier l’utilisateur à une PME (agents, etc.) */
+  smeId?: string;
 }
 
 /** Payload for PATCH /users/:id */

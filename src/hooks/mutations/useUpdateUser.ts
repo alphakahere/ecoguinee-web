@@ -12,6 +12,7 @@ export function useUpdateUser() {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
     },
   });
 }

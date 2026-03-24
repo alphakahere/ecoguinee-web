@@ -3,12 +3,16 @@ import { queryKeys } from '@/lib/query-keys';
 import { interventionsService } from '@/services/interventions';
 import type { InterventionFilters } from '@/types';
 
-export function useInterventions(filters?: InterventionFilters) {
+export function useInterventions(
+  filters?: InterventionFilters,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: filters
       ? queryKeys.interventions.filtered(filters)
       : queryKeys.interventions.all,
     queryFn: () => interventionsService.getAll(filters),
+    enabled: options?.enabled !== false,
   });
 }
 

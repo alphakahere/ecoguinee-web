@@ -27,7 +27,21 @@ const TRANSITIONS: Record<string, { status: ApiCampaignStatus; label: string; co
   CANCELLED:   [],
 };
 
-export function AdminCampaignDetail({ id }: { id: string }) {
+interface AdminCampaignDetailProps {
+  id: string;
+  /** List index path, e.g. `/admin/campagnes` or `/superviseur/campagnes` */
+  listPath?: string;
+  /** When set, only campaigns for this SME are shown; others → introuvable */
+  enforceSmeId?: string;
+  enforceSmeName?: string;
+}
+
+export function AdminCampaignDetail({
+  id,
+  listPath = '/admin/campagnes',
+  enforceSmeId,
+  enforceSmeName,
+}: AdminCampaignDetailProps) {
   const { data: campaign, isLoading, isError } = useCampaign(id);
   const updateCampaign = useUpdateCampaign();
   const [editOpen, setEditOpen] = useState(false);
@@ -51,10 +65,21 @@ export function AdminCampaignDetail({ id }: { id: string }) {
   if (isError || !campaign) {
     return (
       <div className="space-y-4">
-        <Link href="/admin/campagnes" className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
+        <Link href={listPath} className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-3.5 h-3.5" /> Retour
         </Link>
         <p className="text-sm font-mono text-muted-foreground py-8">Campagne introuvable.</p>
+      </div>
+    );
+  }
+
+  if (enforceSmeId && campaign.smeId !== enforceSmeId) {
+    return (
+      <div className="space-y-4">
+        <Link href={listPath} className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="w-3.5 h-3.5" /> Retour
+        </Link>
+        <p className="text-sm font-mono text-muted-foreground py-8">Cette campagne n&apos;est pas dans votre périmètre.</p>
       </div>
     );
   }
@@ -67,7 +92,7 @@ export function AdminCampaignDetail({ id }: { id: string }) {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2">
-        <Link href="/admin/campagnes" className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
+        <Link href={listPath} className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-3.5 h-3.5" /> Campagnes
         </Link>
         <span className="text-xs text-muted-foreground">/</span>
@@ -221,6 +246,8 @@ export function AdminCampaignDetail({ id }: { id: string }) {
         open={editOpen}
         campaign={campaign}
         onClose={() => setEditOpen(false)}
+        fixedSmeId={enforceSmeId}
+        fixedSmeName={enforceSmeName}
       />
     </div>
   );

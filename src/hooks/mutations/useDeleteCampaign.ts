@@ -6,6 +6,9 @@ export function useDeleteCampaign() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => campaignsService.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.campaigns.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.campaigns.all });
+      qc.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
+    },
   });
 }

@@ -16,11 +16,20 @@ interface Props {
   open: boolean;
   campaign: ApiCampaign;
   onClose: () => void;
+  /** When set, PME cannot be changed (superviseur) */
+  fixedSmeId?: string;
+  fixedSmeName?: string;
 }
 
 const TYPES = Object.entries(API_CAMPAIGN_TYPE_META) as [ApiCampaignType, { label: string }][];
 
-export function CampaignEditModal({ open, campaign, onClose }: Props) {
+export function CampaignEditModal({
+  open,
+  campaign,
+  onClose,
+  fixedSmeId,
+  fixedSmeName,
+}: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<ApiCampaignType>('AWARENESS');
@@ -45,7 +54,7 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
       setDescription(campaign.description ?? '');
       setType(campaign.type);
       setZoneId(campaign.zoneId ?? '');
-      setSmeId(campaign.smeId ?? '');
+      setSmeId(fixedSmeId ?? campaign.smeId ?? '');
       setScheduledDate(campaign.scheduledDate ? campaign.scheduledDate.slice(0, 16) : '');
       setEndDate(campaign.endDate ? campaign.endDate.slice(0, 16) : '');
       setExistingPhotos(campaign.photos ?? []);
@@ -53,7 +62,7 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
       setNewPhotoFiles([]);
       setNewDocFiles([]);
     }
-  }, [open, campaign]);
+  }, [open, campaign, fixedSmeId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +72,7 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
         uploadFiles(newPhotoFiles),
         uploadFiles(newDocFiles),
       ]);
+      const effectiveSmeId = fixedSmeId ?? smeId;
       await updateCampaign.mutateAsync({
         id: campaign.id,
         payload: {
@@ -70,7 +80,7 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
           description: description.trim() || undefined,
           type,
           zoneId: zoneId || undefined,
-          smeId: smeId || undefined,
+          smeId: effectiveSmeId || undefined,
           scheduledDate: scheduledDate ? new Date(scheduledDate).toISOString() : undefined,
           endDate: endDate ? new Date(endDate).toISOString() : undefined,
           photos: [...existingPhotos, ...uploadedPhotos],
@@ -139,10 +149,16 @@ export function CampaignEditModal({ open, campaign, onClose }: Props) {
                 </div>
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">PME organisatrice</label>
-                  <select className={`${inputCls} appearance-none`} value={smeId} onChange={(e) => setSmeId(e.target.value)}>
-                    <option value="">— Aucune —</option>
-                    {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
+                  {fixedSmeId ? (
+                    <p className={`${inputCls} bg-muted/40 text-muted-foreground`}>
+                      {fixedSmeName ?? fixedSmeId}
+                    </p>
+                  ) : (
+                    <select className={`${inputCls} appearance-none`} value={smeId} onChange={(e) => setSmeId(e.target.value)}>
+                      <option value="">— Aucune —</option>
+                      {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>

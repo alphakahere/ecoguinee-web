@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { Eye } from 'lucide-react';
 import { PageHeader } from '@/components/shared/page-header';
 import { SearchInput } from '@/components/shared/search-input';
 import { Select } from '@/components/ui/select';
@@ -57,22 +59,49 @@ export default function SuperviseurSignalementsPage() {
   const canPrev = page > 1;
 
   const columns: Column<ApiReport>[] = [
+    {
+      key: 'id',
+      label: 'Réf.',
+      render: (r) => (
+        <Link
+          href={`/superviseur/signalements/${r.id}`}
+          className="font-mono text-xs text-primary hover:underline"
+        >
+          #SIG-{r.id.slice(0, 6)}
+        </Link>
+      ),
+    },
     { key: 'type', label: 'Type', render: (r) => <Badge className={`${WASTE_TYPE_META[r.type].bg} ${WASTE_TYPE_META[r.type].color} border-0`}>{WASTE_TYPE_META[r.type].label}</Badge> },
     { key: 'severity', label: 'Gravité', render: (r) => <Badge className={`${SEVERITY_META_API[r.severity].bg} ${SEVERITY_META_API[r.severity].color} border-0`}>{SEVERITY_META_API[r.severity].label}</Badge> },
     { key: 'zone', label: 'Zone', render: (r) => <span className="text-sm font-mono">{r.zone?.name ?? '—'}</span> },
     { key: 'source', label: 'Source', render: (r) => <span className="text-xs font-mono text-muted-foreground">{REPORT_SOURCE_META[r.source].label}</span> },
     { key: 'status', label: 'Statut', render: (r) => <Badge className={`${REPORT_STATUS_META[r.status].bg} ${REPORT_STATUS_META[r.status].color} border-0`}>{REPORT_STATUS_META[r.status].label}</Badge> },
     { key: 'date', label: 'Date', render: (r) => <span className="text-xs font-mono text-muted-foreground">{formatDate(r.createdAt)}</span> },
+    {
+      key: 'actions',
+      label: '',
+      headerClassName: 'text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground',
+      className: 'text-right w-[52px]',
+      render: (r) => (
+        <Link
+          href={`/superviseur/signalements/${r.id}`}
+          className="inline-flex rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label="Voir le détail"
+        >
+          <Eye className="h-4 w-4" />
+        </Link>
+      ),
+    },
   ];
 
   const toolbar = (
     <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
       <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Adresse, zone…" className="w-full max-w-md" />
-      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[150px]">
+      <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[150px] max-w-xs">
         <option value="">Tous les statuts</option>
         {Object.entries(REPORT_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
       </Select>
-      <Select value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); resetPage(); }} className="min-w-[140px]">
+      <Select value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); resetPage(); }} className="min-w-[140px] max-w-xs">
         <option value="">Toutes gravités</option>
         {Object.entries(SEVERITY_META_API).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
       </Select>

@@ -9,6 +9,7 @@ export function useDeleteUser() {
     mutationFn: (id: string) => usersService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
     },
   });
 }

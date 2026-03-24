@@ -10,6 +10,7 @@ export function useCreateUser() {
     mutationFn: (payload: CreateUserPayload) => usersService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
     },
   });
 }

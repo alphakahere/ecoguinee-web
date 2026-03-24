@@ -3,12 +3,13 @@ import { queryKeys } from '@/lib/query-keys';
 import { usersService } from '@/services/users';
 import type { UserFilters } from '@/types';
 
-export function useUsers(filters?: UserFilters) {
+export function useUsers(filters?: UserFilters, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: filters
       ? queryKeys.users.filtered(filters)
       : queryKeys.users.all,
     queryFn: () => usersService.getAll(filters),
+    enabled: options?.enabled !== false,
   });
 }
 
