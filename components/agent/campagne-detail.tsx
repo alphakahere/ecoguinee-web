@@ -10,19 +10,41 @@ import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { useDeleteCampaign } from '@/hooks/mutations/useDeleteCampaign';
-import { useAuthStore } from '@/stores/auth.store';
-import { CampagneFormModal } from './campagne-form-modal';
+import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
+import { CompleteCampaignDialog } from './complete-campaign-dialog';
+import type { ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
+
+const TRANSITIONS: Record<string, { status: ApiCampaignStatus; label: string; color: string }[]> = {
+  PLANNED:     [
+    { status: 'IN_PROGRESS', label: 'Démarrer',  color: 'bg-[#E8A020] hover:bg-[#E8A020]/90 text-white' },
+    { status: 'CANCELLED',   label: 'Annuler',   color: 'bg-[#D94035]/10 text-[#D94035] hover:bg-[#D94035]/20' },
+  ],
+  IN_PROGRESS: [
+    { status: 'COMPLETED',   label: 'Terminer',  color: 'bg-[#6FCF4A] hover:bg-[#6FCF4A]/90 text-white' },
+    { status: 'CANCELLED',   label: 'Annuler',   color: 'bg-[#D94035]/10 text-[#D94035] hover:bg-[#D94035]/20' },
+  ],
+  COMPLETED:   [],
+  CANCELLED:   [],
+};
 
 export function CampagneDetail({ id }: { id: string }) {
   const router = useRouter();
-  const currentUser = useAuthStore((s) => s.user);
-  const agentId = currentUser?.id ?? '';
-  const smeId = currentUser?.memberSmeId ?? '';
 
   const { data: campaign, isLoading, isError } = useCampaign(id);
-  const [editOpen, setEditOpen] = useState(false);
+  const [completeOpen, setCompleteOpen] = useState(false);
   const deleteCampaign = useDeleteCampaign();
+  const updateCampaign = useUpdateCampaign();
+
+  async function handleTransition(status: ApiCampaignStatus) {
+    if (status === 'COMPLETED') { setCompleteOpen(true); return; }
+    try {
+      await updateCampaign.mutateAsync({ id, payload: { status } });
+      toast.success('Statut mis à jour');
+    } catch {
+      toast.error('Impossible de mettre à jour le statut');
+    }
+  }
 
   async function handleDelete() {
     if (!campaign) return;
@@ -69,14 +91,24 @@ export function CampagneDetail({ id }: { id: string }) {
           <span className="text-xs text-muted-foreground">/</span>
           <span className="text-xs font-mono truncate max-w-[200px]">{campaign.title}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setEditOpen(true)}
+        <div className="flex items-center gap-2 flex-wrap">
+          {(TRANSITIONS[campaign.status] ?? []).map((t) => (
+            <button
+              key={t.status}
+              type="button"
+              onClick={() => handleTransition(t.status)}
+              disabled={updateCampaign.isPending}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors disabled:opacity-50 ${t.color}`}
+            >
+              {t.label}
+            </button>
+          ))}
+          <Link
+            href={`/agent/campagnes/${id}/modifier`}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono border border-border hover:bg-muted transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" /> Modifier
-          </button>
+          </Link>
           <button
             type="button"
             onClick={handleDelete}
@@ -198,16 +230,34 @@ export function CampagneDetail({ id }: { id: string }) {
                 </div>
               )}
             </div>
+
+            {/* Proof section */}
+            {(campaign.proofDocument || campaign.proofNote) && (
+              <div className="border-t border-border pt-3 space-y-2">
+                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Preuve de clôture</p>
+                {campaign.proofDocument && (
+                  <a
+                    href={campaign.proofDocument}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-xs font-mono text-primary hover:underline"
+                  >
+                    📄 Document de preuve
+                  </a>
+                )}
+                {campaign.proofNote && (
+                  <p className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">{campaign.proofNote}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <CampagneFormModal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        campaign={campaign}
-        agentId={agentId}
-        smeId={smeId}
+      <CompleteCampaignDialog
+        open={completeOpen}
+        campaignId={id}
+        onClose={() => setCompleteOpen(false)}
       />
     </div>
   );

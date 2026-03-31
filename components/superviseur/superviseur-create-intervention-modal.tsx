@@ -51,7 +51,7 @@ export function SuperviseurCreateInterventionModal({
         smeId,
         agentId,
         notes: notes.trim() || undefined,
-      } as never);
+      });
       await queryClient.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
       toast.success('Intervention créée');
       onClose();

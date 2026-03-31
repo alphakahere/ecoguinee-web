@@ -9,12 +9,20 @@ import { DataTable, type Column } from '@/components/shared/data-table';
 import { formatDate } from '@/lib/utils';
 import { useCampaigns } from '@/hooks/queries/useCampaigns';
 import { useDeleteCampaign } from '@/hooks/mutations/useDeleteCampaign';
+import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import { useAuthStore } from '@/stores/auth.store';
-import { CampagneFormModal } from './campagne-form-modal';
+import { CompleteCampaignDialog } from './complete-campaign-dialog';
 import type { ApiCampaign, ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
 
 const STATUS_FILTER_OPTIONS = Object.entries(API_CAMPAIGN_STATUS_META) as [ApiCampaignStatus, { label: string }][];
+
+const NEXT_STATUS: Record<string, { status: ApiCampaignStatus; label: string }[]> = {
+  PLANNED:     [{ status: 'IN_PROGRESS', label: 'Démarrer' }],
+  IN_PROGRESS: [{ status: 'COMPLETED',   label: 'Terminer' }],
+  COMPLETED:   [],
+  CANCELLED:   [],
+};
 
 export function CampagnesList() {
   const currentUser = useAuthStore((s) => s.user);
@@ -23,8 +31,7 @@ export function CampagnesList() {
 
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<ApiCampaign | null>(null);
+  const [completeCampaignId, setCompleteCampaignId] = useState<string | null>(null);
   const pageSize = 15;
   const resetPage = () => setPage(1);
 
@@ -43,6 +50,17 @@ export function CampagnesList() {
   const canPrev = page > 1;
 
   const deleteCampaign = useDeleteCampaign();
+  const updateCampaign = useUpdateCampaign();
+
+  async function handleStatusChange(id: string, status: ApiCampaignStatus) {
+    if (status === 'COMPLETED') { setCompleteCampaignId(id); return; }
+    try {
+      await updateCampaign.mutateAsync({ id, payload: { status } });
+      toast.success('Statut mis à jour');
+    } catch {
+      toast.error('Impossible de mettre à jour le statut');
+    }
+  }
 
   async function handleDelete(c: ApiCampaign) {
     if (!confirm(`Supprimer la campagne "${c.title}" ?`)) return;
@@ -64,13 +82,12 @@ export function CampagnesList() {
         <option value="">Tous les statuts</option>
         {STATUS_FILTER_OPTIONS.map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
       </select>
-      <button
-        type="button"
-        onClick={() => setCreateOpen(true)}
+      <Link
+        href="/agent/campagnes/nouvelle"
         className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         <Plus className="w-4 h-4" /> Nouvelle campagne
-      </button>
+      </Link>
     </div>
   );
 
@@ -84,17 +101,23 @@ export function CampagnesList() {
       key: 'actions', label: '',
       headerClassName: 'text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground',
       className: 'text-right',
-      render: (c) => (
-        <div className="flex items-center justify-end gap-1">
-          <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
-          <button type="button" onClick={() => setEditTarget(c)} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-            <Pencil className="w-3 h-3" />
-          </button>
-          <button type="button" onClick={() => handleDelete(c)} disabled={deleteCampaign.isPending} className="p-1.5 rounded-lg border border-destructive/40 hover:bg-destructive/10 transition-colors text-destructive disabled:opacity-50">
-            <Trash2 className="w-3 h-3" />
-          </button>
-        </div>
-      ),
+      render: (c) => {
+        const transitions = NEXT_STATUS[c.status] ?? [];
+        return (
+          <div className="flex items-center justify-end gap-1">
+            {transitions.map((t) => (
+              <button key={t.status} type="button" onClick={() => handleStatusChange(c.id, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
+            ))}
+            <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
+            <Link href={`/agent/campagnes/${c.id}/modifier`} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+              <Pencil className="w-3 h-3" />
+            </Link>
+            <button type="button" onClick={() => handleDelete(c)} disabled={deleteCampaign.isPending} className="p-1.5 rounded-lg border border-destructive/40 hover:bg-destructive/10 transition-colors text-destructive disabled:opacity-50">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -129,11 +152,14 @@ export function CampagnesList() {
                         <span className="text-[10px] font-mono text-muted-foreground shrink-0">{formatDate(c.scheduledDate)}</span>
                       </div>
                       {c.zone && <p className="text-[10px] font-mono text-muted-foreground">{c.zone.name}</p>}
-                      <div className="flex items-center justify-end gap-1 pt-1">
+                      <div className="flex items-center justify-end gap-1 pt-1 flex-wrap">
+                        {(NEXT_STATUS[c.status] ?? []).map((t) => (
+                          <button key={t.status} type="button" onClick={() => handleStatusChange(c.id, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
+                        ))}
                         <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
-                        <button type="button" onClick={() => setEditTarget(c)} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+                        <Link href={`/agent/campagnes/${c.id}/modifier`} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                           <Pencil className="w-3 h-3" />
-                        </button>
+                        </Link>
                         <button type="button" onClick={() => handleDelete(c)} disabled={deleteCampaign.isPending} className="p-1.5 rounded-lg border border-destructive/40 hover:bg-destructive/10 transition-colors text-destructive disabled:opacity-50">
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -174,18 +200,10 @@ export function CampagnesList() {
         />
       </div>
 
-      <CampagneFormModal
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        agentId={agentId}
-        smeId={smeId}
-      />
-      <CampagneFormModal
-        open={!!editTarget}
-        onClose={() => setEditTarget(null)}
-        campaign={editTarget ?? undefined}
-        agentId={agentId}
-        smeId={smeId}
+      <CompleteCampaignDialog
+        open={completeCampaignId !== null}
+        campaignId={completeCampaignId ?? ''}
+        onClose={() => setCompleteCampaignId(null)}
       />
     </>
   );

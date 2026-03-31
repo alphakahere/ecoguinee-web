@@ -14,13 +14,16 @@ export const interventionsService = {
     return data;
   },
 
-  async getById(id: string): Promise<Intervention> {
-    const { data } = await api.get<Intervention>(`/interventions/${id}`);
+  async getById(id: string): Promise<ApiIntervention> {
+    const { data } = await api.get<ApiIntervention>(`/interventions/${id}`);
     return data;
   },
 
   async create(
-    payload: Omit<ApiIntervention, 'id' | 'createdAt' | 'updatedAt'>,
+    payload: Omit<
+      ApiIntervention,
+      'id' | 'createdAt' | 'updatedAt' | 'agent' | 'report' | 'sme'
+    >,
   ): Promise<ApiIntervention> {
     const { data } = await api.post<ApiIntervention>('/interventions', payload);
     return data;

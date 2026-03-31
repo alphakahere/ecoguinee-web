@@ -40,7 +40,7 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
         smeId,
         agentId,
         notes: notes.trim() || undefined,
-      } as never);
+      });
       toast.success('Intervention créée');
       onClose();
     } catch {

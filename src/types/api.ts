@@ -128,6 +128,8 @@ export interface ApiCampaign {
   sme?: { id: string; name: string };
   documents: string[];
   photos: string[];
+  proofDocument?: string | null;
+  proofNote?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -197,6 +199,7 @@ export interface CreateCampaignPayload {
   title: string;
   description?: string;
   type: ApiCampaignType;
+  status?: ApiCampaignStatus;
   zoneId?: string;
   scheduledDate: string;
   endDate?: string;
@@ -205,9 +208,13 @@ export interface CreateCampaignPayload {
   smeId?: string;
   photos?: string[];
   documents?: string[];
+  proofDocument?: string;
+  proofNote?: string;
 }
 export type UpdateCampaignPayload = Partial<CreateCampaignPayload> & {
   status?: ApiCampaignStatus;
+  proofDocument?: string;
+  proofNote?: string;
 };
 
 // ── API response wrapper ────────────────────────────────────────────────────
