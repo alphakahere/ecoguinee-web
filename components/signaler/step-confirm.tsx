@@ -26,10 +26,13 @@ export function StepConfirm({ data, goTo }: Props) {
   const flat = useMemo(() => flattenTree(tree), [tree]);
 
   const communeName = flat.find(z => z.id === data.commune)?.name ?? data.commune;
-  const secteurName = flat.find(z => z.id === data.secteur)?.name ?? data.secteur;
+  const quartierName = flat.find(z => z.id === data.quartier)?.name;
+  const secteurName = flat.find(z => z.id === data.secteur)?.name;
+
+  const locationLabel = [communeName, quartierName, secteurName].filter(Boolean).join(' — ');
 
   const summary = [
-    { label: `${communeName} — ${secteurName}`, step: 1 as Step },
+    { label: locationLabel, step: 1 as Step },
     { label: data.wasteType === 'liquid' ? 'Déchets Liquides' : 'Déchets Solides', step: 2 as Step },
     { label: `Gravité ${GRAVITE_LABEL[data.gravite ?? 'faible']}`, step: 2 as Step },
     { label: data.photos.length > 0 ? `${data.photos.length} photo(s)` : 'Aucune photo', step: 3 as Step },

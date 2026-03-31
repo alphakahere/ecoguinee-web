@@ -17,6 +17,7 @@ export type Gravite = 'faible' | 'modere' | 'critique';
 
 export interface ReportData {
   commune: string;
+  quartier: string;
   secteur: string;
   zoneId: string;
   latitude: number;
@@ -30,7 +31,7 @@ export interface ReportData {
 }
 
 const INITIAL: ReportData = {
-  commune: '', secteur: '', zoneId: '', latitude: 0, longitude: 0,
+  commune: '', quartier: '', secteur: '', zoneId: '', latitude: 0, longitude: 0,
   wasteType: null, gravite: null,
   photos: [], description: '', prenom: '', telephone: '',
 };

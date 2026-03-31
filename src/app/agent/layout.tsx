@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Plus, Activity, ChevronRight } from 'lucide-react';
@@ -11,6 +11,7 @@ import { NotificationsPanel } from '@/components/layouts/notifications-panel';
 import { HeaderProfileMenu } from '@/components/layouts/header-bar';
 import { AuthGuard } from '@/components/shared/auth-guard';
 import { NewReportModal } from '@/components/agent/new-report-modal';
+import { AgentNewReportProvider } from '@/contexts/agent-new-report-context';
 import { AGENT_NAV } from '@/lib/constants';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -34,6 +35,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
   const pageLabel = findLabel(pathname);
   const isRoot = pathname === '/agent';
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const openNewReportModal = useCallback(() => setReportModalOpen(true), []);
 
   const currentUser = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -59,6 +61,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
   return (
     <AuthGuard allowedRoles={['AGENT']} requireSme>
+    <AgentNewReportProvider openNewReportModal={openNewReportModal}>
     <div className="flex h-screen overflow-hidden bg-background">
       <aside className="hidden lg:flex w-56 shrink-0 flex-col h-full">
         <SidebarNav
@@ -123,6 +126,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
       <NewReportModal open={reportModalOpen} onClose={() => setReportModalOpen(false)} />
     </div>
+    </AgentNewReportProvider>
     </AuthGuard>
   );
 }

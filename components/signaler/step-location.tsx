@@ -29,16 +29,17 @@ export function StepLocation({ data, update }: Props) {
     z.type === 'MUNICIPALITY',
   ), [flat]);
 
-  const secteurZones = useMemo(() => {
+  const quartierZones = useMemo(() => {
     if (!data.commune) return [];
     const communeZone = flat.find(z => z.id === data.commune);
-    if (!communeZone) return [];
-    // Get all descendants (neighborhoods + sectors)
-    const descendants: ApiZone[] = [];
-    function walk(n: ApiZone) { descendants.push(n); n.children?.forEach(walk); }
-    communeZone.children?.forEach(walk);
-    return descendants;
+    return communeZone?.children?.filter(z => z.type === 'NEIGHBORHOOD') ?? [];
   }, [flat, data.commune]);
+
+  const secteurZones = useMemo(() => {
+    if (!data.quartier) return [];
+    const quartierZone = flat.find(z => z.id === data.quartier);
+    return quartierZone?.children?.filter(z => z.type === 'SECTOR') ?? [];
+  }, [flat, data.quartier]);
 
   const handleGPS = () => {
     if (!navigator.geolocation) { setGpsState('denied'); return; }
@@ -57,21 +58,21 @@ export function StepLocation({ data, update }: Props) {
   };
 
   const handleCommuneChange = (zoneId: string) => {
-    update({ commune: zoneId, secteur: '', zoneId: '' });
+    update({ commune: zoneId, quartier: '', secteur: '', zoneId: '' });
+  };
+
+  const handleQuartierChange = (zoneId: string) => {
+    update({ quartier: zoneId, secteur: '', zoneId: zoneId });
   };
 
   const handleSecteurChange = (zoneId: string) => {
     update({ secteur: zoneId, zoneId });
-    // Find the zone name for display
-    const zone = flat.find(z => z.id === zoneId);
-    if (zone) {
-      // Also set secteur name for display in confirm step
-    }
   };
 
   const selectedCommune = flat.find(z => z.id === data.commune);
+  const selectedQuartier = flat.find(z => z.id === data.quartier);
   const selectedSecteur = flat.find(z => z.id === data.secteur);
-  const hasLocation = !!(data.commune && data.secteur);
+  const hasLocation = !!(data.commune && data.quartier);
 
   return (
     <div className="space-y-5">
@@ -153,7 +154,9 @@ export function StepLocation({ data, update }: Props) {
           <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-white/90 rounded-lg px-2.5 py-1.5 border border-border">
             <MapPin className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-mono font-semibold text-foreground">
-              {selectedCommune?.name ?? data.commune} — {selectedSecteur?.name ?? data.secteur}
+              {selectedCommune?.name ?? data.commune}
+              {selectedQuartier && ` — ${selectedQuartier.name}`}
+              {selectedSecteur && ` — ${selectedSecteur.name}`}
             </span>
           </div>
         </div>
@@ -186,7 +189,24 @@ export function StepLocation({ data, update }: Props) {
 
           {data.commune && (
             <div>
-              <label className="block text-sm font-mono text-muted-foreground mb-2">Secteur / Quartier *</label>
+              <label className="block text-sm font-mono text-muted-foreground mb-2">Quartier *</label>
+              <div className="relative">
+                <select
+                  value={data.quartier}
+                  onChange={(e) => handleQuartierChange(e.target.value)}
+                  className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-base font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none pr-10"
+                >
+                  <option value="">Choisir un quartier...</option>
+                  {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+          )}
+
+          {data.quartier && secteurZones.length > 0 && (
+            <div>
+              <label className="block text-sm font-mono text-muted-foreground mb-2">Secteur</label>
               <div className="relative">
                 <select
                   value={data.secteur}

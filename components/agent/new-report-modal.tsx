@@ -1,15 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, MapPin, Navigation } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import { useCreateReport } from '@/hooks/mutations/useCreateReport';
-import { useAgentOverview } from '@/hooks/queries/useAgentDashboard';
 import { useAuthStore } from '@/stores/auth.store';
+import { useZoneTree } from '@/hooks/queries/useZones';
 import { uploadFiles } from '@/services/uploads';
+import type { ApiZone } from '@/types/api';
+
+function flattenTree(nodes: ApiZone[]): ApiZone[] {
+  const result: ApiZone[] = [];
+  function walk(n: ApiZone) { result.push(n); n.children?.forEach(walk); }
+  nodes.forEach(walk);
+  return result;
+}
+
+const schema = z.object({
+  commune: z.string().min(1, 'Sélectionnez une commune'),
+  quartier: z.string().min(1, 'Sélectionnez un quartier'),
+  secteur: z.string().optional(),
+  wasteType: z.enum(['SOLID', 'LIQUID']),
+  severity: z.enum(['LOW', 'MODERATE', 'CRITICAL']),
+  address: z.string().optional(),
+  latitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
+  longitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
+  description: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 interface Props {
   open: boolean;
@@ -19,79 +44,116 @@ interface Props {
 const WASTE_TYPES = [
   { value: 'SOLID', label: 'Solide' },
   { value: 'LIQUID', label: 'Liquide' },
-];
+] as const;
 
 const SEVERITIES = [
   { value: 'LOW', label: 'Faible' },
   { value: 'MODERATE', label: 'Modéré' },
   { value: 'CRITICAL', label: 'Critique' },
-];
+] as const;
+
+const inputCls = 'w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40';
+const errorCls = 'mt-1 text-[11px] font-mono text-destructive';
 
 export function NewReportModal({ open, onClose }: Props) {
   const currentUser = useAuthStore((s) => s.user);
-  const { data: overview } = useAgentOverview();
-  const zones = overview?.sme.zones ?? [];
-
+  const { data: tree = [] } = useZoneTree();
   const createReport = useCreateReport();
 
-  const [zoneId, setZoneId] = useState('');
-  const [wasteType, setWasteType] = useState('SOLID');
-  const [severity, setSeverity] = useState('MODERATE');
-  const [description, setDescription] = useState('');
-  const [address, setAddress] = useState('');
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
+  const flat = useMemo(() => flattenTree(tree), [tree]);
+  const communeZones = useMemo(() => flat.filter(z => z.type === 'MUNICIPALITY'), [flat]);
+
   const [geoLoading, setGeoLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      commune: '',
+      quartier: '',
+      secteur: '',
+      wasteType: 'SOLID',
+      severity: 'MODERATE',
+      address: '',
+      latitude: 0,
+      longitude: 0,
+      description: '',
+    },
+  });
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const commune = watch('commune');
+  const quartier = watch('quartier');
+  const latitude = watch('latitude');
+  const longitude = watch('longitude');
+
+  const quartierZones = useMemo(() => {
+    if (!commune) return [];
+    const communeZone = flat.find(z => z.id === commune);
+    return communeZone?.children?.filter(z => z.type === 'NEIGHBORHOOD') ?? [];
+  }, [flat, commune]);
+
+  const secteurZones = useMemo(() => {
+    if (!quartier) return [];
+    const quartierZone = flat.find(z => z.id === quartier);
+    return quartierZone?.children?.filter(z => z.type === 'SECTOR') ?? [];
+  }, [flat, quartier]);
 
   useEffect(() => {
     if (open) {
-      setZoneId(zones[0]?.id ?? '');
-      setWasteType('SOLID');
-      setSeverity('MODERATE');
-      setDescription('');
-      setAddress('');
-      setLatitude(0);
-      setLongitude(0);
+      reset();
       setPhotoFiles([]);
     }
-  }, [open, zones]);
+  }, [open, reset]);
 
   const getLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Géolocalisation non disponible');
-      return;
-    }
+    if (!navigator.geolocation) { toast.error('Géolocalisation non disponible'); return; }
     setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLatitude(pos.coords.latitude);
-        setLongitude(pos.coords.longitude);
+        setValue('latitude', pos.coords.latitude, { shouldValidate: true });
+        setValue('longitude', pos.coords.longitude, { shouldValidate: true });
         setGeoLoading(false);
         toast.success('Position obtenue');
       },
-      () => {
-        setGeoLoading(false);
-        toast.error('Impossible d\'obtenir la position');
-      },
+      () => { setGeoLoading(false); toast.error("Impossible d'obtenir la position"); },
       { enableHighAccuracy: true, timeout: 10000 },
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!zoneId) { toast.error('Sélectionnez une zone'); return; }
-    if (!latitude || !longitude) { toast.error('Position GPS requise'); return; }
+  const onSubmit = async (values: FormValues) => {
+    const zoneId = values.secteur || values.quartier;
+    let photoUrls: string[] = [];
+
+    if (photoFiles.length > 0) {
+      setIsUploading(true);
+      try {
+        photoUrls = await uploadFiles(photoFiles);
+      } catch {
+        toast.error("Échec de l'envoi des photos");
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     try {
-      const photoUrls = await uploadFiles(photoFiles);
       await createReport.mutateAsync({
-        type: wasteType,
-        severity,
+        type: values.wasteType,
+        severity: values.severity,
         source: 'AGENT',
-        description: description.trim() || undefined,
-        address: address.trim() || undefined,
-        latitude,
-        longitude,
+        description: values.description?.trim() || undefined,
+        address: values.address?.trim() || undefined,
+        latitude: values.latitude,
+        longitude: values.longitude,
         zoneId,
         agentId: currentUser?.id,
         photos: photoUrls.length > 0 ? photoUrls : undefined,
@@ -102,8 +164,6 @@ export function NewReportModal({ open, onClose }: Props) {
       toast.error('Impossible de créer le signalement');
     }
   };
-
-  const inputCls = 'w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40';
 
   return (
     <AnimatePresence>
@@ -133,35 +193,78 @@ export function NewReportModal({ open, onClose }: Props) {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+                {/* Commune */}
                 <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Zone *</label>
-                  <select className={`${inputCls} appearance-none`} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Commune *</label>
+                  <select
+                    className={`${inputCls} appearance-none`}
+                    {...register('commune')}
+                    onChange={(e) => {
+                      setValue('commune', e.target.value, { shouldValidate: true });
+                      setValue('quartier', '', { shouldValidate: false });
+                      setValue('secteur', '', { shouldValidate: false });
+                    }}
+                  >
                     <option value="">— Sélectionner —</option>
-                    {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                    {communeZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
                   </select>
+                  {errors.commune && <p className={errorCls}>{errors.commune.message}</p>}
                 </div>
 
+                {/* Quartier */}
+                {commune && (
+                  <div>
+                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Quartier *</label>
+                    <select
+                      className={`${inputCls} appearance-none`}
+                      {...register('quartier')}
+                      onChange={(e) => {
+                        setValue('quartier', e.target.value, { shouldValidate: true });
+                        setValue('secteur', '', { shouldValidate: false });
+                      }}
+                    >
+                      <option value="">— Sélectionner —</option>
+                      {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                    </select>
+                    {errors.quartier && <p className={errorCls}>{errors.quartier.message}</p>}
+                  </div>
+                )}
+
+                {/* Secteur */}
+                {quartier && secteurZones.length > 0 && (
+                  <div>
+                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Secteur</label>
+                    <select className={`${inputCls} appearance-none`} {...register('secteur')}>
+                      <option value="">— Sélectionner —</option>
+                      {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                {/* Type + Gravité */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Type de déchet *</label>
-                    <select className={`${inputCls} appearance-none`} value={wasteType} onChange={(e) => setWasteType(e.target.value)}>
+                    <select className={`${inputCls} appearance-none`} {...register('wasteType')}>
                       {WASTE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Gravité *</label>
-                    <select className={`${inputCls} appearance-none`} value={severity} onChange={(e) => setSeverity(e.target.value)}>
+                    <select className={`${inputCls} appearance-none`} {...register('severity')}>
                       {SEVERITIES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
                   </div>
                 </div>
 
+                {/* Adresse */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Adresse</label>
-                  <input className={inputCls} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rue, quartier…" />
+                  <input className={inputCls} placeholder="Rue, quartier…" {...register('address')} />
                 </div>
 
+                {/* GPS */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Position GPS *</label>
                   <div className="flex items-center gap-3">
@@ -180,8 +283,10 @@ export function NewReportModal({ open, onClose }: Props) {
                       </span>
                     )}
                   </div>
+                  {errors.latitude && <p className={errorCls}>{errors.latitude.message}</p>}
                 </div>
 
+                {/* Photos */}
                 <FileUploadZone
                   files={photoFiles}
                   onAddFiles={(f) => setPhotoFiles((prev) => [...prev, ...f])}
@@ -191,15 +296,16 @@ export function NewReportModal({ open, onClose }: Props) {
                   label="Photos"
                 />
 
+                {/* Description */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Description</label>
-                  <textarea className={`${inputCls} min-h-[80px] resize-y`} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Décrivez le problème…" />
+                  <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="Décrivez le problème…" {...register('description')} />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
                   <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>
-                  <Button type="submit" disabled={createReport.isPending} className="font-mono text-xs">
-                    {createReport.isPending ? 'En cours…' : 'Créer le signalement'}
+                  <Button type="submit" disabled={isUploading || createReport.isPending} className="font-mono text-xs">
+                    {isUploading ? 'Envoi des photos…' : createReport.isPending ? 'En cours…' : 'Créer le signalement'}
                   </Button>
                 </div>
               </form>
