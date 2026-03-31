@@ -1,7 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { interventionsService } from '@/services/interventions';
-import type { Intervention } from '@/types';
+import type { ApiInterventionStatus } from '@/types/api';
+
+export interface UpdateInterventionPayload {
+  status?: ApiInterventionStatus;
+  notes?: string;
+  resolutionDate?: string;
+  pvDocument?: string;
+  resolutionNote?: string;
+}
 
 export function useUpdateIntervention() {
   const queryClient = useQueryClient();
@@ -12,7 +20,7 @@ export function useUpdateIntervention() {
       payload,
     }: {
       id: string;
-      payload: Partial<Intervention>;
+      payload: UpdateInterventionPayload;
     }) => interventionsService.update(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({

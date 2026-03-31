@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { ArrowLeft, MapPin, Calendar, Building2, Users, FileText, Camera, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
-import { documentLabel, formatDate, getDocumentUrl, getImageUrl } from '@/lib/utils';
+import { formatDate, getImageUrl } from '@/lib/utils';
 
 const TYPE_EMOJI: Record<string, string> = { AWARENESS: '📢', PROMOTION: '🎯', TRAINING: '📚' };
 
@@ -155,25 +155,6 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                 <div className="flex flex-col items-center gap-3 py-12 rounded-xl border border-dashed border-border text-center">
                   <Camera className="w-10 h-10" style={{ color: 'rgba(45,125,70,0.2)' }} />
                   <p className="text-sm font-mono text-muted-foreground">Aucune photo disponible.</p>
-                </div>
-              )}
-            </section>
-            {/* Documents partagés */}
-            <section>
-              <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>Documents partagés</h2>
-              {campaign.documents && campaign.documents.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {campaign.documents.map((document, i) => (
-                    <a key={i} href={getDocumentUrl(document)} className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2.5">
-                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <span className="min-w-0 flex-1 truncate font-mono text-foreground">{documentLabel(document, i)}</span>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3 py-12 rounded-xl border border-dashed border-border text-center">
-                  <FileText className="w-10 h-10" style={{ color: 'rgba(45,125,70,0.2)' }} />
-                  <p className="text-sm font-mono text-muted-foreground">Aucun document disponible.</p>
                 </div>
               )}
             </section>

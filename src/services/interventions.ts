@@ -1,6 +1,7 @@
 import { api } from './api';
-import type { Intervention, InterventionFilters, PaginatedResponse } from '@/types';
+import type { InterventionFilters, PaginatedResponse } from '@/types';
 import type { ApiIntervention } from '@/types/api';
+import type { UpdateInterventionPayload } from '@/hooks/mutations/useUpdateIntervention';
 
 export const interventionsService = {
   async getAll(
@@ -19,17 +20,17 @@ export const interventionsService = {
   },
 
   async create(
-    payload: Omit<Intervention, 'id'>,
-  ): Promise<Intervention> {
-    const { data } = await api.post<Intervention>('/interventions', payload);
+    payload: Omit<ApiIntervention, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ApiIntervention> {
+    const { data } = await api.post<ApiIntervention>('/interventions', payload);
     return data;
   },
 
   async update(
     id: string,
-    payload: Partial<Intervention>,
-  ): Promise<Intervention> {
-    const { data } = await api.patch<Intervention>(
+    payload: UpdateInterventionPayload,
+  ): Promise<ApiIntervention> {
+    const { data } = await api.patch<ApiIntervention>(
       `/interventions/${id}`,
       payload,
     );

@@ -101,6 +101,8 @@ export interface ApiIntervention {
   sme?: { id: string; name: string };
   assignedDate?: string | null;
   resolutionDate?: string | null;
+  pvDocument?: string | null;
+  resolutionNote?: string | null;
   createdAt: string;
   updatedAt: string;
 }

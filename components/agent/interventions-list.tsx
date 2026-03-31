@@ -10,6 +10,7 @@ import { formatDate } from '@/lib/utils';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import { useAuthStore } from '@/stores/auth.store';
+import { ResolveInterventionDialog } from '@/components/agent/resolve-intervention-dialog';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 import { INTERVENTION_STATUS_META, SEVERITY_META_API } from '@/types/api';
 
@@ -43,10 +44,15 @@ export function InterventionsList() {
   const canPrev = page > 1;
 
   const updateIntervention = useUpdateIntervention();
+  const [resolveTargetId, setResolveTargetId] = useState<string | null>(null);
 
   const handleStatusChange = async (id: string, status: ApiInterventionStatus) => {
+    if (status === 'RESOLVED') {
+      setResolveTargetId(id);
+      return;
+    }
     try {
-      await updateIntervention.mutateAsync({ id, payload: { status } as never });
+      await updateIntervention.mutateAsync({ id, payload: { status } });
       toast.success('Statut mis à jour');
     } catch {
       toast.error('Impossible de mettre à jour');
@@ -92,6 +98,12 @@ export function InterventionsList() {
 
   return (
     <>
+      <ResolveInterventionDialog
+        open={resolveTargetId !== null}
+        interventionId={resolveTargetId ?? ''}
+        onClose={() => setResolveTargetId(null)}
+      />
+
       {/* Mobile cards */}
       <div className="lg:hidden">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
