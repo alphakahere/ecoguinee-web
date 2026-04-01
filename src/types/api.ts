@@ -54,6 +54,8 @@ export interface ApiZone {
 export interface ApiOrganization {
   id: string;
   name: string;
+  slug: string;
+  acronym?: string | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
@@ -109,6 +111,7 @@ export interface ApiIntervention {
 
 export interface ApiCampaign {
   id: string;
+  slug: string;
   title: string;
   description?: string | null;
   type: ApiCampaignType;
@@ -188,8 +191,16 @@ export interface CreateZonePayload {
 }
 export type UpdateZonePayload = Partial<CreateZonePayload>;
 
+export interface CreateManagerPayload {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+}
+
 export interface CreateOrganizationPayload {
   name: string;
+  acronym?: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -197,6 +208,7 @@ export interface CreateOrganizationPayload {
   activityType?: string;
   active?: boolean;
   zoneIds?: string[];
+  manager?: CreateManagerPayload;
 }
 export type UpdateOrganizationPayload = Partial<CreateOrganizationPayload>;
 

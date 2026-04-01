@@ -11,12 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Select } from '@/components/ui/select';
 import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import { useZoneTree } from '@/hooks/queries/useZones';
-import { useCreateOrganization } from '@/hooks/mutations/useCreateOrganization';
 import { useUpdateOrganization } from '@/hooks/mutations/useUpdateOrganization';
 import { useDeleteOrganization } from '@/hooks/mutations/useDeleteOrganization';
 import { OrganizationModal } from '@/components/admin/organization-modal';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import type { ApiOrganization, CreateOrganizationPayload, UpdateOrganizationPayload } from '@/types/api';
+import type { ApiOrganization, UpdateOrganizationPayload } from '@/types/api';
 
 export default function AdminPMEPage() {
   const router = useRouter();
@@ -45,28 +44,22 @@ export default function AdminPMEPage() {
 
   const { data: tree = [] } = useZoneTree();
 
-  const createOrganization = useCreateOrganization();
   const updateOrganization = useUpdateOrganization();
   const deleteOrganization = useDeleteOrganization();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editOrganization, setEditOrganization] = useState<ApiOrganization | null>(null);
 
-  const openCreate = () => { setEditOrganization(null); setModalOpen(true); };
   const openEdit = (s: ApiOrganization) => { setEditOrganization(s); setModalOpen(true); };
   const close = () => { setModalOpen(false); setEditOrganization(null); };
 
-  const isMutating = createOrganization.isPending || updateOrganization.isPending || deleteOrganization.isPending;
+  const isMutating = updateOrganization.isPending || deleteOrganization.isPending;
 
-  const handleSave = async (payload: CreateOrganizationPayload | UpdateOrganizationPayload, id?: string) => {
+  const handleSave = async (payload: UpdateOrganizationPayload, id?: string) => {
+    if (!id) return;
     try {
-      if (id) {
-        await updateOrganization.mutateAsync({ id, payload });
-        toast.success('Organisation mise à jour');
-      } else {
-        await createOrganization.mutateAsync(payload as CreateOrganizationPayload);
-        toast.success('Organisation créée');
-      }
+      await updateOrganization.mutateAsync({ id, payload });
+      toast.success('Organisation mise à jour');
       close();
     } catch {
       toast.error('Une erreur est survenue');
@@ -191,7 +184,7 @@ export default function AdminPMEPage() {
           <h2 className="text-lg font-semibold tracking-tight">Gestion des organisations</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">{total} organisation enregistrée{total !== 1 ? 's' : ''}</p>
         </div>
-        <Button type="button" onClick={openCreate} className="font-mono text-xs">
+        <Button type="button" onClick={() => router.push('/admin/organisations/new')} className="font-mono text-xs">
           <Plus className="mr-2 h-4 w-4" /> Nouvelle organisation
         </Button>
       </div>

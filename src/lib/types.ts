@@ -58,6 +58,8 @@ export interface Intervention {
 export interface PME {
   id: string;
   name: string;
+  slug: string;
+  acronym?: string;
   contact: string;
   activeInterventions: number;
   completedInterventions: number;
@@ -113,6 +115,7 @@ export interface CampaignPhoto {
 
 export interface Campaign {
   id: string;
+  slug: string;
   titre: string;
   description: string;
   type: CampaignType;
