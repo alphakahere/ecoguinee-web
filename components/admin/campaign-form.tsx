@@ -41,6 +41,8 @@ export interface CampaignFormValues {
   existingDocUrls: string[];
 }
 
+type CampaignFormState = Omit<CampaignFormValues, 'photoFiles' | 'docFiles' | 'existingPhotoUrls' | 'existingDocUrls'>;
+
 interface CampaignFormProps {
   initialValues?: Partial<Omit<CampaignFormValues, 'photoFiles' | 'docFiles' | 'existingPhotoUrls' | 'existingDocUrls'>>;
   existingPhotoUrls?: string[];
@@ -59,7 +61,7 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
   const flat = useMemo(() => flattenTree(tree), [tree]);
   const communeZones = useMemo(() => flat.filter((z) => z.type === 'MUNICIPALITY'), [flat]);
 
-  const [form, setForm] = useState<Omit<CampaignFormValues, 'photoFiles' | 'docFiles'>>({
+  const [form, setForm] = useState<CampaignFormState>({
     title: '',
     description: '',
     type: 'AWARENESS',

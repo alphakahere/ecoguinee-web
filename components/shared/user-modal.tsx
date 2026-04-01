@@ -15,6 +15,8 @@ export interface UserSaveFullPayload {
   phone: string;
   role: UserRole;
   address?: string;
+  territoire?: string;
+  status?: UserStatus;
   password?: string;
 }
 
@@ -69,6 +71,7 @@ const emptyFull: UserSaveFullPayload = {
   phone: '',
   role: 'AGENT',
   address: '',
+  territoire: '',
 };
 
 export function UserModal({
@@ -86,6 +89,7 @@ export function UserModal({
   isSubmitting = false,
 }: UserModalProps) {
   const [form, setForm] = useState<UserSaveFullPayload>(emptyFull);
+  const [accountStatus, setAccountStatus] = useState<UserStatus>('ACTIVE');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -103,7 +107,10 @@ export function UserModal({
         phone: user.phone,
         role: user.role,
         address: user.address ?? '',
+        territoire: user.territoire ?? '',
+        status: user.status,
       });
+      setAccountStatus(user.status);
     } else {
       setForm({
         ...emptyFull,
@@ -135,7 +142,7 @@ export function UserModal({
     ev.preventDefault();
     if (variant === 'statusOnly') {
       if (!user || !onSaveStatus) return;
-      await onSaveStatus(user.id, form.status);
+      await onSaveStatus(user.id, accountStatus);
       return;
     }
     const errs = validateFull();
@@ -151,6 +158,8 @@ export function UserModal({
       phone: form.phone.trim(),
       role: roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : form.role,
       address: form.address?.trim() || undefined,
+      territoire: form.territoire?.trim() || undefined,
+      status: form.status,
       ...(showPasswordFields && password ? { password } : {}),
     };
     await onSaveFull(payload);
@@ -222,7 +231,7 @@ export function UserModal({
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 {variant === 'statusOnly' && user && (
-                  <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2 text-sm">
+                  <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3 text-sm">
                     <p className="font-semibold">{user.name}</p>
                     <p className="font-mono text-xs text-muted-foreground">{user.email ?? '—'}</p>
                     <p className="font-mono text-xs">{user.phone}</p>
@@ -230,6 +239,20 @@ export function UserModal({
                       <span className="text-muted-foreground">Rôle : </span>
                       {ROLE_META[user.role].label}
                     </p>
+                    <div>
+                      <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
+                        Statut du compte
+                      </label>
+                      <select
+                        className={`${inputCls} pl-3 appearance-none`}
+                        value={accountStatus}
+                        onChange={(e) => setAccountStatus(e.target.value as UserStatus)}
+                      >
+                        <option value="ACTIVE">Actif</option>
+                        <option value="INACTIVE">Inactif</option>
+                        <option value="SUSPENDED">Suspendu</option>
+                      </select>
+                    </div>
                   </div>
                 )}
 
@@ -275,6 +298,31 @@ export function UserModal({
                         placeholder="Ex: Kaloum, Conakry"
                       />
                     </Field>
+
+                    <Field label="Territoire">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        className={inputCls}
+                        value={form.territoire ?? ''}
+                        onChange={(e) => setForm((f) => ({ ...f, territoire: e.target.value }))}
+                        placeholder="Ex: Conakry"
+                      />
+                    </Field>
+
+                    <div>
+                      <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
+                        Statut du compte
+                      </label>
+                      <select
+                        className={`${inputCls} pl-9 appearance-none`}
+                        value={form.status ?? 'ACTIVE'}
+                        onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as UserStatus }))}
+                      >
+                        <option value="ACTIVE">Actif</option>
+                        <option value="INACTIVE">Inactif</option>
+                        <option value="SUSPENDED">Suspendu</option>
+                      </select>
+                    </div>
 
                     {showPasswordFields && (
                       <>

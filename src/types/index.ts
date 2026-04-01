@@ -108,8 +108,10 @@ export interface CreateUserPayload {
   name: string;
   email?: string;
   phone: string;
-  role: import(‘@/lib/types’).UserRole;
+  role: import('@/lib/types').UserRole;
   address?: string;
+  territoire?: string;
+  status?: import('@/lib/types').UserStatus;
   password?: string;
   /** Lier l’utilisateur à une PME (agents, etc.) */
   organizationId?: string;
