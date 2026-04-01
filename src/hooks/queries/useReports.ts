@@ -1,17 +1,44 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { reportsService } from '@/services/reports';
-import type { ApiReportFilters } from '@/types/api';
+import { useAuthStore } from '@/stores/auth.store';
+import type { ApiReportFilters, OwnershipFilter } from '@/types/api';
+
+type ReportFiltersWithOwnership = ApiReportFilters & {
+  ownership?: OwnershipFilter;
+};
+
+function resolveFilters(
+  filters: ReportFiltersWithOwnership | undefined,
+  currentUserId: string | undefined,
+): ApiReportFilters | undefined {
+  if (!filters) return undefined;
+  const { ownership, ...rest } = filters;
+  if (!ownership || ownership === 'all') return rest;
+  if (ownership === 'mine') {
+    return { ...rest, agentId: currentUserId };
+  }
+  // 'organization' — same org zones but exclude own reports
+  return { ...rest, excludeAgentId: currentUserId };
+}
 
 export function useReports(
-  filters?: ApiReportFilters,
+  filters?: ReportFiltersWithOwnership,
   options?: { enabled?: boolean },
 ) {
+  const currentUserId = useAuthStore((s) => s.user?.id);
+  const resolved = useMemo(
+    () => resolveFilters(filters, currentUserId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(filters), currentUserId],
+  );
+
   return useQuery({
-    queryKey: filters
-      ? queryKeys.reports.filtered(filters)
+    queryKey: resolved
+      ? queryKeys.reports.filtered(resolved)
       : queryKeys.reports.all,
-    queryFn: () => reportsService.getAll(filters),
+    queryFn: () => reportsService.getAll(resolved),
     enabled: options?.enabled !== false,
   });
 }

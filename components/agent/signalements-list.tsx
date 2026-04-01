@@ -13,11 +13,35 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useReports } from '@/hooks/queries/useReports';
 import { useAuthStore } from '@/stores/auth.store';
 import { useAssignReport } from '@/hooks/mutations/useAssignReport';
-import type { ApiReport, ReportStatus, ApiSeverity } from '@/types/api';
+import type { ApiReport, ReportStatus, ApiSeverity, OwnershipFilter } from '@/types/api';
 import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META, REPORT_SOURCE_META } from '@/types/api';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const MAP_PAGE_SIZE = 200;
+
+const OWNERSHIP_OPTIONS: { value: OwnershipFilter; label: string }[] = [
+  { value: 'all', label: 'Tous' },
+  { value: 'mine', label: 'Mes signalements' },
+  { value: 'organization', label: 'Organisation' },
+];
+
+function OwnershipBadge({ report, currentUserId }: { report: ApiReport; currentUserId?: string }) {
+  if (report.source !== 'AGENT') return null;
+  const isOwn = report.agentId === currentUserId;
+  return (
+    <span
+      className={cn(
+        'text-[9px] font-mono px-1.5 py-0.5 rounded-full shrink-0',
+        isOwn
+          ? 'bg-[#6FCF4A]/15 text-[#6FCF4A]'
+          : 'bg-muted text-muted-foreground',
+      )}
+    >
+      • {isOwn ? 'Moi' : (report.agent?.name ?? '—')}
+    </span>
+  );
+}
 
 export function SignalementsList() {
   const currentUser = useAuthStore((s) => s.user);
@@ -25,6 +49,7 @@ export function SignalementsList() {
   const assignReport = useAssignReport();
 
   const [view, setView] = useState<ViewMode>('table');
+  const [ownership, setOwnership] = useState<OwnershipFilter>('all');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('');
@@ -35,6 +60,7 @@ export function SignalementsList() {
 
   const filters = {
     organizationId: organizationId || undefined,
+    ownership,
     search: debouncedSearch || undefined,
     status: (statusFilter || undefined) as ReportStatus | undefined,
     severity: (severityFilter || undefined) as ApiSeverity | undefined,
@@ -80,11 +106,12 @@ export function SignalementsList() {
       render: (r) => {
         const name = r.source === 'AGENT' ? (r.agent?.name ?? '—') : (r.contactName ?? 'Citoyen');
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-0.5">
             <span className="text-xs font-mono">{name}</span>
             {r.source === 'CITIZEN' && r.contactPhone && (
               <span className="text-[10px] font-mono text-muted-foreground">{r.contactPhone}</span>
             )}
+            <OwnershipBadge report={r} currentUserId={currentUser?.id} />
           </div>
         );
       },
@@ -117,9 +144,17 @@ export function SignalementsList() {
     },
   ];
 
+  // Desktop toolbar includes ownership dropdown
   const toolbar = (
     <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
       <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Adresse, zone…" className="w-full max-w-md" />
+      <Select
+        value={ownership}
+        onChange={(e) => { setOwnership(e.target.value as OwnershipFilter); resetPage(); }}
+        className="min-w-[170px] max-w-xs"
+      >
+        {OWNERSHIP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </Select>
       <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[150px] max-w-xs">
         <option value="">Tous les statuts</option>
         {Object.entries(REPORT_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
@@ -133,6 +168,27 @@ export function SignalementsList() {
 
   return (
     <div>
+      {/* Mobile ownership chips — above view mode tabs */}
+      <div className="lg:hidden mb-3">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {OWNERSHIP_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => { setOwnership(o.value); resetPage(); }}
+              className={cn(
+                'shrink-0 rounded-full px-3.5 py-1.5 text-xs font-mono transition-colors',
+                ownership === o.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border bg-transparent text-muted-foreground hover:bg-muted',
+              )}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <ViewModeTabs value={view} onChange={setView} />
       </div>
@@ -142,7 +198,22 @@ export function SignalementsList() {
           {/* Mobile cards */}
           <div className="lg:hidden">
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
-              <div className="mb-5">{toolbar}</div>
+              <div className="mb-5">
+                {/* Mobile toolbar without ownership (handled by chips above) */}
+                <div className="flex flex-col gap-3">
+                  <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Adresse, zone…" className="w-full" />
+                  <div className="flex gap-2">
+                    <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="flex-1">
+                      <option value="">Tous les statuts</option>
+                      {Object.entries(REPORT_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
+                    </Select>
+                    <Select value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); resetPage(); }} className="flex-1">
+                      <option value="">Toutes gravités</option>
+                      {Object.entries(SEVERITY_META_API).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
+                    </Select>
+                  </div>
+                </div>
+              </div>
               {(tableQuery.isLoading || !organizationId) ? (
                 <div className="flex justify-center py-10">
                   <span className="h-7 w-7 animate-spin rounded-full border-3 border-primary/30 border-t-primary" />
@@ -160,14 +231,17 @@ export function SignalementsList() {
                       const statusMeta = REPORT_STATUS_META[r.status];
                       const createdBy = r.source === 'AGENT' ? (r.agent?.name ?? '—') : (r.contactName ?? 'Citoyen');
                       return (
-                        <div key={r.id} className="rounded-xl border border-border  p-3 space-y-2">
-                          <div className="flex items-center justify-between gap-2">
+                        <div key={r.id} className="rounded-xl border border-border p-3 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <Badge className={`${typeMeta.bg} ${typeMeta.color} border-0 text-[10px]`}>{typeMeta.label}</Badge>
                               <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0 text-[10px]`}>{sevMeta.label}</Badge>
                               <Badge className={`${statusMeta.bg} ${statusMeta.color} border-0 text-[10px]`}>{statusMeta.label}</Badge>
                             </div>
-                            <span className="text-[10px] font-mono text-muted-foreground shrink-0">{formatDate(r.createdAt)}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <OwnershipBadge report={r} currentUserId={currentUser?.id} />
+                              <span className="text-[10px] font-mono text-muted-foreground">{formatDate(r.createdAt)}</span>
+                            </div>
                           </div>
                           {(r.zone?.name || r.address) && (
                             <p className="text-xs font-mono text-muted-foreground truncate">{r.zone?.name ?? r.address}</p>

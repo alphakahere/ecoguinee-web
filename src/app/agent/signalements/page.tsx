@@ -12,8 +12,8 @@ export default function AgentSignalementsPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Mes Signalements"
-        description="Tous les signalements de votre zone"
+        title="Signalements"
+        description="Tous les signalements de votre organisation"
         action={
           <Button
             type="button"

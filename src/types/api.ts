@@ -152,12 +152,16 @@ export interface OrganizationFilters {
   limit?: number;
 }
 
+export type OwnershipFilter = 'all' | 'mine' | 'organization';
+
 export interface ApiReportFilters {
   status?: ReportStatus;
   severity?: ApiSeverity;
   type?: ApiWasteType;
   zoneId?: string;
   organizationId?: string;
+  agentId?: string;
+  excludeAgentId?: string;
   source?: ReportSource;
   search?: string;
   page?: number;
