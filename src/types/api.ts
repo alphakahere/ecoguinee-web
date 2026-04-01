@@ -141,6 +141,49 @@ export interface ApiCampaign {
   updatedAt: string;
 }
 
+// ── Notifications ────────────────────────────────────────────────────────────
+
+export type NotificationType =
+  | 'NEW_REPORT_IN_ZONE'
+  | 'REPORT_CLAIMED_BY_OTHER'
+  | 'INTERVENTION_RESOLVED'
+  | 'AGENT_INACTIVE'
+  | 'INTERVENTION_ASSIGNED'
+  | 'INTERVENTION_OVERDUE'
+  | 'CAMPAIGN_ASSIGNED'
+  | 'REPORT_UNHANDLED'
+  | 'ORGANIZATION_CREATED'
+  | 'USER_CREATED';
+
+export interface ApiNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  reportId?: string;
+  interventionId?: string;
+  campaignId?: string;
+  organizationId?: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface NotificationFilters {
+  read?: boolean;
+  type?: NotificationType;
+  page?: number;
+  limit?: number;
+}
+
+export interface NotificationsResponse {
+  data: ApiNotification[];
+  total: number;
+  unreadCount: number;
+  page: number;
+  limit: number;
+}
+
 // ── Filter DTOs ─────────────────────────────────────────────────────────────
 
 export interface ZoneFilters {
@@ -170,6 +213,7 @@ export interface ApiReportFilters {
   excludeAgentId?: string;
   source?: ReportSource;
   search?: string;
+  olderThan?: string;
   page?: number;
   limit?: number;
 }

@@ -8,6 +8,7 @@ import { KPICard } from '@/components/shared/kpi-card';
 import { PieChart } from '@/components/charts/pie-chart';
 import { cn, formatDate } from '@/lib/utils';
 import { useDashboardOverview } from '@/hooks/queries/useDashboard';
+import { useReports } from '@/hooks/queries/useReports';
 import { REPORT_STATUS_META } from '@/types/api';
 
 // ── Collapsible section wrapper ───────────────────────────────────────────────
@@ -108,6 +109,9 @@ export function DashboardSummary() {
 
   return (
     <>
+      {/* Unhandled reports alert */}
+      <UnhandledReportsAlert />
+
       {/* KPIs */}
       <Section title="Indicateurs clés">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -190,5 +194,34 @@ export function DashboardSummary() {
         </Section>
       </div>
     </>
+  );
+}
+
+function UnhandledReportsAlert() {
+  const { data, isLoading } = useReports({
+    status: 'REPORTED',
+    olderThan: '24h',
+    page: 1,
+    limit: 1,
+  });
+
+  if (isLoading || !data || data.total === 0) return null;
+
+  return (
+    <Link
+      href="/admin/signalements?status=REPORTED&olderThan=24h"
+      className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 py-4 hover:bg-amber-500/10 transition-colors"
+    >
+      <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+        <AlertTriangle className="w-4 h-4 text-amber-500" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+          {data.total} signalement{data.total !== 1 ? 's' : ''} sans prise en charge depuis plus de 24h
+        </p>
+        <p className="text-xs font-mono text-muted-foreground">Cliquez pour voir les détails</p>
+      </div>
+      <ArrowRight className="w-4 h-4 text-amber-500 ml-auto" />
+    </Link>
   );
 }

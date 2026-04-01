@@ -1,13 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Flag, Wrench, TrendingUp, Users, ArrowRight } from 'lucide-react';
+import { Flag, Wrench, TrendingUp, Users, ArrowRight, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn, formatDate } from '@/lib/utils';
 import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
+import { useAvailableReports } from '@/hooks/queries/useAvailableReports';
+import { useClaimReport } from '@/hooks/mutations/useClaimReport';
 import { useAuthStore } from '@/stores/auth.store';
-import { REPORT_STATUS_META } from '@/types/api';
+import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META } from '@/types/api';
 import { BarChart } from '@/components/charts/bar-chart';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { AxiosError } from 'axios';
 
 const SEV_COLOR: Record<string, string> = { LOW: '#6B7280', MODERATE: '#E8A020', CRITICAL: '#D94035' };
 
@@ -75,6 +82,9 @@ export function DashboardOverview() {
           </motion.div>
         ))}
       </div>
+
+      {/* Available reports — claim section */}
+      <AvailableReportsSection />
 
       {/* Recent reports + Agent performance */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -152,5 +162,89 @@ export function DashboardOverview() {
         />
       </motion.div>
     </>
+  );
+}
+
+function AvailableReportsSection() {
+  const router = useRouter();
+  const { data, isLoading } = useAvailableReports();
+  const claim = useClaimReport();
+  const reports = data?.data ?? [];
+
+  const handleClaim = (reportId: string) => {
+    claim.mutate(
+      { reportId },
+      {
+        onSuccess: (intervention) => {
+          toast.success('Signalement pris en charge !');
+          router.push(`/superviseur/interventions`);
+        },
+        onError: (error) => {
+          if (error instanceof AxiosError && error.response?.status === 409) {
+            toast.error('Ce signalement vient d\'être pris en charge par une autre organisation.');
+          } else {
+            toast.error('Erreur lors de la prise en charge.');
+          }
+        },
+      },
+    );
+  };
+
+  if (isLoading || reports.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="bg-card rounded-2xl border border-amber-500/30 overflow-hidden"
+    >
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-amber-500/5">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-500" />
+          <h3 className="text-sm font-semibold">Signalements disponibles</h3>
+          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]">
+            {reports.length}
+          </Badge>
+        </div>
+        <Link
+          href="/superviseur/signalements?tab=available"
+          className="text-xs font-mono text-primary hover:underline flex items-center gap-1"
+        >
+          Voir tout <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
+      <div className="divide-y divide-border">
+        {reports.slice(0, 5).map((r) => {
+          const sevMeta = SEVERITY_META_API[r.severity];
+          const typeMeta = WASTE_TYPE_META[r.type];
+          return (
+            <div key={r.id} className="flex items-center justify-between px-5 py-3 hover:bg-muted/20 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: SEV_COLOR[r.severity] ?? '#6B7280' }} />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">
+                    {r.reference ?? r.id.slice(0, 8)} — {r.address ?? r.zone?.name ?? '—'}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <Badge className={`${typeMeta.bg} ${typeMeta.color} border-0 text-[10px] px-1.5 py-0`}>{typeMeta.label}</Badge>
+                    <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0 text-[10px] px-1.5 py-0`}>{sevMeta.label}</Badge>
+                    <span className="text-[10px] font-mono text-muted-foreground">{r.zone?.name ?? '—'} · {formatDate(r.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => handleClaim(r.id)}
+                disabled={claim.isPending}
+                className="shrink-0 ml-3 text-xs"
+              >
+                Prendre en charge
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
   );
 }

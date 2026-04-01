@@ -159,7 +159,7 @@ export function HeaderBar({
 
       <div className="flex items-center gap-2">
         {rightSlot}
-        <NotificationsPanel count={notifications} />
+        <NotificationsPanel />
 
         {profile && <HeaderProfileMenu profile={profile} onLogout={onLogout} />}
       </div>

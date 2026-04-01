@@ -3,6 +3,7 @@ export const queryKeys = {
     all: ['reports'] as const,
     filtered: (filters: object) => ['reports', 'list', filters] as const,
     detail: (id: string) => ['reports', 'detail', id] as const,
+    available: ['reports', 'available'] as const,
   },
 
   interventions: {
@@ -36,6 +37,12 @@ export const queryKeys = {
     all: ['users'] as const,
     filtered: (filters: object) => ['users', 'list', filters] as const,
     detail: (id: string) => ['users', 'detail', id] as const,
+  },
+
+  notifications: {
+    all: ['notifications'] as const,
+    list: (filters?: object) => ['notifications', 'list', filters] as const,
+    unreadCount: ['notifications', 'unread-count'] as const,
   },
 
   stats: {

@@ -95,7 +95,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
             <h1 className="font-bold text-lg leading-none">{pageLabel}</h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <NotificationsPanel count={0} />
+            <NotificationsPanel />
             <div className="hidden lg:block">
               <HeaderProfileMenu profile={headerProfile} onLogout={handleLogout} />
             </div>

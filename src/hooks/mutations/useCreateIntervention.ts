@@ -4,10 +4,10 @@ import { interventionsService } from '@/services/interventions';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 
 /** Champs attendus par l’API pour créer une intervention */
-export type CreateInterventionInput = Pick<
-  ApiIntervention,
-  'reportId' | 'agentId' | 'organizationId'
-> & {
+export type CreateInterventionInput = {
+  reportId: string;
+  agentId?: string;
+  organizationId?: string;
   notes?: string | null;
   status?: ApiInterventionStatus;
 };

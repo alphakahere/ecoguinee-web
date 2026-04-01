@@ -28,6 +28,13 @@ export const reportsService = {
     return data;
   },
 
+  async getAvailable(): Promise<ApiPaginatedResponse<ApiReport>> {
+    const { data } = await api.get<ApiPaginatedResponse<ApiReport> | ApiReport[]>(
+      '/reports/available',
+    );
+    return normalize(data);
+  },
+
   async delete(id: string): Promise<void> {
     await api.delete(`/reports/${id}`);
   },

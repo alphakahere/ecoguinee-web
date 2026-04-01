@@ -20,10 +20,13 @@ export const interventionsService = {
   },
 
   async create(
-    payload: Omit<
-      ApiIntervention,
-      'id' | 'createdAt' | 'updatedAt' | 'agent' | 'report' | 'organization'
-    >,
+    payload: {
+      reportId: string;
+      agentId?: string;
+      organizationId?: string;
+      notes?: string;
+      status?: string;
+    },
   ): Promise<ApiIntervention> {
     const { data } = await api.post<ApiIntervention>('/interventions', payload);
     return data;
@@ -35,6 +38,28 @@ export const interventionsService = {
   ): Promise<ApiIntervention> {
     const { data } = await api.patch<ApiIntervention>(
       `/interventions/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async assignAgent(
+    id: string,
+    agentId: string,
+  ): Promise<ApiIntervention> {
+    const { data } = await api.patch<ApiIntervention>(
+      `/interventions/${id}/assign`,
+      { agentId },
+    );
+    return data;
+  },
+
+  async resolve(
+    id: string,
+    payload: { pvDocument: string; resolutionNote?: string },
+  ): Promise<ApiIntervention> {
+    const { data } = await api.patch<ApiIntervention>(
+      `/interventions/${id}/resolve`,
       payload,
     );
     return data;
