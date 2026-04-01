@@ -39,6 +39,8 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   /** Row key extractor */
   getRowKey?: (item: T, index: number) => string;
+  /** Optional row click handler — makes rows interactive */
+  onRowClick?: (item: T) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -58,6 +60,7 @@ export function DataTable<T>({
   errorMessage = 'Impossible de charger les données.',
   emptyMessage = 'Aucun résultat',
   getRowKey,
+  onRowClick,
 }: DataTableProps<T>) {
   const showPagination = totalPages && totalPages > 1 && onPageChange;
 
@@ -108,7 +111,11 @@ export function DataTable<T>({
               </TableRow>
             ) : (
               data.map((item, i) => (
-                <TableRow key={getRowKey ? getRowKey(item, i) : i}>
+                <TableRow
+                  key={getRowKey ? getRowKey(item, i) : i}
+                  onClick={onRowClick ? () => onRowClick(item) : undefined}
+                  className={onRowClick ? 'cursor-pointer' : ''}
+                >
                   {columns.map((col) => (
                     <TableCell key={col.key} className={col.className}>
                       {col.render(item)}

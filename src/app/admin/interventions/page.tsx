@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -58,10 +57,6 @@ export default function AdminInterventionsPage() {
     { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? iv.agentId.slice(0, 8)}</span> },
     { key: 'assigned', label: 'Assignée le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : '—'}</span> },
     { key: 'resolved', label: 'Résolue le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.resolutionDate ? formatDate(iv.resolutionDate) : '—'}</span> },
-    {
-      key: 'actions', label: '', headerClassName: 'text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground', className: 'text-right',
-      render: (iv) => <button type="button" onClick={() => setEditIntervention(iv)} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><Pencil className="h-4 w-4" /></button>,
-    },
   ];
 
   const toolbar = (
@@ -71,11 +66,11 @@ export default function AdminInterventionsPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{total} intervention{total !== 1 ? 's' : ''}</p>
       </div>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
-        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px] max-w-[160px]">
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }} className="min-w-[160px] max-w-xs">
           <option value="">Tous les statuts</option>
           {Object.entries(INTERVENTION_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={smeFilter} onChange={(e) => { setSmeFilter(e.target.value); resetPage(); }} className="min-w-[180px] max-w-[180px]">
+        <Select value={smeFilter} onChange={(e) => { setSmeFilter(e.target.value); resetPage(); }} className="min-w-[180px] max-w-xs">
           <option value="">Toutes les organisations</option>
           {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>

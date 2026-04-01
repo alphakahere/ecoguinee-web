@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { DataTable, type Column } from '@/components/shared/data-table';
@@ -19,6 +19,7 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { ApiSME, CreateSMEPayload, UpdateSMEPayload } from '@/types/api';
 
 export default function AdminPMEPage() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
   const [activeFilter, setActiveFilter] = useState<string>('');
@@ -151,14 +152,7 @@ export default function AdminPMEPage() {
       headerClassName: 'text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground',
       className: 'text-right',
       render: (s) => (
-        <div className="flex items-center justify-end gap-1">
-          <Link
-            href={`/admin/organisations/${s.id}`}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            title="Voir les détails"
-          >
-            <Eye className="h-4 w-4" />
-          </Link>
+        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             title="Modifier"
@@ -236,6 +230,7 @@ export default function AdminPMEPage() {
         isLoading={isLoading}
         isError={isError}
         getRowKey={(s) => s.id}
+        onRowClick={(s) => router.push(`/admin/organisations/${s.id}`)}
       />
       <SMEModal
         open={modalOpen}
