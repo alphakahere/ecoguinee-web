@@ -61,7 +61,7 @@ export default function AdminHotspotsPage() {
   };
 
   const columns: Column<ApiReport>[] = [
-    { key: 'id', label: 'ID', render: (r) => <Link href={`/admin/signalements/${r.id}`} className="font-mono text-xs text-primary hover:underline">#SIG-{r.id.slice(0, 6)}</Link> },
+    { key: 'id', label: 'Référence', render: (r) => <Link href={`/admin/signalements/${r.id}`} className="font-mono text-xs text-primary hover:underline">{r.reference ?? `#${r.id.slice(0, 8)}`}</Link> },
     { key: 'type', label: 'Type', render: (r) => <Badge className={`${WASTE_TYPE_META[r.type].bg} ${WASTE_TYPE_META[r.type].color} border-0`}>{WASTE_TYPE_META[r.type].label}</Badge> },
     { key: 'severity', label: 'Gravité', render: (r) => <Badge className={`${SEVERITY_META_API[r.severity].bg} ${SEVERITY_META_API[r.severity].color} border-0`}>{SEVERITY_META_API[r.severity].label}</Badge> },
     { key: 'zone', label: 'Zone', render: (r) => <span className="text-sm font-mono">{r.zone?.name ?? '—'}</span> },

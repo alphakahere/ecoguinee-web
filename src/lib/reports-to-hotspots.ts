@@ -16,6 +16,7 @@ export function apiReportsToHotspots(reports: ApiReport[]): Hotspot[] {
     .filter((r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))
     .map((r) => ({
       id: r.id,
+      reference: r.reference,
       location: {
         lat: r.latitude,
         lng: r.longitude,

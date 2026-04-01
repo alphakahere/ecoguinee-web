@@ -46,7 +46,7 @@ export function SuperviseurInterventionsTable({ organizationId }: Props) {
       key: 'id',
       label: 'Réf.',
       render: (iv) => (
-        <span className="font-mono text-xs text-muted-foreground">#{iv.id.slice(0, 8)}</span>
+        <span className="font-mono text-xs text-muted-foreground">{iv.reference ?? `#${iv.id.slice(0, 8)}`}</span>
       ),
     },
     {
@@ -57,7 +57,7 @@ export function SuperviseurInterventionsTable({ organizationId }: Props) {
           href={`/superviseur/signalements/${iv.reportId}`}
           className="font-mono text-xs text-primary hover:underline line-clamp-2 max-w-[220px] inline-block align-top"
         >
-          {iv.report?.address?.trim() || `#SIG-${iv.reportId.slice(0, 6)}`}
+          {iv.report?.reference ?? iv.report?.address?.trim() ?? `#${iv.reportId.slice(0, 8)}`}
         </Link>
       ),
     },

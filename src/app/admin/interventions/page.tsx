@@ -51,10 +51,10 @@ export default function AdminInterventionsPage() {
   };
 
   const columns: Column<ApiIntervention>[] = [
-    { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.address ?? iv.reportId.slice(0, 8) + '…'}</Link> },
+    { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.reference ?? `#${iv.reportId.slice(0, 8)}`}</Link> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'organization', label: 'Organisation', render: (iv) => <span className="text-sm font-mono">{iv.organization?.name ?? iv.organizationId.slice(0, 8)}</span> },
-    { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? iv.agentId.slice(0, 8)}</span> },
+    { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? '—'}</span> },
     { key: 'assigned', label: 'Assignée le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : '—'}</span> },
     { key: 'resolved', label: 'Résolue le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.resolutionDate ? formatDate(iv.resolutionDate) : '—'}</span> },
   ];

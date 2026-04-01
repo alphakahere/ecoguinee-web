@@ -58,8 +58,11 @@ function generatePassword(): string {
   return parts.join('');
 }
 
-const ROLE_OPTIONS: { value: UserRole; label: string }[] =
+const ALL_ROLE_OPTIONS: { value: UserRole; label: string }[] =
   (Object.entries(ROLE_META) as [UserRole, { label: string }][]).map(([value, m]) => ({ value, label: m.label }));
+
+const ADMIN_ROLE_OPTIONS = ALL_ROLE_OPTIONS.filter((r) => r.value === 'ADMIN');
+const AGENT_ROLE_OPTIONS = ALL_ROLE_OPTIONS.filter((r) => r.value === 'AGENT');
 const emptyFull: UserSaveFullPayload = {
   name: '',
   email: '',
@@ -334,7 +337,7 @@ export function UserModal({
                             disabled={roleLockedToAdmin || roleLockedToAgent}
                             onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as UserRole }))}
                           >
-                            {ROLE_OPTIONS.map((r) => (
+                            {(roleLockedToAdmin ? ADMIN_ROLE_OPTIONS : roleLockedToAgent ? AGENT_ROLE_OPTIONS : ALL_ROLE_OPTIONS).map((r) => (
                               <option key={r.value} value={r.value}>
                                 {r.label}
                               </option>

@@ -72,6 +72,7 @@ export interface ApiOrganization {
 
 export interface ApiReport {
   id: string;
+  reference?: string;
   type: ApiWasteType;
   severity: ApiSeverity;
   status: ReportStatus;
@@ -93,11 +94,12 @@ export interface ApiReport {
 
 export interface ApiIntervention {
   id: string;
+  reference?: string;
   status: ApiInterventionStatus;
   notes?: string | null;
   reportId: string;
-  report?: { id: string; address?: string | null; severity?: ApiSeverity };
-  agentId: string;
+  report?: { id: string; reference?: string; address?: string | null; severity?: ApiSeverity };
+  agentId?: string | null;
   agent?: { id: string; name: string };
   organizationId: string;
   organization?: { id: string; name: string };
@@ -111,6 +113,7 @@ export interface ApiIntervention {
 
 export interface ApiCampaign {
   id: string;
+  reference?: string;
   slug: string;
   title: string;
   description?: string | null;

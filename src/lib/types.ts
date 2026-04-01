@@ -27,6 +27,7 @@ export interface Territoire {
 
 export interface Hotspot {
   id: string;
+  reference?: string;
   location: {
     lat: number;
     lng: number;

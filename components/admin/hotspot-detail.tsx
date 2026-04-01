@@ -1,10 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, MapPin, Calendar, User, Phone, Plus } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { useReport } from '@/hooks/queries/useReports';
 import { useInterventions } from '@/hooks/queries/useInterventions';
@@ -16,7 +14,6 @@ import {
   INTERVENTION_STATUS_META,
   type ApiIntervention,
 } from '@/types/api';
-import { CreateInterventionModal } from './create-intervention-modal';
 import Image from 'next/image';
 
 export function HotspotDetail({ id }: { id: string }) {
@@ -26,8 +23,6 @@ export function HotspotDetail({ id }: { id: string }) {
     interventionsData?.data ??
     (Array.isArray(interventionsData) ? interventionsData : [])
   ) as ApiIntervention[];
-  const [modalOpen, setModalOpen] = useState(false);
-  console.log({ report });
 
   if (isLoading) {
     return (
@@ -121,9 +116,6 @@ export function HotspotDetail({ id }: { id: string }) {
                 Interventions
                 {interventions.length > 0 && <span className="ml-2 text-xs font-mono text-muted-foreground">({interventions.length})</span>}
               </h3>
-              <Button type="button" onClick={() => setModalOpen(true)} className="font-mono text-xs h-8">
-                <Plus className="w-3.5 h-3.5 mr-1.5" /> Créer
-              </Button>
             </div>
             {interventions.length === 0 ? (
               <p className="text-sm text-muted-foreground font-mono">Aucune intervention liée</p>
@@ -211,11 +203,6 @@ export function HotspotDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      <CreateInterventionModal
-        open={modalOpen}
-        reportId={id}
-        onClose={() => setModalOpen(false)}
-      />
     </div>
   );
 }

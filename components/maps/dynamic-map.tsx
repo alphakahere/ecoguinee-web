@@ -42,9 +42,17 @@ export function DynamicMap({ hotspots, center = CONAKRY_CENTER, zoom = 13, class
       {hotspots.map((h) => (
         <Marker key={h.id} position={[h.location.lat, h.location.lng]} icon={createIcon(h.severity, h.status)}>
           <Popup>
-            <div className="p-3 min-w-[200px]">
-              <h4 className="font-semibold text-sm mb-1">{h.location.address}</h4>
-              <p className="text-xs text-muted-foreground mb-2">{h.description}</p>
+            <div className="p-3 min-w-[220px]">
+              {h.reference && (
+                <p className="font-mono text-xs font-semibold text-primary mb-1">{h.reference}</p>
+              )}
+              <h4 className="font-semibold text-sm mb-0.5">{h.location.territoire}</h4>
+              {h.location.address !== '—' && (
+                <p className="text-xs text-muted-foreground mb-2">{h.location.address}</p>
+              )}
+              {h.description && (
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{h.description}</p>
+              )}
               <div className="flex gap-2 text-xs">
                 <span className={`px-2 py-0.5 rounded-full ${SEVERITY_META[h.severity].bg} ${SEVERITY_META[h.severity].color}`}>
                   {SEVERITY_META[h.severity].label}
