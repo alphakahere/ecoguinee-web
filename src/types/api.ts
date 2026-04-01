@@ -64,8 +64,8 @@ export interface ApiOrganization {
   activityType?: string | null;
   active: boolean;
   zones?: ApiZone[];
-  supervisors?: { id: string; name: string }[];
-  members?: { id: string; name: string }[];
+  supervisors?: { id: string; name: string; email?: string; phone?: string; role?: string }[];
+  members?: { id: string; name: string; email?: string; phone?: string; role?: string }[];
   createdAt: string;
   updatedAt: string;
 }

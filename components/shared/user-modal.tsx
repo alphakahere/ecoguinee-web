@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, User as UserIcon, Mail, Phone, Shield, ToggleLeft, Trash2, Lock } from 'lucide-react';
+import { X, User as UserIcon, Mail, Phone, Shield, ToggleLeft, Trash2, Lock, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROLE_META } from '@/lib/types';
 import type { User, UserRole, UserStatus } from '@/lib/types';
@@ -37,6 +37,28 @@ interface UserModalProps {
   isSubmitting?: boolean;
 }
 
+function generatePassword(): string {
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const digits = '0123456789';
+  const special = '!@#$%&*?';
+  const all = upper + lower + digits + special;
+  const parts = [
+    upper[Math.floor(Math.random() * upper.length)],
+    lower[Math.floor(Math.random() * lower.length)],
+    digits[Math.floor(Math.random() * digits.length)],
+    special[Math.floor(Math.random() * special.length)],
+  ];
+  for (let i = parts.length; i < 12; i++) {
+    parts.push(all[Math.floor(Math.random() * all.length)]);
+  }
+  for (let i = parts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [parts[i], parts[j]] = [parts[j], parts[i]];
+  }
+  return parts.join('');
+}
+
 const ROLE_OPTIONS: { value: UserRole; label: string }[] =
   (Object.entries(ROLE_META) as [UserRole, { label: string }][]).map(([value, m]) => ({ value, label: m.label }));
 const emptyFull: UserSaveFullPayload = {
@@ -64,7 +86,8 @@ export function UserModal({
 }: UserModalProps) {
   const [form, setForm] = useState<UserSaveFullPayload>(emptyFull);
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isCreate = !user;
@@ -87,8 +110,9 @@ export function UserModal({
         role: roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : 'AGENT',
       });
     }
-    setPassword('');
-    setConfirmPassword('');
+    setPassword(user ? '' : generatePassword());
+    setShowPassword(false);
+    setCopied(false);
     setErrors({});
   }, [user, open, roleLockedToAdmin, roleLockedToAgent, variant]);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -103,7 +127,6 @@ export function UserModal({
     if (showPasswordFields) {
       if (!password.trim()) e.password = 'Le mot de passe est requis';
       else if (password.length < 6) e.password = 'Minimum 6 caractères';
-      if (password !== confirmPassword) e.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
     return e;
   };
@@ -249,25 +272,46 @@ export function UserModal({
                         <Field label="Mot de passe" error={errors.password}>
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             autoComplete="new-password"
-                            className={`${inputCls} ${errors.password ? 'border-[#D94035]' : ''}`}
+                            className={`${inputCls} pr-24 ${errors.password ? 'border-[#D94035]' : ''}`}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
+                            readOnly
                           />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                              title={showPassword ? 'Masquer' : 'Afficher'}
+                            >
+                              {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                await navigator.clipboard.writeText(password);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                              }}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                              title="Copier"
+                            >
+                              {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setPassword(generatePassword()); setCopied(false); }}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                              title="Régénérer"
+                            >
+                              <RefreshCw className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </Field>
-                        <Field label="Confirmer le mot de passe" error={errors.confirmPassword}>
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <input
-                            type="password"
-                            autoComplete="new-password"
-                            className={`${inputCls} ${errors.confirmPassword ? 'border-[#D94035]' : ''}`}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="••••••••"
-                          />
-                        </Field>
+                        <p className="text-xs text-muted-foreground -mt-2 ml-1">
+                          L&apos;utilisateur devra changer son mot de passe à la première connexion
+                        </p>
                       </>
                     )}
 
