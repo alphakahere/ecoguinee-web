@@ -195,7 +195,7 @@ export default function AdminCampagneNouvellePage() {
 
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">
-            PME organisatrice
+            Organisation organisatrice
           </label>
           <div className="relative">
             <select

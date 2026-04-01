@@ -17,7 +17,7 @@ export function AgentsGrid() {
   }
 
   if (agents.length === 0) {
-    return <p className="text-sm font-mono text-muted-foreground text-center py-16">Aucun agent dans votre PME.</p>;
+    return <p className="text-sm font-mono text-muted-foreground text-center py-16">Aucun agent dans votre organisation.</p>;
   }
 
   return (

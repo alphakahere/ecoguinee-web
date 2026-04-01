@@ -32,7 +32,7 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!smeId) { toast.error('Veuillez sélectionner une PME'); return; }
+    if (!smeId) { toast.error('Veuillez sélectionner une organisation'); return; }
     if (!agentId) { toast.error('Veuillez sélectionner un agent'); return; }
     try {
       await createIntervention.mutateAsync({
@@ -81,9 +81,9 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">PME *</label>
+                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Organisation *</label>
                   <select className={`${inputCls} appearance-none`} value={smeId} onChange={(e) => setSmeId(e.target.value)}>
-                    <option value="">— Sélectionner une PME —</option>
+                    <option value="">— Sélectionner une organisation —</option>
                     {smes.map((s) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}

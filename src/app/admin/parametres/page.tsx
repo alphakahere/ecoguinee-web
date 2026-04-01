@@ -94,7 +94,7 @@ export default function AdminParametresPage() {
         <div className="space-y-4">
           {([
             { key: 'emailNotif' as const, label: 'Notifications par email', description: 'Envoyer des emails aux agents et superviseurs' },
-            { key: 'autoAssign' as const, label: 'Assignation automatique', description: 'Assigner automatiquement les signalements aux PME' },
+            { key: 'autoAssign' as const, label: 'Assignation automatique', description: 'Assigner automatiquement les signalements aux organisations' },
           ]).map((item) => (
             <div key={item.key} className="flex items-center justify-between">
               <div>

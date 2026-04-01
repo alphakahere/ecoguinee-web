@@ -63,7 +63,7 @@ export function AuthGuard({ allowedRoles, requireSme = false, children }: AuthGu
         <div className="text-center max-w-sm space-y-3">
           <p className="text-sm font-semibold">Accès refusé</p>
           <p className="text-xs font-mono text-muted-foreground">
-            Votre compte n'est associé à aucune PME. Contactez un administrateur pour être rattaché à une PME.
+            Votre compte n'est associé à aucune organisation. Contactez un administrateur pour être rattaché à une organisation.
           </p>
           <button
             onClick={() => router.replace('/')}

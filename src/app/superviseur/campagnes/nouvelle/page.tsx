@@ -75,7 +75,7 @@ export default function SuperviseurCampagneNouvellePage() {
 
   const onValid = async (data: CreateCampaignApiFormInput) => {
     if (!smeId) {
-      toast.error('Périmètre PME indisponible.');
+      toast.error('Périmètre de l\'organisation indisponible.');
       return;
     }
     try {
@@ -124,7 +124,7 @@ export default function SuperviseurCampagneNouvellePage() {
         >
           <ArrowLeft className="w-4 h-4" /> Retour aux campagnes
         </Link>
-        <p className="text-sm font-mono text-muted-foreground py-8">Périmètre PME indisponible.</p>
+        <p className="text-sm font-mono text-muted-foreground py-8">Périmètre de l'organisation indisponible.</p>
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function SuperviseurCampagneNouvellePage() {
       >
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">
-            PME organisatrice
+            Organisation organisatrice
           </label>
           <div className={`${inputCls} bg-muted/40 text-muted-foreground`}>{pmeName}</div>
         </div>

@@ -17,7 +17,7 @@ interface Notification {
 
 const MOCK_NOTIFICATIONS: Notification[] = [
   { id: '1', icon: AlertTriangle, title: 'Nouveau signalement critique', detail: 'Ratoma — Déchets solides', time: 'Il y a 2h', read: false, borderColor: 'border-l-[#D94035]' },
-  { id: '2', icon: CheckCircle, title: 'Intervention résolue', detail: 'PME LVG Smart — Kaloum', time: 'Il y a 5h', read: false, borderColor: 'border-l-[#6FCF4A]' },
+  { id: '2', icon: CheckCircle, title: 'Intervention résolue', detail: 'Organisation LVG Smart — Kaloum', time: 'Il y a 5h', read: false, borderColor: 'border-l-[#6FCF4A]' },
   { id: '3', icon: Megaphone, title: 'Campagne démarrée', detail: 'Sensibilisation Matam', time: 'Hier', read: true, borderColor: 'border-l-[#E8A020]' },
 ];
 

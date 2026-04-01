@@ -16,7 +16,7 @@ interface Props {
   open: boolean;
   campaign: ApiCampaign;
   onClose: () => void;
-  /** When set, PME cannot be changed (superviseur) */
+  /** When set, organisation cannot be changed (superviseur) */
   fixedSmeId?: string;
   fixedSmeName?: string;
 }
@@ -148,7 +148,7 @@ export function CampaignEditModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">PME organisatrice</label>
+                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Organisation organisatrice</label>
                   {fixedSmeId ? (
                     <p className={`${inputCls} bg-muted/40 text-muted-foreground`}>
                       {fixedSmeName ?? fixedSmeId}

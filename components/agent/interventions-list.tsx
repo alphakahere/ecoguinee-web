@@ -66,7 +66,7 @@ export function InterventionsList() {
       const m = sev ? SEVERITY_META_API[sev] : null;
       return m ? <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge> : <span>—</span>;
     } },
-    { key: 'sme', label: 'PME', render: (iv) => <span className="text-xs font-mono">{iv.sme?.name ?? '—'}</span> },
+    { key: 'sme', label: 'Organisation', render: (iv) => <span className="text-xs font-mono">{iv.sme?.name ?? '—'}</span> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'date', label: 'Date', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : formatDate(iv.createdAt)}</span> },
     {

@@ -216,7 +216,7 @@ export function HeroSection() {
             <CounterItem value={stats?.totalReports ?? 0} label="Points noirs signalés" delay={0} skipAnimation={!!prefersReducedMotion} />
             <CounterItem value={stats?.resolvedReports ?? 0} label="Interventions résolues" delay={150} skipAnimation={!!prefersReducedMotion} />
             <CounterItem value={stats?.communes ?? 0} label="Communes couvertes" delay={300} skipAnimation={!!prefersReducedMotion} />
-            <CounterItem value={stats?.activeSmes ?? 0} label="PMEs partenaires" delay={450} skipAnimation={!!prefersReducedMotion} />
+            <CounterItem value={stats?.activeSmes ?? 0} label="Organisations partenaires" delay={450} skipAnimation={!!prefersReducedMotion} />
           </motion.div>
           <p className="mt-4 text-center md:text-left">
             <a

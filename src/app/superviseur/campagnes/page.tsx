@@ -211,7 +211,7 @@ export default function SuperviseurCampagnesPage() {
 
       {!smeId && !overviewLoading ? (
         <p className="text-sm font-mono text-muted-foreground text-center py-16">
-          Périmètre PME indisponible.
+          Périmètre de l'organisation indisponible.
         </p>
       ) : (
         <DataTable

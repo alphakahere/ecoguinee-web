@@ -8,7 +8,7 @@ export function StatsBar() {
   const stats = [
     { value: data?.totalReports ?? 0, label: 'Signalements', suffix: '' },
     { value: data?.resolvedReports ?? 0, label: 'Résolus', suffix: '' },
-    { value: data?.activeSmes ?? 0, label: 'PMEs actives', suffix: '' },
+    { value: data?.activeSmes ?? 0, label: 'Organisations actives', suffix: '' },
     { value: data?.totalCampaigns ?? 0, label: 'Campagnes', suffix: '' },
   ];
 

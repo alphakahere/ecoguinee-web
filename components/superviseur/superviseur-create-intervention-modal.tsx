@@ -29,7 +29,7 @@ export function SuperviseurCreateInterventionModal({
   const createIntervention = useCreateIntervention();
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
 
-  /** Agents de la PME (même source que la page Agents superviseur) */
+  /** Agents de l'organisation (même source que la page Agents superviseur) */
   const agents = overview?.agents ?? [];
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function SuperviseurCreateInterventionModal({
                   <div>
                     <h2 className="font-semibold text-sm">Nouvelle intervention</h2>
                     <p className="text-xs text-muted-foreground font-mono">
-                      {pmeName ?? 'Votre PME'} · #{reportId.slice(0, 8)}…
+                      {pmeName ?? 'Votre organisation'} · #{reportId.slice(0, 8)}…
                     </p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export function SuperviseurCreateInterventionModal({
                   )}
                   {!overviewLoading && agents.length === 0 && (
                     <p className="text-[11px] font-mono text-muted-foreground mt-1.5">
-                      Aucun agent rattaché à votre PME. Ajoutez des agents depuis l&apos;administration.
+                      Aucun agent rattaché à votre organisation. Ajoutez des agents depuis l&apos;administration.
                     </p>
                   )}
                 </div>

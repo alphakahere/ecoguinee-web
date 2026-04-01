@@ -27,7 +27,7 @@ interface UserModalProps {
   roleLockedToAdmin?: boolean;
   /** Role fixed to AGENT (superviseur gérant son équipe) */
   roleLockedToAgent?: boolean;
-  /** Sous-titre contexte (ex. PME) */
+  /** Sous-titre contexte (ex. Organisation) */
   contextSubtitle?: string;
   onClose: () => void;
   onSaveFull?: (payload: UserSaveFullPayload) => void | Promise<void>;
@@ -298,7 +298,7 @@ export function UserModal({
                         )}
                         {roleLockedToAgent && (
                           <p className="text-[10px] text-muted-foreground mt-1 font-mono">
-                            Agent rattaché à votre PME
+                            Agent rattaché à votre organisation
                           </p>
                         )}
                       </div>

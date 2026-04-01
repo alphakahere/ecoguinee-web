@@ -71,7 +71,7 @@ export default function SuperviseurParametresPage() {
             { icon: Mail, label: 'Email', value: currentUser?.email ?? '—' },
             { icon: Phone, label: 'Téléphone', value: currentUser?.phone ?? '—' },
             { icon: Shield, label: 'Rôle', value: ROLE_LABELS[currentUser?.role ?? ''] ?? currentUser?.role ?? '—' },
-            { icon: Globe, label: 'PME', value: pme?.name ?? '—' },
+            { icon: Globe, label: 'Organisation', value: pme?.name ?? '—' },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-4">
               <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">

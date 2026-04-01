@@ -96,7 +96,7 @@ export default function SuperviseurAgentsPage() {
   };
   const openEdit = (u: User) => {
     if (smeId && u.smeId && u.smeId !== smeId) {
-      toast.error('Cet utilisateur n\'appartient pas à votre PME.');
+      toast.error('Cet utilisateur n\'appartient pas à votre organisation.');
       return;
     }
     setEditUser(u);
@@ -300,7 +300,7 @@ export default function SuperviseurAgentsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Agents de la PME</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Agents de l'organisation</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {total} agent{total !== 1 ? 's' : ''}
             {pmeName ? ` — ${pmeName}` : ''}
@@ -357,7 +357,7 @@ export default function SuperviseurAgentsPage() {
       <div>
         <PageHeader title="Agents" description="Équipe terrain" />
         <p className="text-sm font-mono text-muted-foreground text-center py-16">
-          Périmètre PME indisponible.
+          Périmètre de l'organisation indisponible.
         </p>
       </div>
     );
@@ -390,7 +390,7 @@ export default function SuperviseurAgentsPage() {
         user={editUser}
         variant="full"
         roleLockedToAgent
-        contextSubtitle={pmeName ? `PME : ${pmeName}` : undefined}
+        contextSubtitle={pmeName ? `Organisation : ${pmeName}` : undefined}
         onClose={closeModal}
         onSaveFull={handleSaveFull}
         onDelete={canDelete ? handleDelete : undefined}

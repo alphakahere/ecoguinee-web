@@ -33,7 +33,7 @@ export default function SuperviseurCampagneDetailPage({ params }: Props) {
         >
           <ChevronLeft className="w-3.5 h-3.5" /> Campagnes
         </Link>
-        <p className="text-sm font-mono text-muted-foreground py-8">Périmètre PME indisponible.</p>
+        <p className="text-sm font-mono text-muted-foreground py-8">Périmètre de l'organisation indisponible.</p>
       </div>
     );
   }

@@ -61,10 +61,10 @@ export default function AdminPMEPage() {
     try {
       if (id) {
         await updateSME.mutateAsync({ id, payload });
-        toast.success('PME mise à jour');
+        toast.success('Organisation mise à jour');
       } else {
         await createSME.mutateAsync(payload as CreateSMEPayload);
-        toast.success('PME créée');
+        toast.success('Organisation créée');
       }
       close();
     } catch {
@@ -73,10 +73,10 @@ export default function AdminPMEPage() {
   };
 
   const handleDelete = async (s: ApiSME) => {
-    if (!window.confirm(`Supprimer la PME « ${s.name} » ?`)) return;
+    if (!window.confirm(`Supprimer l'organisation « ${s.name} » ?`)) return;
     try {
       await deleteSME.mutateAsync(s.id);
-      toast.success('PME supprimée');
+      toast.success('Organisation supprimée');
     } catch {
       toast.error('Suppression impossible');
     }
@@ -85,7 +85,7 @@ export default function AdminPMEPage() {
   const handleToggleActive = async (s: ApiSME) => {
     try {
       await updateSME.mutateAsync({ id: s.id, payload: { active: !s.active } });
-      toast.success(s.active ? 'PME désactivée' : 'PME réactivée');
+      toast.success(s.active ? 'Organisation désactivée' : 'Organisation réactivée');
     } catch {
       toast.error('Une erreur est survenue');
     }

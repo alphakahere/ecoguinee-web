@@ -54,7 +54,7 @@ export default function AdminInterventionsPage() {
   const columns: Column<ApiIntervention>[] = [
     { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.address ?? iv.reportId.slice(0, 8) + '…'}</Link> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
-    { key: 'sme', label: 'PME', render: (iv) => <span className="text-sm font-mono">{iv.sme?.name ?? iv.smeId.slice(0, 8)}</span> },
+    { key: 'sme', label: 'Organisation', render: (iv) => <span className="text-sm font-mono">{iv.sme?.name ?? iv.smeId.slice(0, 8)}</span> },
     { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? iv.agentId.slice(0, 8)}</span> },
     { key: 'assigned', label: 'Assignée le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : '—'}</span> },
     { key: 'resolved', label: 'Résolue le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.resolutionDate ? formatDate(iv.resolutionDate) : '—'}</span> },
@@ -76,7 +76,7 @@ export default function AdminInterventionsPage() {
           {Object.entries(INTERVENTION_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
         <Select value={smeFilter} onChange={(e) => { setSmeFilter(e.target.value); resetPage(); }} className="min-w-[180px] max-w-[180px]">
-          <option value="">Toutes les PME</option>
+          <option value="">Toutes les organisations</option>
           {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>
       </div>

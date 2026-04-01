@@ -130,7 +130,7 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="Email" error={errors.email}>
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="email" className={`${inputCls} ${errors.email ? 'border-[#D94035]' : ''}`} value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="contact@pme.gn" />
+                    <input type="email" className={`${inputCls} ${errors.email ? 'border-[#D94035]' : ''}`} value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="contact@organisation.gn" />
                   </Field>
                   <Field label="Téléphone">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
