@@ -23,7 +23,7 @@ export function CampaignCard({ campaign, index = 0, basePath = '/campagnes' }: P
   const heroPhoto = getImageUrl(campaign.photos?.[0]);
   return (
     <Link
-      href={`${basePath}/${campaign.id}`}
+      href={`${basePath}/${campaign.slug ?? campaign.id}`}
       className="group bg-card rounded-2xl border border-border overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(45,125,70,0.15)] hover:border-primary/45 transition-all duration-250 h-full"
       style={{ animationDelay: `${index * 50}ms` }}
     >

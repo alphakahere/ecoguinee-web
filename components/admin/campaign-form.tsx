@@ -37,17 +37,21 @@ export interface CampaignFormValues {
   endDate: string;
   photoFiles: File[];
   docFiles: File[];
+  existingPhotoUrls: string[];
+  existingDocUrls: string[];
 }
 
 interface CampaignFormProps {
-  initialValues?: Partial<Omit<CampaignFormValues, 'photoFiles' | 'docFiles'>>;
+  initialValues?: Partial<Omit<CampaignFormValues, 'photoFiles' | 'docFiles' | 'existingPhotoUrls' | 'existingDocUrls'>>;
+  existingPhotoUrls?: string[];
+  existingDocUrls?: string[];
   onSubmit: (values: CampaignFormValues) => Promise<void>;
   isPending: boolean;
   submitLabel: string;
   cancelHref: string;
 }
 
-export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, cancelHref }: CampaignFormProps) {
+export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls = [], existingDocUrls: initDocUrls = [], onSubmit, isPending, submitLabel, cancelHref }: CampaignFormProps) {
   const { data: tree = [] } = useZoneTree();
   const { data: organizationsData } = useOrganizations();
   const organizations = organizationsData?.data ?? [];
@@ -69,6 +73,8 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
   });
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [docFiles, setDocFiles] = useState<File[]>([]);
+  const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(initPhotoUrls);
+  const [existingDocUrls, setExistingDocUrls] = useState<string[]>(initDocUrls);
 
   // Seed form with initialValues once the zone tree is ready
   useEffect(() => {
@@ -114,7 +120,7 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({ ...form, photoFiles, docFiles });
+    await onSubmit({ ...form, photoFiles, docFiles, existingPhotoUrls, existingDocUrls });
   };
 
   const inputCls = 'w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30';
@@ -219,8 +225,10 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
 
       <FileUploadZone
         files={photoFiles}
+        existingUrls={existingPhotoUrls}
         onAddFiles={(f) => setPhotoFiles((prev) => [...prev, ...f])}
         onRemoveFile={(i) => setPhotoFiles((prev) => prev.filter((_, idx) => idx !== i))}
+        onRemoveExisting={(i) => setExistingPhotoUrls((prev) => prev.filter((_, idx) => idx !== i))}
         accept="image/*"
         max={5}
         label="Photos"
@@ -228,8 +236,10 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
 
       <FileUploadZone
         files={docFiles}
+        existingUrls={existingDocUrls}
         onAddFiles={(f) => setDocFiles((prev) => [...prev, ...f])}
         onRemoveFile={(i) => setDocFiles((prev) => prev.filter((_, idx) => idx !== i))}
+        onRemoveExisting={(i) => setExistingDocUrls((prev) => prev.filter((_, idx) => idx !== i))}
         accept=".pdf,.doc,.docx"
         max={5}
         label="Documents"

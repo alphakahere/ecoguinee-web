@@ -78,7 +78,7 @@ export default function AdminCampagneModifierPage({ params }: Props) {
       return;
     }
     try {
-      const [photoUrls, docUrls] = await Promise.all([
+      const [newPhotoUrls, newDocUrls] = await Promise.all([
         uploadFiles(values.photoFiles),
         uploadFiles(values.docFiles),
       ]);
@@ -94,8 +94,8 @@ export default function AdminCampagneModifierPage({ params }: Props) {
           organizationId: values.organizationId || undefined,
           scheduledDate: new Date(values.scheduledDate).toISOString(),
           endDate: values.endDate ? new Date(values.endDate).toISOString() : undefined,
-          ...(photoUrls.length > 0 && { photos: photoUrls }),
-          ...(docUrls.length > 0 && { documents: docUrls }),
+          photos: [...values.existingPhotoUrls, ...newPhotoUrls],
+          documents: [...values.existingDocUrls, ...newDocUrls],
         },
       });
       toast.success('Campagne mise à jour !');
@@ -132,6 +132,8 @@ export default function AdminCampagneModifierPage({ params }: Props) {
       <PageHeader title="Modifier la campagne" description={campaign.title} />
       <CampaignForm
         initialValues={initialValues}
+        existingPhotoUrls={campaign.photos}
+        existingDocUrls={campaign.documents}
         onSubmit={handleSubmit}
         isPending={updateCampaign.isPending}
         submitLabel="Enregistrer les modifications"
