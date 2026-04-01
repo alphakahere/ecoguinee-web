@@ -52,6 +52,7 @@ function OrganizationModalInner({
     resolver: zodResolver(organizationFormSchema),
     defaultValues: {
       name: organization?.name ?? '',
+      acronym: organization?.acronym ?? '',
       email: organization?.email ?? '',
       phone: organization?.phone ?? '',
       address: organization?.address ?? '',
@@ -95,6 +96,7 @@ function OrganizationModalInner({
   const onValid = async (data: OrganizationFormInput) => {
     const payload: CreateOrganizationPayload = {
       name: data.name.trim(),
+      acronym: data.acronym?.trim().toUpperCase() || undefined,
       email: data.email?.trim() || undefined,
       phone: data.phone?.trim() || undefined,
       address: data.address?.trim() || undefined,
@@ -150,6 +152,16 @@ function OrganizationModalInner({
                     {...register('name')}
                     className={`${inputCls} ${errors.name ? 'border-destructive' : ''}`}
                     placeholder="Nom de l'organisation"
+                  />
+                </Field>
+
+                <Field label="Acronyme" error={errors.acronym?.message}>
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    {...register('acronym')}
+                    maxLength={10}
+                    className={`${inputCls} uppercase ${errors.acronym ? 'border-destructive' : ''}`}
+                    placeholder="Ex: LVG"
                   />
                 </Field>
 

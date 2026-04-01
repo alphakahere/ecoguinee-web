@@ -74,9 +74,9 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
   useEffect(() => {
     if (!initialValues || flat.length === 0) return;
 
-    let commune = initialValues.commune ?? '';
-    let quartier = initialValues.quartier ?? '';
-    let secteur = initialValues.secteur ?? '';
+    const commune = initialValues.commune ?? '';
+    const quartier = initialValues.quartier ?? '';
+    const secteur = initialValues.secteur ?? '';
 
     // If cascading fields not provided but we have zoneId-level info in initialValues,
     // treat commune/quartier/secteur as already resolved by the parent page.

@@ -89,7 +89,10 @@ export default function AdminPMEPage() {
     {
       key: 'name',
       label: 'Nom',
-      render: (s) => <span className="text-sm font-semibold">{s.name}</span>,
+      render: (s) => <div className="flex flex-col gap-1">
+        <span className="text-sm font-semibold">{s.name}</span>
+        <span className="text-xs font-mono text-muted-foreground">{s.acronym ?? '—'}</span>
+      </div>,
     },
     {
       key: 'phone',

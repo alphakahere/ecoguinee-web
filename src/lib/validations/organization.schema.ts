@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 export const organizationFormSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
+  acronym: z.string().max(10, 'Maximum 10 caractères').optional().or(z.literal('')),
   email: z
     .string()
     .optional()
