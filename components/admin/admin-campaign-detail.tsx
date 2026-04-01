@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Calendar, MapPin, User, Building2, Pencil, FileText, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,7 +9,6 @@ import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import type { ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
-import { CampaignEditModal } from './campaign-edit-modal';
 import Image from 'next/image';
 
 // Valid status transitions
@@ -44,7 +42,6 @@ export function AdminCampaignDetail({
 }: AdminCampaignDetailProps) {
   const { data: campaign, isLoading, isError } = useCampaign(id);
   const updateCampaign = useUpdateCampaign();
-  const [editOpen, setEditOpen] = useState(false);
   const handleTransition = async (status: ApiCampaignStatus) => {
     try {
       await updateCampaign.mutateAsync({ id, payload: { status } });
@@ -112,13 +109,12 @@ export function AdminCampaignDetail({
                   <Badge className={`${statusMeta.bg} ${statusMeta.color} border-0`}>{statusMeta.label}</Badge>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setEditOpen(true)}
+              <Link
+                href={`/admin/campagnes/${id}/modifier`}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono border border-border hover:bg-muted transition-colors shrink-0"
               >
                 <Pencil className="w-3.5 h-3.5" /> Modifier
-              </button>
+              </Link>
             </div>
 
             {/* Status transitions */}
@@ -242,13 +238,6 @@ export function AdminCampaignDetail({
         </div>
       </div>
 
-      <CampaignEditModal
-        open={editOpen}
-        campaign={campaign}
-        onClose={() => setEditOpen(false)}
-        fixedSmeId={enforceSmeId}
-        fixedSmeName={enforceSmeName}
-      />
     </div>
   );
 }

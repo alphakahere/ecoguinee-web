@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Trash2, Eye } from 'lucide-react';
+import { Plus, Trash2, Eye, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { SearchInput } from '@/components/shared/search-input';
 import { Select } from '@/components/ui/select';
@@ -59,13 +59,14 @@ export default function AdminCampagnesPage() {
     { key: 'type', label: 'Type', render: (c) => <Badge className={`${API_CAMPAIGN_TYPE_META[c.type].bg} ${API_CAMPAIGN_TYPE_META[c.type].color} border-0`}>{API_CAMPAIGN_TYPE_META[c.type].label}</Badge> },
     { key: 'zone', label: 'Zone', render: (c) => <span className="text-sm font-mono">{c.zone?.name ?? '—'}</span> },
     { key: 'status', label: 'Statut', render: (c) => <Badge className={`${API_CAMPAIGN_STATUS_META[c.status].bg} ${API_CAMPAIGN_STATUS_META[c.status].color} border-0`}>{API_CAMPAIGN_STATUS_META[c.status].label}</Badge> },
-    { key: 'date', label: 'Date prévue', render: (c) => <span className="text-xs font-mono text-muted-foreground">{formatDate(c.scheduledDate)}</span> },
+    { key: 'date', label: 'Date', render: (c) => <span className="text-xs font-mono text-muted-foreground">{formatDate(c.scheduledDate)}</span> },
     { key: 'agent', label: 'Agent', render: (c) => <span className="text-xs font-mono">{c.agent?.name ?? '—'}</span> },
     {
       key: 'actions', label: '', headerClassName: 'text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground', className: 'text-right',
       render: (c) => (
         <div className="flex items-center justify-end gap-1">
-          <Link href={`/admin/campagnes/${c.id}`} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><Eye className="h-4 w-4" /></Link>
+          <Link href={`/admin/campagnes/${c.id}`} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground" title="Voir"><Eye className="h-4 w-4" /></Link>
+          <Link href={`/admin/campagnes/${c.id}/modifier`} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground" title="Modifier"><Pencil className="h-4 w-4" /></Link>
           <button type="button" onClick={() => handleDelete(c)} disabled={deleteCampaign.isPending} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"><Trash2 className="h-4 w-4" /></button>
         </div>
       ),

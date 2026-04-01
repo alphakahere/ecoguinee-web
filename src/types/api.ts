@@ -115,6 +115,7 @@ export interface ApiCampaign {
   status: ApiCampaignStatus;
   zoneId?: string | null;
   zone?: ApiZone;
+  address?: string | null;
   scheduledDate: string;
   endDate?: string | null;
   participantCount?: number | null;
@@ -201,6 +202,7 @@ export interface CreateCampaignPayload {
   type: ApiCampaignType;
   status?: ApiCampaignStatus;
   zoneId?: string;
+  address?: string;
   scheduledDate: string;
   endDate?: string;
   creatorId: string;
