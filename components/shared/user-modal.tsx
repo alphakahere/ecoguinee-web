@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, User as UserIcon, Mail, Phone, Shield, ToggleLeft, Trash2, Lock, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
+import { X, User as UserIcon, Mail, Phone, Shield, MapPin, ToggleLeft, Trash2, Lock, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROLE_META } from '@/lib/types';
 import type { User, UserRole, UserStatus } from '@/lib/types';
@@ -14,8 +14,7 @@ export interface UserSaveFullPayload {
   email?: string;
   phone: string;
   role: UserRole;
-  territoire?: string;
-  status: UserStatus;
+  address?: string;
   password?: string;
 }
 
@@ -66,8 +65,7 @@ const emptyFull: UserSaveFullPayload = {
   email: '',
   phone: '',
   role: 'AGENT',
-  territoire: 'Conakry',
-  status: 'ACTIVE',
+  address: '',
 };
 
 export function UserModal({
@@ -101,8 +99,7 @@ export function UserModal({
         email: user.email ?? '',
         phone: user.phone,
         role: user.role,
-        territoire: user.territoire ?? '',
-        status: user.status,
+        address: user.address ?? '',
       });
     } else {
       setForm({
@@ -150,8 +147,7 @@ export function UserModal({
       email: form.email?.trim() || undefined,
       phone: form.phone.trim(),
       role: roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : form.role,
-      territoire: form.territoire || undefined,
-      status: form.status,
+      address: form.address?.trim() || undefined,
       ...(showPasswordFields && password ? { password } : {}),
     };
     await onSaveFull(payload);
@@ -264,6 +260,16 @@ export function UserModal({
                         value={form.phone}
                         onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                         placeholder="+224 6XX XX XX XX"
+                      />
+                    </Field>
+
+                    <Field label="Adresse">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        className={inputCls}
+                        value={form.address ?? ''}
+                        onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                        placeholder="Ex: Kaloum, Conakry"
                       />
                     </Field>
 

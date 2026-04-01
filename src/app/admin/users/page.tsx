@@ -100,10 +100,10 @@ export default function AdminUsersPage() {
   const handleSaveFull = async (payload: UserSaveFullPayload) => {
     try {
       if (payload.id) {
-        await updateUser.mutateAsync({ id: payload.id, payload: { name: payload.name, email: payload.email, phone: payload.phone, role: payload.role, territoire: payload.territoire, status: payload.status } });
+        await updateUser.mutateAsync({ id: payload.id, payload: { name: payload.name, email: payload.email, phone: payload.phone, role: payload.role, address: payload.address } });
         toast.success('Utilisateur mis à jour');
       } else {
-        await createUser.mutateAsync({ name: payload.name, email: payload.email, phone: payload.phone, role: payload.role, territoire: payload.territoire, status: payload.status ?? 'ACTIVE', password: payload.password });
+        await createUser.mutateAsync({ name: payload.name, email: payload.email, phone: payload.phone, role: payload.role, address: payload.address, password: payload.password });
         toast.success('Utilisateur créé');
       }
       closeModal();
