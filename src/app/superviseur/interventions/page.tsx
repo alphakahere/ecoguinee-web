@@ -12,7 +12,7 @@ import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
 
 export default function SuperviseurInterventionsPage() {
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
   const [view, setView] = useState<InterventionViewMode>('kanban');
 
   const count = overview?.counts.interventions ?? 0;
@@ -25,14 +25,14 @@ export default function SuperviseurInterventionsPage() {
         action={<InterventionViewTabs value={view} onChange={setView} />}
       />
 
-      {overviewLoading || !smeId ? (
+      {overviewLoading || !organizationId ? (
         <div className="flex justify-center py-16">
           <span className="h-8 w-8 animate-spin rounded-full border-3 border-primary/30 border-t-primary" />
         </div>
       ) : view === 'kanban' ? (
-        <InterventionsBoard smeId={smeId} />
+        <InterventionsBoard organizationId={organizationId} />
       ) : (
-        <SuperviseurInterventionsTable smeId={smeId} />
+        <SuperviseurInterventionsTable organizationId={organizationId} />
       )}
     </div>
   );

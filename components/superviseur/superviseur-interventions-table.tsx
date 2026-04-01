@@ -14,10 +14,10 @@ import type { ApiIntervention } from '@/types/api';
 import { INTERVENTION_STATUS_META } from '@/types/api';
 
 interface Props {
-  smeId: string;
+  organizationId: string;
 }
 
-export function SuperviseurInterventionsTable({ smeId }: Props) {
+export function SuperviseurInterventionsTable({ organizationId }: Props) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('');
@@ -26,7 +26,7 @@ export function SuperviseurInterventionsTable({ smeId }: Props) {
   const resetPage = () => setPage(1);
 
   const filters = {
-    smeId,
+    organizationId,
     page,
     limit: pageSize,
     status: statusFilter || undefined,

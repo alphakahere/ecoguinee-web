@@ -414,7 +414,7 @@ export default function AdminTerritoiresPage() {
                     {[
                       { icon: FileText,  label: 'Signalements', value: zoneDetail._count.reports,   color: 'text-[#D94035]', bg: 'bg-[#D94035]/10' },
                       { icon: Megaphone, label: 'Campagnes',    value: zoneDetail._count.campaigns, color: 'text-[#2D7D46]', bg: 'bg-[#2D7D46]/10' },
-                      { icon: Building2, label: 'PMEs',         value: zoneDetail._count.smes,      color: 'text-primary',   bg: 'bg-primary/10'   },
+                      { icon: Building2, label: 'Organisations', value: zoneDetail._count.organizations, color: 'text-primary',   bg: 'bg-primary/10'   },
                     ].map(({ icon: Icon, label, value, color, bg }) => (
                       <div key={label} className="rounded-xl border border-border p-3 flex items-center gap-3">
                         <span className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', bg)}>

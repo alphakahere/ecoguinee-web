@@ -9,14 +9,14 @@ import { SearchInput } from '@/components/shared/search-input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select } from '@/components/ui/select';
-import { useSMEs } from '@/hooks/queries/useSMEs';
+import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import { useZoneTree } from '@/hooks/queries/useZones';
-import { useCreateSME } from '@/hooks/mutations/useCreateSME';
-import { useUpdateSME } from '@/hooks/mutations/useUpdateSME';
-import { useDeleteSME } from '@/hooks/mutations/useDeleteSME';
-import { SMEModal } from '@/components/admin/sme-modal';
+import { useCreateOrganization } from '@/hooks/mutations/useCreateOrganization';
+import { useUpdateOrganization } from '@/hooks/mutations/useUpdateOrganization';
+import { useDeleteOrganization } from '@/hooks/mutations/useDeleteOrganization';
+import { OrganizationModal } from '@/components/admin/organization-modal';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import type { ApiSME, CreateSMEPayload, UpdateSMEPayload } from '@/types/api';
+import type { ApiOrganization, CreateOrganizationPayload, UpdateOrganizationPayload } from '@/types/api';
 
 export default function AdminPMEPage() {
   const router = useRouter();
@@ -36,8 +36,8 @@ export default function AdminPMEPage() {
     [debouncedSearch, activeFilter, page],
   );
 
-  const { data, isLoading, isError } = useSMEs(filters);
-  const smeList = data?.data ?? [];
+  const { data, isLoading, isError } = useOrganizations(filters);
+  const organizationList = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const canNext = page < totalPages;
@@ -45,26 +45,26 @@ export default function AdminPMEPage() {
 
   const { data: tree = [] } = useZoneTree();
 
-  const createSME = useCreateSME();
-  const updateSME = useUpdateSME();
-  const deleteSME = useDeleteSME();
+  const createOrganization = useCreateOrganization();
+  const updateOrganization = useUpdateOrganization();
+  const deleteOrganization = useDeleteOrganization();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editSME, setEditSME] = useState<ApiSME | null>(null);
+  const [editOrganization, setEditOrganization] = useState<ApiOrganization | null>(null);
 
-  const openCreate = () => { setEditSME(null); setModalOpen(true); };
-  const openEdit = (s: ApiSME) => { setEditSME(s); setModalOpen(true); };
-  const close = () => { setModalOpen(false); setEditSME(null); };
+  const openCreate = () => { setEditOrganization(null); setModalOpen(true); };
+  const openEdit = (s: ApiOrganization) => { setEditOrganization(s); setModalOpen(true); };
+  const close = () => { setModalOpen(false); setEditOrganization(null); };
 
-  const isMutating = createSME.isPending || updateSME.isPending || deleteSME.isPending;
+  const isMutating = createOrganization.isPending || updateOrganization.isPending || deleteOrganization.isPending;
 
-  const handleSave = async (payload: CreateSMEPayload | UpdateSMEPayload, id?: string) => {
+  const handleSave = async (payload: CreateOrganizationPayload | UpdateOrganizationPayload, id?: string) => {
     try {
       if (id) {
-        await updateSME.mutateAsync({ id, payload });
+        await updateOrganization.mutateAsync({ id, payload });
         toast.success('Organisation mise à jour');
       } else {
-        await createSME.mutateAsync(payload as CreateSMEPayload);
+        await createOrganization.mutateAsync(payload as CreateOrganizationPayload);
         toast.success('Organisation créée');
       }
       close();
@@ -73,26 +73,26 @@ export default function AdminPMEPage() {
     }
   };
 
-  const handleDelete = async (s: ApiSME) => {
+  const handleDelete = async (s: ApiOrganization) => {
     if (!window.confirm(`Supprimer l'organisation « ${s.name} » ?`)) return;
     try {
-      await deleteSME.mutateAsync(s.id);
+      await deleteOrganization.mutateAsync(s.id);
       toast.success('Organisation supprimée');
     } catch {
       toast.error('Suppression impossible');
     }
   };
 
-  const handleToggleActive = async (s: ApiSME) => {
+  const handleToggleActive = async (s: ApiOrganization) => {
     try {
-      await updateSME.mutateAsync({ id: s.id, payload: { active: !s.active } });
+      await updateOrganization.mutateAsync({ id: s.id, payload: { active: !s.active } });
       toast.success(s.active ? 'Organisation désactivée' : 'Organisation réactivée');
     } catch {
       toast.error('Une erreur est survenue');
     }
   };
 
-  const columns: Column<ApiSME>[] = [
+  const columns: Column<ApiOrganization>[] = [
     {
       key: 'name',
       label: 'Nom',
@@ -218,7 +218,7 @@ export default function AdminPMEPage() {
   return (
     <div className="space-y-4">
       <DataTable
-        data={smeList}
+        data={organizationList}
         columns={columns}
         total={total}
         page={page}
@@ -232,9 +232,9 @@ export default function AdminPMEPage() {
         getRowKey={(s) => s.id}
         onRowClick={(s) => router.push(`/admin/organisations/${s.id}`)}
       />
-      <SMEModal
+      <OrganizationModal
         open={modalOpen}
-        sme={editSME}
+        organization={editOrganization}
         zones={tree[0]?.children ?? []}
         onClose={close}
         onSave={handleSave}

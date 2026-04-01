@@ -22,7 +22,7 @@ const pageSize = 15;
 
 export default function SuperviseurCampagnesPage() {
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
@@ -33,9 +33,9 @@ export default function SuperviseurCampagnesPage() {
 
   const filters = useMemo(
     () =>
-      smeId
+      organizationId
         ? {
-            smeId,
+            organizationId,
             search: debouncedSearch || undefined,
             status: (statusFilter || undefined) as ApiCampaignStatus | undefined,
             type: (typeFilter || undefined) as ApiCampaignType | undefined,
@@ -43,11 +43,11 @@ export default function SuperviseurCampagnesPage() {
             limit: pageSize,
           }
         : undefined,
-    [smeId, debouncedSearch, statusFilter, typeFilter, page],
+    [organizationId, debouncedSearch, statusFilter, typeFilter, page],
   );
 
   const { data, isLoading, isError } = useCampaigns(filters, {
-    enabled: !!smeId,
+    enabled: !!organizationId,
   });
 
   const deleteCampaign = useDeleteCampaign();
@@ -199,7 +199,7 @@ export default function SuperviseurCampagnesPage() {
             : `${total} campagne${total !== 1 ? 's' : ''} — ${overview.pme.name}`
         }
         action={
-          smeId ? (
+          organizationId ? (
             <Link href="/superviseur/campagnes/nouvelle">
               <Button className="font-mono text-xs">
                 <Plus className="w-4 h-4 mr-2" /> Nouvelle campagne
@@ -209,7 +209,7 @@ export default function SuperviseurCampagnesPage() {
         }
       />
 
-      {!smeId && !overviewLoading ? (
+      {!organizationId && !overviewLoading ? (
         <p className="text-sm font-mono text-muted-foreground text-center py-16">
           Périmètre de l'organisation indisponible.
         </p>

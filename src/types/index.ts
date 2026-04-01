@@ -32,8 +32,8 @@ export {
 // ── API-layer aliases ──────────────────────────────────────────────────────
 /** A "report" in the API maps to a Hotspot in the UI */
 export type { Hotspot as Report } from '@/lib/types';
-/** A PME in the UI maps to an SME in the API */
-export type { PME as SME } from '@/lib/types';
+/** A PME in the UI maps to an Organization in the API */
+export type { PME as Organization } from '@/lib/types';
 
 // ── Offline queue ──────────────────────────────────────────────────────────
 export interface PendingReport {
@@ -65,7 +65,7 @@ export interface InterventionFilters {
   status?: string;
   assignedTo?: string;
   reportId?: string;
-  smeId?: string;
+  organizationId?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -84,7 +84,7 @@ export interface UserFilters {
   /** Maps to backend roleGroup: admin | superviseur | agent | public */
   roleGroup?: 'admin' | 'superviseur' | 'agent' | 'public';
   status?: string;
-  smeId?: string;
+  organizationId?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -113,7 +113,7 @@ export interface CreateUserPayload {
   status?: import('@/lib/types').UserStatus;
   password?: string;
   /** Lier l’utilisateur à une PME (agents, etc.) */
-  smeId?: string;
+  organizationId?: string;
 }
 
 /** Payload for PATCH /users/:id */

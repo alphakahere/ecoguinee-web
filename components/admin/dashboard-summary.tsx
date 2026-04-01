@@ -114,7 +114,7 @@ export function DashboardSummary() {
           <KPICard icon={Users}         title="Utilisateurs"    value={counts?.users ?? 0}    delay={0} />
           <KPICard icon={AlertTriangle} title="Signalements"    value={counts?.reports ?? 0}  delay={0.06} />
           <KPICard icon={CheckCircle}   title="Taux résolution" value={resolutionRate}         delay={0.12} />
-          <KPICard icon={Building2}     title="Organisations actives"    value={counts?.smes ?? 0}     delay={0.18} />
+          <KPICard icon={Building2}     title="Organisations actives"    value={counts?.organizations ?? 0}     delay={0.18} />
         </div>
       </Section>
 
@@ -135,7 +135,7 @@ export function DashboardSummary() {
             {[
               { label: 'Utilisateurs', href: '/admin/users',       icon: Users,         count: counts?.users ?? 0 },
               { label: 'Territoires',  href: '/admin/territoires', icon: MapIcon,      count: '—' },
-              { label: 'Organisations', href: '/admin/organisations', icon: Building2, count: counts?.smes ?? 0 },
+              { label: 'Organisations', href: '/admin/organisations', icon: Building2, count: counts?.organizations ?? 0 },
               { label: 'Signalements', href: '/admin/hotspots',    icon: AlertTriangle, count: counts?.reports ?? 0 },
             ].map((link) => (
               <Link

@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useZoneTree } from '@/hooks/queries/useZones';
-import { useSMEs } from '@/hooks/queries/useSMEs';
+import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import type { ApiCampaignType, ApiZone } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META } from '@/types/api';
@@ -32,7 +32,7 @@ export interface CampaignFormValues {
   quartier: string;
   secteur: string;
   address: string;
-  smeId: string;
+  organizationId: string;
   scheduledDate: string;
   endDate: string;
   photoFiles: File[];
@@ -49,8 +49,8 @@ interface CampaignFormProps {
 
 export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, cancelHref }: CampaignFormProps) {
   const { data: tree = [] } = useZoneTree();
-  const { data: smesData } = useSMEs();
-  const smes = smesData?.data ?? [];
+  const { data: organizationsData } = useOrganizations();
+  const organizations = organizationsData?.data ?? [];
 
   const flat = useMemo(() => flattenTree(tree), [tree]);
   const communeZones = useMemo(() => flat.filter((z) => z.type === 'MUNICIPALITY'), [flat]);
@@ -63,7 +63,7 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
     quartier: '',
     secteur: '',
     address: '',
-    smeId: '',
+    organizationId: '',
     scheduledDate: '',
     endDate: '',
   });
@@ -89,7 +89,7 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
       quartier,
       secteur,
       address: initialValues.address ?? prev.address,
-      smeId: initialValues.smeId ?? prev.smeId,
+      organizationId: initialValues.organizationId ?? prev.organizationId,
       scheduledDate: initialValues.scheduledDate ?? prev.scheduledDate,
       endDate: initialValues.endDate ?? prev.endDate,
     }));
@@ -149,9 +149,9 @@ export function CampaignForm({ initialValues, onSubmit, isPending, submitLabel, 
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Organisation organisatrice</label>
           <div className="relative">
-            <select value={form.smeId} onChange={(e) => update('smeId', e.target.value)} className={selectCls}>
+            <select value={form.organizationId} onChange={(e) => update('organizationId', e.target.value)} className={selectCls}>
               <option value="">— Aucune —</option>
-              {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {organizations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>

@@ -39,7 +39,7 @@ export function CampagneCreateForm() {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id ?? '';
-  const smeId   = currentUser?.memberSmeId ?? '';
+  const organizationId   = currentUser?.memberOrganizationId ?? '';
 
   const [proofFile, setProofFile]   = useState<File | null>(null);
   const [proofError, setProofError] = useState('');
@@ -88,7 +88,7 @@ export function CampagneCreateForm() {
         type:          values.type,
         status:        values.status,
         zoneId:        values.zoneId || undefined,
-        smeId:         smeId || undefined,
+        organizationId:         organizationId || undefined,
         scheduledDate: new Date(values.scheduledDate).toISOString(),
         endDate:       values.endDate ? new Date(values.endDate).toISOString() : undefined,
         creatorId:     agentId,

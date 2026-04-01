@@ -27,7 +27,7 @@ const NEXT_STATUS: Record<string, { status: ApiCampaignStatus; label: string }[]
 export function CampagnesList() {
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id ?? '';
-  const smeId = currentUser?.memberSmeId ?? '';
+  const organizationId = currentUser?.memberOrganizationId ?? '';
 
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');

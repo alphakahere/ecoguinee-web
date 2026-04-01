@@ -9,14 +9,14 @@ import { DataTable, type Column } from '@/components/shared/data-table';
 import { formatDate } from '@/lib/utils';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
-import { useSMEs } from '@/hooks/queries/useSMEs';
+import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 import { INTERVENTION_STATUS_META } from '@/types/api';
 import { InterventionStatusModal } from '@/components/admin/intervention-status-modal';
 
 export default function AdminInterventionsPage() {
   const [statusFilter, setStatusFilter] = useState('');
-  const [smeFilter, setSmeFilter] = useState('');
+  const [organizationFilter, setOrganizationFilter] = useState('');
   const [editIntervention, setEditIntervention] = useState<ApiIntervention | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 15;
@@ -24,7 +24,7 @@ export default function AdminInterventionsPage() {
 
   const filters = {
     status: statusFilter || undefined,
-    smeId: smeFilter || undefined,
+    organizationId: organizationFilter || undefined,
     page,
     limit: pageSize,
   };
@@ -36,8 +36,8 @@ export default function AdminInterventionsPage() {
   const canNext = page < totalPages;
   const canPrev = page > 1;
 
-  const { data: smesData } = useSMEs({ page: 1, limit: 100 });
-  const smes = smesData?.data ?? [];
+  const { data: organizationsData } = useOrganizations({ page: 1, limit: 100 });
+  const organizations = organizationsData?.data ?? [];
   const updateIntervention = useUpdateIntervention();
 
   const handleStatusChange = async (id: string, status: ApiInterventionStatus) => {
@@ -53,7 +53,7 @@ export default function AdminInterventionsPage() {
   const columns: Column<ApiIntervention>[] = [
     { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.address ?? iv.reportId.slice(0, 8) + '…'}</Link> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
-    { key: 'sme', label: 'Organisation', render: (iv) => <span className="text-sm font-mono">{iv.sme?.name ?? iv.smeId.slice(0, 8)}</span> },
+    { key: 'organization', label: 'Organisation', render: (iv) => <span className="text-sm font-mono">{iv.organization?.name ?? iv.organizationId.slice(0, 8)}</span> },
     { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? iv.agentId.slice(0, 8)}</span> },
     { key: 'assigned', label: 'Assignée le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : '—'}</span> },
     { key: 'resolved', label: 'Résolue le', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.resolutionDate ? formatDate(iv.resolutionDate) : '—'}</span> },
@@ -70,9 +70,9 @@ export default function AdminInterventionsPage() {
           <option value="">Tous les statuts</option>
           {Object.entries(INTERVENTION_STATUS_META).map(([v, m]) => <option key={v} value={v}>{m.label}</option>)}
         </Select>
-        <Select value={smeFilter} onChange={(e) => { setSmeFilter(e.target.value); resetPage(); }} className="min-w-[180px] max-w-xs">
+        <Select value={organizationFilter} onChange={(e) => { setOrganizationFilter(e.target.value); resetPage(); }} className="min-w-[180px] max-w-xs">
           <option value="">Toutes les organisations</option>
-          {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {organizations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>
       </div>
     </div>

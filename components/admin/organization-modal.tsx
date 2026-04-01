@@ -5,25 +5,25 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Building2, Mail, Phone, MapPin, FileText, ToggleLeft, ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { smeFormSchema, type SMEFormInput } from '@/lib/validations/sme.schema';
-import type { ApiSME, ApiZone, CreateSMEPayload, UpdateSMEPayload } from '@/types/api';
+import { organizationFormSchema, type OrganizationFormInput } from '@/lib/validations/organization.schema';
+import type { ApiOrganization, ApiZone, CreateOrganizationPayload, UpdateOrganizationPayload } from '@/types/api';
 
-interface SMEModalProps {
+interface OrganizationModalProps {
   open: boolean;
-  sme?: ApiSME | null;
+  organization?: ApiOrganization | null;
   zones: ApiZone[];
   onClose: () => void;
-  onSave: (payload: CreateSMEPayload | UpdateSMEPayload, id?: string) => void | Promise<void>;
+  onSave: (payload: CreateOrganizationPayload | UpdateOrganizationPayload, id?: string) => void | Promise<void>;
   isSubmitting?: boolean;
 }
 
-export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = false }: SMEModalProps) {
+export function OrganizationModal({ open, organization, zones, onClose, onSave, isSubmitting = false }: OrganizationModalProps) {
   return (
     <AnimatePresence>
       {open && (
-        <SMEModalInner
-          key={sme?.id ?? 'new'}
-          sme={sme}
+        <OrganizationModalInner
+          key={organization?.id ?? 'new'}
+          organization={organization}
           zones={zones}
           onClose={onClose}
           onSave={onSave}
@@ -34,29 +34,29 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
   );
 }
 
-function SMEModalInner({
-  sme,
+function OrganizationModalInner({
+  organization,
   zones,
   onClose,
   onSave,
   isSubmitting = false,
-}: Omit<SMEModalProps, 'open'>) {
-  const [zoneIds, setZoneIds] = useState(() => (sme?.zones ?? []).map((z) => z.id));
+}: Omit<OrganizationModalProps, 'open'>) {
+  const [zoneIds, setZoneIds] = useState(() => (organization?.zones ?? []).map((z) => z.id));
   const [expandedMunicipalities, setExpandedMunicipalities] = useState<Set<string>>(() => new Set());
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SMEFormInput>({
-    resolver: zodResolver(smeFormSchema),
+  } = useForm<OrganizationFormInput>({
+    resolver: zodResolver(organizationFormSchema),
     defaultValues: {
-      name: sme?.name ?? '',
-      email: sme?.email ?? '',
-      phone: sme?.phone ?? '',
-      address: sme?.address ?? '',
-      description: sme?.description ?? '',
-      activityType: sme?.activityType ?? '',
+      name: organization?.name ?? '',
+      email: organization?.email ?? '',
+      phone: organization?.phone ?? '',
+      address: organization?.address ?? '',
+      description: organization?.description ?? '',
+      activityType: organization?.activityType ?? '',
     },
   });
 
@@ -92,8 +92,8 @@ function SMEModalInner({
     });
   };
 
-  const onValid = async (data: SMEFormInput) => {
-    const payload: CreateSMEPayload = {
+  const onValid = async (data: OrganizationFormInput) => {
+    const payload: CreateOrganizationPayload = {
       name: data.name.trim(),
       email: data.email?.trim() || undefined,
       phone: data.phone?.trim() || undefined,
@@ -102,7 +102,7 @@ function SMEModalInner({
       activityType: data.activityType?.trim() || undefined,
       zoneIds: zoneIds.length > 0 ? zoneIds : undefined,
     };
-    await onSave(payload, sme?.id);
+    await onSave(payload, organization?.id);
   };
 
   const inputCls =
@@ -133,8 +133,8 @@ function SMEModalInner({
                     <Building2 className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-sm">{sme ? "Modifier l'organisation" : 'Nouvelle organisation'}</h2>
-                    <p className="text-xs text-muted-foreground font-mono">{sme ? `ID: ${sme.id}` : 'Remplir les informations'}</p>
+                    <h2 className="font-semibold text-sm">{organization ? "Modifier l'organisation" : 'Nouvelle organisation'}</h2>
+                    <p className="text-xs text-muted-foreground font-mono">{organization ? `ID: ${organization.id}` : 'Remplir les informations'}</p>
                   </div>
                 </div>
                 <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground">

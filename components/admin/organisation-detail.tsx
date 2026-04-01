@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/shared/page-header';
 import { useZoneTree } from '@/hooks/queries/useZones';
-import type { ApiSME, ApiZone } from '@/types/api';
+import type { ApiOrganization, ApiZone } from '@/types/api';
 
 interface OrganisationDetailProps {
-  organisation: ApiSME;
+  organisation: ApiOrganization;
 }
 
 export function OrganisationDetail({ organisation }: OrganisationDetailProps) {

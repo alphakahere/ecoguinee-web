@@ -6,7 +6,7 @@ import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 /** Champs attendus par l’API pour créer une intervention */
 export type CreateInterventionInput = Pick<
   ApiIntervention,
-  'reportId' | 'agentId' | 'smeId'
+  'reportId' | 'agentId' | 'organizationId'
 > & {
   notes?: string | null;
   status?: ApiInterventionStatus;

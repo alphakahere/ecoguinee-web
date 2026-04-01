@@ -1,7 +1,7 @@
 import { api } from './api';
 
 export interface AgentOverview {
-  sme: {
+  organization: {
     id: string;
     name: string;
     zones: { id: string; name: string }[];
@@ -27,7 +27,7 @@ export interface AgentOverview {
     reportId: string;
     address?: string | null;
     severity: string;
-    smeName?: string | null;
+    organizationName?: string | null;
     createdAt: string;
   }[];
 }

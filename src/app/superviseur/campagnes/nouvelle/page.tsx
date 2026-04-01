@@ -32,7 +32,7 @@ export default function SuperviseurCampagneNouvellePage() {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
   const pmeName = overview?.pme.name ?? '';
   const pmeZoneIds = useMemo(() => new Set((overview?.pme.zones ?? []).map((z) => z.id)), [overview?.pme.zones]);
 
@@ -74,7 +74,7 @@ export default function SuperviseurCampagneNouvellePage() {
     scheduledDate && scheduledDate >= minScheduled ? scheduledDate : minScheduled;
 
   const onValid = async (data: CreateCampaignApiFormInput) => {
-    if (!smeId) {
+    if (!organizationId) {
       toast.error('Périmètre de l\'organisation indisponible.');
       return;
     }
@@ -88,7 +88,7 @@ export default function SuperviseurCampagneNouvellePage() {
         description: data.description?.trim() || undefined,
         type: data.type,
         zoneId: data.zoneId?.trim() || undefined,
-        smeId,
+        organizationId,
         scheduledDate: new Date(data.scheduledDate).toISOString(),
         endDate: data.endDate?.trim() ? new Date(data.endDate).toISOString() : undefined,
         creatorId: currentUser?.id ?? '',
@@ -115,7 +115,7 @@ export default function SuperviseurCampagneNouvellePage() {
     );
   }
 
-  if (!smeId) {
+  if (!organizationId) {
     return (
       <div>
         <Link

@@ -38,11 +38,11 @@ function getColumnForDrop(
 }
 
 interface InterventionsBoardProps {
-  smeId: string;
+  organizationId: string;
 }
 
-export function InterventionsBoard({ smeId }: InterventionsBoardProps) {
-  const { data, isLoading } = useInterventions({ smeId, limit: 100 });
+export function InterventionsBoard({ organizationId }: InterventionsBoardProps) {
+  const { data, isLoading } = useInterventions({ organizationId, limit: 100 });
   const interventions: ApiIntervention[] =
     data?.data ?? (Array.isArray(data) ? (data as ApiIntervention[]) : []);
 

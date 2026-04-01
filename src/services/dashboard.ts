@@ -6,7 +6,7 @@ export interface DashboardOverview {
     resolvedReports: number;
     interventions: number;
     campaigns: number;
-    smes: number;
+    organizations: number;
     users: number;
   };
   resolutionRate: number;

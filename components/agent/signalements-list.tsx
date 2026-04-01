@@ -21,7 +21,7 @@ const MAP_PAGE_SIZE = 200;
 
 export function SignalementsList() {
   const currentUser = useAuthStore((s) => s.user);
-  const smeId = currentUser?.memberSmeId;
+  const organizationId = currentUser?.memberOrganizationId;
   const assignReport = useAssignReport();
 
   const [view, setView] = useState<ViewMode>('table');
@@ -34,24 +34,24 @@ export function SignalementsList() {
   const resetPage = () => setPage(1);
 
   const filters = {
-    smeId: smeId || undefined,
+    organizationId: organizationId || undefined,
     search: debouncedSearch || undefined,
     status: (statusFilter || undefined) as ReportStatus | undefined,
     severity: (severityFilter || undefined) as ApiSeverity | undefined,
   };
 
-  const tableFilters = smeId
+  const tableFilters = organizationId
     ? { ...filters, page, limit: pageSize }
     : undefined;
-  const mapFilters = smeId
+  const mapFilters = organizationId
     ? { ...filters, page: 1, limit: MAP_PAGE_SIZE }
     : undefined;
 
   const tableQuery = useReports(tableFilters, {
-    enabled: !!smeId && view === 'table',
+    enabled: !!organizationId && view === 'table',
   });
   const mapQuery = useReports(mapFilters, {
-    enabled: !!smeId && view === 'map',
+    enabled: !!organizationId && view === 'map',
   });
 
   const total = tableQuery.data?.total ?? 0;
@@ -60,9 +60,9 @@ export function SignalementsList() {
   const canPrev = page > 1;
 
   function handleTakeCharge(r: ApiReport) {
-    if (!currentUser || !smeId) return;
+    if (!currentUser || !organizationId) return;
     assignReport.mutate(
-      { reportId: r.id, agentId: currentUser.id, smeId },
+      { reportId: r.id, agentId: currentUser.id, organizationId },
       {
         onSuccess: () => toast.success('Signalement pris en charge'),
         onError: () => toast.error('Erreur lors de la prise en charge'),
@@ -143,7 +143,7 @@ export function SignalementsList() {
           <div className="lg:hidden">
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
               <div className="mb-5">{toolbar}</div>
-              {(tableQuery.isLoading || !smeId) ? (
+              {(tableQuery.isLoading || !organizationId) ? (
                 <div className="flex justify-center py-10">
                   <span className="h-7 w-7 animate-spin rounded-full border-3 border-primary/30 border-t-primary" />
                 </div>
@@ -221,7 +221,7 @@ export function SignalementsList() {
               canPrev={canPrev}
               canNext={canNext}
               toolbar={toolbar}
-              isLoading={tableQuery.isLoading || !smeId}
+              isLoading={tableQuery.isLoading || !organizationId}
               isError={tableQuery.isError}
               getRowKey={(r) => r.id}
             />
@@ -232,7 +232,7 @@ export function SignalementsList() {
           <div className="mb-4">{toolbar}</div>
           <ReportsMapView
             reports={mapQuery.data?.data ?? []}
-            isLoading={mapQuery.isLoading || !smeId}
+            isLoading={mapQuery.isLoading || !organizationId}
           />
         </div>
       )}

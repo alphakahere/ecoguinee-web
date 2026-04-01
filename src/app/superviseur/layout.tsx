@@ -60,7 +60,7 @@ export default function SuperviseurLayout({ children }: { children: React.ReactN
   const sidebarUser = { name: userName, initials: userInitials, subtitle: roleBadge };
 
   return (
-    <AuthGuard allowedRoles={['MANAGER', 'SUPERVISOR']} requireSme>
+    <AuthGuard allowedRoles={['MANAGER', 'SUPERVISOR']} requireOrganization>
     <div className="flex h-screen overflow-hidden bg-background">
       <motion.aside
         animate={{ width: collapsed ? 56 : 224 }}

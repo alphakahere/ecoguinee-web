@@ -32,7 +32,7 @@ export default function AdminCampagneNouvellePage() {
         type: values.type,
         zoneId,
         address: values.address || undefined,
-        smeId: values.smeId || undefined,
+        organizationId: values.organizationId || undefined,
         scheduledDate: new Date(values.scheduledDate).toISOString(),
         endDate: values.endDate ? new Date(values.endDate).toISOString() : undefined,
         creatorId: currentUser?.id ?? '',

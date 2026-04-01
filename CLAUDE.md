@@ -96,7 +96,7 @@ src/
 │   ├── interventions.ts
 │   ├── campaigns.ts
 │   ├── zones.ts
-│   ├── smes.ts
+│   ├── organizations.ts
 │   └── users.ts
 │
 └── hooks/
@@ -105,7 +105,7 @@ src/
     │   ├── useInterventions.ts
     │   ├── useCampaigns.ts
     │   ├── useZones.ts
-    │   ├── useSMEs.ts
+    │   ├── useOrganizations.ts
     │   └── useUsers.ts
     └── mutations/                # useMutation hooks (one file per action)
         ├── useCreateReport.ts

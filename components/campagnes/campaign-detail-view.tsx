@@ -179,8 +179,8 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                 {campaign.endDate && (
                   <div className="flex items-start gap-3"><Calendar className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" /><span className="font-mono text-sm">Fin: {formatDate(campaign.endDate)}</span></div>
                 )}
-                {campaign.sme && (
-                  <div className="flex items-center gap-3"><Building2 className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm">{campaign.sme.name}</span></div>
+                {campaign.organization && (
+                  <div className="flex items-center gap-3"><Building2 className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm">{campaign.organization.name}</span></div>
                 )}
                 {campaign.agent && (
                   <div className="flex items-center gap-3"><Users className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm text-muted-foreground">Agent : {campaign.agent.name}</span></div>

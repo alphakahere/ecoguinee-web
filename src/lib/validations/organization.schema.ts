@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const smeFormSchema = z.object({
+export const organizationFormSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
   email: z
     .string()
@@ -19,4 +19,4 @@ export const smeFormSchema = z.object({
   zoneIds: z.array(z.string()).optional(),
 });
 
-export type SMEFormInput = z.infer<typeof smeFormSchema>;
+export type OrganizationFormInput = z.infer<typeof organizationFormSchema>;

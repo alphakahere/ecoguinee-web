@@ -5,7 +5,7 @@ import { X, Wrench } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useCreateIntervention } from '@/hooks/mutations/useCreateIntervention';
-import { useSMEs } from '@/hooks/queries/useSMEs';
+import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import { useUsers } from '@/hooks/queries/useUsers';
 
 interface Props {
@@ -15,29 +15,29 @@ interface Props {
 }
 
 export function CreateInterventionModal({ open, reportId, onClose }: Props) {
-  const [smeId, setSmeId] = useState('');
+  const [organizationId, setOrganizationId] = useState('');
   const [agentId, setAgentId] = useState('');
   const [notes, setNotes] = useState('');
 
   const createIntervention = useCreateIntervention();
-  const { data: smesData } = useSMEs({ page: 1, limit: 100 });
+  const { data: organizationsData } = useOrganizations({ page: 1, limit: 100 });
   const { data: agentsData } = useUsers({ roleGroup: 'agent', page: 1, limit: 100 });
 
-  const smes = smesData?.data ?? [];
+  const organizations = organizationsData?.data ?? [];
   const agents = agentsData?.data ?? [];
 
   useEffect(() => {
-    if (open) { setSmeId(''); setAgentId(''); setNotes(''); }
+    if (open) { setOrganizationId(''); setAgentId(''); setNotes(''); }
   }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!smeId) { toast.error('Veuillez sélectionner une organisation'); return; }
+    if (!organizationId) { toast.error('Veuillez sélectionner une organisation'); return; }
     if (!agentId) { toast.error('Veuillez sélectionner un agent'); return; }
     try {
       await createIntervention.mutateAsync({
         reportId,
-        smeId,
+        organizationId,
         agentId,
         notes: notes.trim() || undefined,
       });
@@ -82,9 +82,9 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Organisation *</label>
-                  <select className={`${inputCls} appearance-none`} value={smeId} onChange={(e) => setSmeId(e.target.value)}>
+                  <select className={`${inputCls} appearance-none`} value={organizationId} onChange={(e) => setOrganizationId(e.target.value)}>
                     <option value="">— Sélectionner une organisation —</option>
-                    {smes.map((s) => (
+                    {organizations.map((s) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
                   </select>

@@ -29,16 +29,16 @@ interface AdminCampaignDetailProps {
   id: string;
   /** List index path, e.g. `/admin/campagnes` or `/superviseur/campagnes` */
   listPath?: string;
-  /** When set, only campaigns for this SME are shown; others → introuvable */
-  enforceSmeId?: string;
-  enforceSmeName?: string;
+  /** When set, only campaigns for this organization are shown; others → introuvable */
+  enforceOrganizationId?: string;
+  enforceOrganizationName?: string;
 }
 
 export function AdminCampaignDetail({
   id,
   listPath = '/admin/campagnes',
-  enforceSmeId,
-  enforceSmeName,
+  enforceOrganizationId,
+  enforceOrganizationName,
 }: AdminCampaignDetailProps) {
   const { data: campaign, isLoading, isError } = useCampaign(id);
   const updateCampaign = useUpdateCampaign();
@@ -70,7 +70,7 @@ export function AdminCampaignDetail({
     );
   }
 
-  if (enforceSmeId && campaign.smeId !== enforceSmeId) {
+  if (enforceOrganizationId && campaign.organizationId !== enforceOrganizationId) {
     return (
       <div className="space-y-4">
         <Link href={listPath} className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
@@ -213,10 +213,10 @@ export function AdminCampaignDetail({
                 <span className="font-mono text-xs">{campaign.zone.name}</span>
               </div>
             )}
-            {campaign.sme && (
+            {campaign.organization && (
               <div className="flex items-center gap-2 text-sm">
                 <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="font-mono text-xs">{campaign.sme.name}</span>
+                <span className="font-mono text-xs">{campaign.organization.name}</span>
               </div>
             )}
             {campaign.agent && (

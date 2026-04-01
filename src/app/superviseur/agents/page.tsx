@@ -46,7 +46,7 @@ const pageSize = 10;
 export default function SuperviseurAgentsPage() {
   const currentUser = useAuthStore((s) => s.user);
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
   const pmeName = overview?.pme.name ?? '';
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -59,20 +59,20 @@ export default function SuperviseurAgentsPage() {
 
   const filters = useMemo(
     () =>
-      smeId
+      organizationId
         ? {
             roleGroup: 'agent' as const,
-            smeId,
+            organizationId,
             search: debouncedSearch || undefined,
             status: statusFilter || undefined,
             page,
             limit: pageSize,
           }
         : undefined,
-    [smeId, debouncedSearch, statusFilter, page],
+    [organizationId, debouncedSearch, statusFilter, page],
   );
 
-  const { data, isLoading, isError } = useUsers(filters, { enabled: !!smeId });
+  const { data, isLoading, isError } = useUsers(filters, { enabled: !!organizationId });
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const canNext = page < totalPages;
@@ -95,7 +95,7 @@ export default function SuperviseurAgentsPage() {
     setModalOpen(true);
   };
   const openEdit = (u: User) => {
-    if (smeId && u.smeId && u.smeId !== smeId) {
+    if (organizationId && u.organizationId && u.organizationId !== organizationId) {
       toast.error('Cet utilisateur n\'appartient pas à votre organisation.');
       return;
     }
@@ -108,7 +108,7 @@ export default function SuperviseurAgentsPage() {
   };
 
   const handleSaveFull = async (payload: UserSaveFullPayload) => {
-    if (!smeId) return;
+    if (!organizationId) return;
     try {
       if (payload.id) {
         await updateUser.mutateAsync({
@@ -120,7 +120,7 @@ export default function SuperviseurAgentsPage() {
             role: 'AGENT',
             territoire: payload.territoire,
             status: payload.status,
-            smeId,
+            organizationId,
           },
         });
         toast.success('Agent mis à jour');
@@ -133,7 +133,7 @@ export default function SuperviseurAgentsPage() {
           territoire: payload.territoire,
           status: payload.status ?? 'ACTIVE',
           password: payload.password,
-          smeId,
+          organizationId,
         });
         toast.success('Agent créé');
       }
@@ -178,14 +178,14 @@ export default function SuperviseurAgentsPage() {
   };
 
   const onExportCsv = useCallback(() => {
-    if (!smeId) return;
+    if (!organizationId) return;
     usersService.exportCsv({
       roleGroup: 'agent',
-      smeId,
+      organizationId,
       search: debouncedSearch || undefined,
       status: statusFilter || undefined,
     });
-  }, [smeId, debouncedSearch, statusFilter]);
+  }, [organizationId, debouncedSearch, statusFilter]);
 
   const canDelete = Boolean(editUser && editUser.id !== currentUser?.id);
 
@@ -311,13 +311,13 @@ export default function SuperviseurAgentsPage() {
             type="button"
             variant="outline"
             onClick={onExportCsv}
-            disabled={!smeId}
+            disabled={!organizationId}
             className="font-mono text-xs"
           >
             <Download className="mr-2 h-4 w-4" />
             Exporter CSV
           </Button>
-          <Button type="button" onClick={openCreate} disabled={!smeId} className="font-mono text-xs">
+          <Button type="button" onClick={openCreate} disabled={!organizationId} className="font-mono text-xs">
             <Plus className="mr-2 h-4 w-4" />
             Nouvel agent
           </Button>
@@ -352,7 +352,7 @@ export default function SuperviseurAgentsPage() {
     </div>
   );
 
-  if (!overviewLoading && !smeId) {
+  if (!overviewLoading && !organizationId) {
     return (
       <div>
         <PageHeader title="Agents" description="Équipe terrain" />

@@ -22,7 +22,7 @@ export const interventionsService = {
   async create(
     payload: Omit<
       ApiIntervention,
-      'id' | 'createdAt' | 'updatedAt' | 'agent' | 'report' | 'sme'
+      'id' | 'createdAt' | 'updatedAt' | 'agent' | 'report' | 'organization'
     >,
   ): Promise<ApiIntervention> {
     const { data } = await api.post<ApiIntervention>('/interventions', payload);

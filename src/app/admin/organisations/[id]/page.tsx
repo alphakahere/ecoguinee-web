@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { useSME } from '@/hooks/queries/useSMEs';
+import { useOrganization } from '@/hooks/queries/useOrganizations';
 import { OrganisationDetail } from '@/components/admin/organisation-detail';
 
 interface PageProps {
@@ -10,7 +10,7 @@ interface PageProps {
 
 export default function OrganisationDetailPage({ params }: PageProps) {
   const { id } = use(params);
-  const { data: organisation, isLoading, isError } = useSME(id);
+  const { data: organisation, isLoading, isError } = useOrganization(id);
 
   if (isLoading) {
     return (

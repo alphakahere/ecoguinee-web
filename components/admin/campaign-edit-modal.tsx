@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import { useZones } from '@/hooks/queries/useZones';
-import { useSMEs } from '@/hooks/queries/useSMEs';
+import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import { uploadFiles } from '@/services/uploads';
 import type { ApiCampaign, ApiCampaignType } from '@/types/api';
@@ -17,8 +17,8 @@ interface Props {
   campaign: ApiCampaign;
   onClose: () => void;
   /** When set, organisation cannot be changed (superviseur) */
-  fixedSmeId?: string;
-  fixedSmeName?: string;
+  fixedOrganizationId?: string;
+  fixedOrganizationName?: string;
 }
 
 const TYPES = Object.entries(API_CAMPAIGN_TYPE_META) as [ApiCampaignType, { label: string }][];
@@ -27,14 +27,14 @@ export function CampaignEditModal({
   open,
   campaign,
   onClose,
-  fixedSmeId,
-  fixedSmeName,
+  fixedOrganizationId,
+  fixedOrganizationName,
 }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<ApiCampaignType>('AWARENESS');
   const [zoneId, setZoneId] = useState('');
-  const [smeId, setSmeId] = useState('');
+  const [organizationId, setOrganizationId] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
@@ -44,9 +44,9 @@ export function CampaignEditModal({
 
   const updateCampaign = useUpdateCampaign();
   const { data: zonesData } = useZones({ page: 1, limit: 200 });
-  const { data: smesData } = useSMEs({ page: 1, limit: 100 });
+  const { data: organizationsData } = useOrganizations({ page: 1, limit: 100 });
   const zones = zonesData?.data ?? [];
-  const smes = smesData?.data ?? [];
+  const organizations = organizationsData?.data ?? [];
 
   useEffect(() => {
     if (open && campaign) {
@@ -54,7 +54,7 @@ export function CampaignEditModal({
       setDescription(campaign.description ?? '');
       setType(campaign.type);
       setZoneId(campaign.zoneId ?? '');
-      setSmeId(fixedSmeId ?? campaign.smeId ?? '');
+      setOrganizationId(fixedOrganizationId ?? campaign.organizationId ?? '');
       setScheduledDate(campaign.scheduledDate ? campaign.scheduledDate.slice(0, 16) : '');
       setEndDate(campaign.endDate ? campaign.endDate.slice(0, 16) : '');
       setExistingPhotos(campaign.photos ?? []);
@@ -62,7 +62,7 @@ export function CampaignEditModal({
       setNewPhotoFiles([]);
       setNewDocFiles([]);
     }
-  }, [open, campaign, fixedSmeId]);
+  }, [open, campaign, fixedOrganizationId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +72,7 @@ export function CampaignEditModal({
         uploadFiles(newPhotoFiles),
         uploadFiles(newDocFiles),
       ]);
-      const effectiveSmeId = fixedSmeId ?? smeId;
+      const effectiveOrganizationId = fixedOrganizationId ?? organizationId;
       await updateCampaign.mutateAsync({
         id: campaign.id,
         payload: {
@@ -80,7 +80,7 @@ export function CampaignEditModal({
           description: description.trim() || undefined,
           type,
           zoneId: zoneId || undefined,
-          smeId: effectiveSmeId || undefined,
+          organizationId: effectiveOrganizationId || undefined,
           scheduledDate: scheduledDate ? new Date(scheduledDate).toISOString() : undefined,
           endDate: endDate ? new Date(endDate).toISOString() : undefined,
           photos: [...existingPhotos, ...uploadedPhotos],
@@ -149,14 +149,14 @@ export function CampaignEditModal({
                 </div>
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Organisation organisatrice</label>
-                  {fixedSmeId ? (
+                  {fixedOrganizationId ? (
                     <p className={`${inputCls} bg-muted/40 text-muted-foreground`}>
-                      {fixedSmeName ?? fixedSmeId}
+                      {fixedOrganizationName ?? fixedOrganizationId}
                     </p>
                   ) : (
-                    <select className={`${inputCls} appearance-none`} value={smeId} onChange={(e) => setSmeId(e.target.value)}>
+                    <select className={`${inputCls} appearance-none`} value={organizationId} onChange={(e) => setOrganizationId(e.target.value)}>
                       <option value="">— Aucune —</option>
-                      {smes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      {organizations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                   )}
                 </div>

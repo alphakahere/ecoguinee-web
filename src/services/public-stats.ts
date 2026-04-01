@@ -3,7 +3,7 @@ import { api } from './api';
 export interface PublicStats {
   totalReports: number;
   resolvedReports: number;
-  activeSmes: number;
+  activeOrganizations: number;
   totalCampaigns: number;
   communes: number;
 }

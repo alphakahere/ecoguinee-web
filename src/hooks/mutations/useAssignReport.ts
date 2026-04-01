@@ -5,17 +5,17 @@ import { interventionsService } from '@/services/interventions';
 interface TakeChargePayload {
   reportId: string;
   agentId: string;
-  smeId: string;
+  organizationId: string;
 }
 
 export function useAssignReport() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ reportId, agentId, smeId }: TakeChargePayload) =>
+    mutationFn: ({ reportId, agentId, organizationId }: TakeChargePayload) =>
       interventionsService.create({
         reportId,
         agentId,
-        smeId,
+        organizationId,
         assignedDate: new Date().toISOString(),
       } as never),
     onSuccess: (_data, { reportId }) => {

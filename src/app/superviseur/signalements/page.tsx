@@ -21,7 +21,7 @@ const MAP_PAGE_SIZE = 200;
 
 export default function SuperviseurSignalementsPage() {
   const { data: overview } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
 
   const [view, setView] = useState<ViewMode>('table');
   const [search, setSearch] = useState('');
@@ -33,24 +33,24 @@ export default function SuperviseurSignalementsPage() {
   const resetPage = () => setPage(1);
 
   const filters = {
-    smeId: smeId || undefined,
+    organizationId: organizationId || undefined,
     search: debouncedSearch || undefined,
     status: (statusFilter || undefined) as ReportStatus | undefined,
     severity: (severityFilter || undefined) as ApiSeverity | undefined,
   };
 
-  const tableFilters = smeId
+  const tableFilters = organizationId
     ? { ...filters, page, limit: pageSize }
     : undefined;
-  const mapFilters = smeId
+  const mapFilters = organizationId
     ? { ...filters, page: 1, limit: MAP_PAGE_SIZE }
     : undefined;
 
   const tableQuery = useReports(tableFilters, {
-    enabled: !!smeId && view === 'table',
+    enabled: !!organizationId && view === 'table',
   });
   const mapQuery = useReports(mapFilters, {
-    enabled: !!smeId && view === 'map',
+    enabled: !!organizationId && view === 'map',
   });
 
   const total = mapQuery.data?.total ?? tableQuery.data?.total ?? 0;
@@ -127,7 +127,7 @@ export default function SuperviseurSignalementsPage() {
           canPrev={canPrev}
           canNext={canNext}
           toolbar={toolbar}
-          isLoading={tableQuery.isLoading || !smeId}
+          isLoading={tableQuery.isLoading || !organizationId}
           isError={tableQuery.isError}
           getRowKey={(r) => r.id}
         />
@@ -136,7 +136,7 @@ export default function SuperviseurSignalementsPage() {
           <div className="mb-4">{toolbar}</div>
           <ReportsMapView
             reports={mapQuery.data?.data ?? []}
-            isLoading={mapQuery.isLoading || !smeId}
+            isLoading={mapQuery.isLoading || !organizationId}
           />
         </div>
       )}

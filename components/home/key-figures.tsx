@@ -84,7 +84,7 @@ export function KeyFigures() {
 
   const stats = [
     { icon: MapPin,      color: '#6FCF4A', value: publicStats?.communes ?? 0,        label: 'Communes couvertes' },
-    { icon: Users,       color: '#2D7D46', value: publicStats?.activeSmes ?? 0,      label: 'Organisations partenaires' },
+    { icon: Users,       color: '#2D7D46', value: publicStats?.activeOrganizations ?? 0,      label: 'Organisations partenaires' },
     { icon: Activity,    color: '#E8A020', value: publicStats?.totalReports ?? 0,     label: 'Signalements reçus' },
     { icon: CheckCircle, color: '#D94035', value: publicStats?.resolvedReports ?? 0,  label: 'Signalements traités', suffix: '+' },
     { icon: Megaphone,   color: '#6FCF4A', value: publicStats?.totalCampaigns ?? 0,   label: 'Campagnes réalisées' },

@@ -156,10 +156,10 @@ export function InterventionDetail({ id }: { id: string }) {
             </div>
 
             <div className="border-t border-border pt-3 space-y-2">
-              {intervention.sme && (
+              {intervention.organization && (
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span className="font-mono text-xs">{intervention.sme.name}</span>
+                  <span className="font-mono text-xs">{intervention.organization.name}</span>
                 </div>
               )}
               {intervention.agent && (

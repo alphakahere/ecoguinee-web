@@ -22,7 +22,7 @@ import Image from 'next/image';
 
 export function SuperviseurReportDetail({ id }: { id: string }) {
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
   const pmeName = overview?.pme.name;
 
   const { data: report, isLoading, isError } = useReport(id);
@@ -136,9 +136,9 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
               <Button
                 type="button"
                 onClick={() => setModalOpen(true)}
-                disabled={overviewLoading || !smeId}
+                disabled={overviewLoading || !organizationId}
                 className="font-mono text-xs h-8"
-                title={!smeId && !overviewLoading ? 'Périmètre indisponible' : undefined}
+                title={!organizationId && !overviewLoading ? 'Périmètre indisponible' : undefined}
               >
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
                 {overviewLoading ? 'Chargement…' : 'Assigner un agent'}
@@ -242,11 +242,11 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      {smeId && (
+      {organizationId && (
         <SuperviseurCreateInterventionModal
           open={modalOpen}
           reportId={id}
-          smeId={smeId}
+          organizationId={organizationId}
           pmeName={pmeName}
           onClose={() => setModalOpen(false)}
         />

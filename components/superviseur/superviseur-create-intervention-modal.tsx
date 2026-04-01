@@ -11,7 +11,7 @@ import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
 interface Props {
   open: boolean;
   reportId: string;
-  smeId: string;
+  organizationId: string;
   pmeName?: string;
   onClose: () => void;
 }
@@ -19,7 +19,7 @@ interface Props {
 export function SuperviseurCreateInterventionModal({
   open,
   reportId,
-  smeId,
+  organizationId,
   pmeName,
   onClose,
 }: Props) {
@@ -48,7 +48,7 @@ export function SuperviseurCreateInterventionModal({
     try {
       await createIntervention.mutateAsync({
         reportId,
-        smeId,
+        organizationId,
         agentId,
         notes: notes.trim() || undefined,
       });

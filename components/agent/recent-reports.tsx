@@ -76,7 +76,7 @@ export function RecentReports() {
               <div key={iv.id} className="flex items-center justify-between px-5 py-3 hover:bg-muted/20 transition-colors">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold truncate">{iv.address ?? iv.reportId.slice(0, 8)}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground">{iv.smeName ?? '—'}</p>
+                  <p className="text-[10px] font-mono text-muted-foreground">{iv.organizationName ?? '—'}</p>
                 </div>
                 {sMeta && <Badge className={`${sMeta.bg} ${sMeta.color} border-0 shrink-0`}>{sMeta.label}</Badge>}
               </div>

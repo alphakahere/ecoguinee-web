@@ -146,7 +146,7 @@ export function SignalementDetail({ id }: { id: string }) {
                       <div className="flex items-center gap-3 min-w-0">
                         <Badge className={`${sMeta.bg} ${sMeta.color} border-0 shrink-0`}>{sMeta.label}</Badge>
                         <div className="min-w-0">
-                          <p className="text-xs font-mono truncate">{iv.sme?.name ?? iv.smeId.slice(0, 8)}</p>
+                          <p className="text-xs font-mono truncate">{iv.organization?.name ?? iv.organizationId.slice(0, 8)}</p>
                           <p className="text-[10px] font-mono text-muted-foreground">{iv.agent?.name ?? '—'}</p>
                         </div>
                       </div>

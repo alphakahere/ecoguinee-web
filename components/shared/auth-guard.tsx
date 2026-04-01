@@ -9,12 +9,12 @@ import type { UserRole } from '@/lib/types';
 
 interface AuthGuardProps {
   allowedRoles: UserRole[];
-  /** Require the user to be linked to an SME (smeId or memberSmeId). Shows an error if not. */
-  requireSme?: boolean;
+  /** Require the user to be linked to an organization (organizationId or memberOrganizationId). Shows an error if not. */
+  requireOrganization?: boolean;
   children: React.ReactNode;
 }
 
-export function AuthGuard({ allowedRoles, requireSme = false, children }: AuthGuardProps) {
+export function AuthGuard({ allowedRoles, requireOrganization = false, children }: AuthGuardProps) {
   const router = useRouter();
   const { user, token, setUser, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
@@ -57,7 +57,7 @@ export function AuthGuard({ allowedRoles, requireSme = false, children }: AuthGu
   if (!token) return null;
   if (user && !allowedRoles.includes(user.role)) return null;
 
-  if (requireSme && user && !user.smeId && !user.memberSmeId) {
+  if (requireOrganization && user && !user.organizationId && !user.memberOrganizationId) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center max-w-sm space-y-3">

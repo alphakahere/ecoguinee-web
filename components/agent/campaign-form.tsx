@@ -45,7 +45,7 @@ export function CampaignForm({ campaign }: Props) {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id ?? '';
-  const smeId   = currentUser?.memberSmeId ?? '';
+  const organizationId   = currentUser?.memberOrganizationId ?? '';
 
   const [proofFile, setProofFile]     = useState<File | null>(null);
   const [proofError, setProofError]   = useState('');
@@ -110,7 +110,7 @@ export function CampaignForm({ campaign }: Props) {
             description:   values.description?.trim() || undefined,
             type:          values.type,
             zoneId:        values.zoneId || undefined,
-            smeId:         smeId || undefined,
+            organizationId:         organizationId || undefined,
             scheduledDate: new Date(values.scheduledDate).toISOString(),
             endDate:       values.endDate ? new Date(values.endDate).toISOString() : undefined,
           },
@@ -125,7 +125,7 @@ export function CampaignForm({ campaign }: Props) {
           type:          values.type,
           status:        values.status,
           zoneId:        values.zoneId || undefined,
-          smeId:         smeId || undefined,
+          organizationId:         organizationId || undefined,
           scheduledDate: new Date(values.scheduledDate).toISOString(),
           endDate:       values.endDate ? new Date(values.endDate).toISOString() : undefined,
           creatorId:     agentId,

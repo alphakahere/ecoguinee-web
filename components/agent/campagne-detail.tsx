@@ -217,10 +217,10 @@ export function CampagneDetail({ id }: { id: string }) {
                   <span className="font-mono text-xs">{campaign.agent.name}</span>
                 </div>
               )}
-              {campaign.sme && (
+              {campaign.organization && (
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span className="font-mono text-xs">{campaign.sme.name}</span>
+                  <span className="font-mono text-xs">{campaign.organization.name}</span>
                 </div>
               )}
               {campaign.creator && (

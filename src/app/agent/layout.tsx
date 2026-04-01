@@ -60,7 +60,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <AuthGuard allowedRoles={['AGENT']} requireSme>
+    <AuthGuard allowedRoles={['AGENT']} requireOrganization>
     <AgentNewReportProvider openNewReportModal={openNewReportModal}>
     <div className="flex h-screen overflow-hidden bg-background">
       <aside className="hidden lg:flex w-56 shrink-0 flex-col h-full">

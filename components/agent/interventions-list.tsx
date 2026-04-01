@@ -66,7 +66,7 @@ export function InterventionsList() {
       const m = sev ? SEVERITY_META_API[sev] : null;
       return m ? <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge> : <span>—</span>;
     } },
-    { key: 'sme', label: 'Organisation', render: (iv) => <span className="text-xs font-mono">{iv.sme?.name ?? '—'}</span> },
+    { key: 'organization', label: 'Organisation', render: (iv) => <span className="text-xs font-mono">{iv.organization?.name ?? '—'}</span> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'date', label: 'Date', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : formatDate(iv.createdAt)}</span> },
     {
@@ -135,7 +135,7 @@ export function InterventionsList() {
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <span className="text-xs font-mono truncate">{iv.report?.address ?? `#${iv.reportId.slice(0, 8)}`}</span>
-                        {iv.sme && <span className="text-[10px] font-mono text-muted-foreground">{iv.sme.name}</span>}
+                        {iv.organization && <span className="text-[10px] font-mono text-muted-foreground">{iv.organization.name}</span>}
                       </div>
                       <div className="flex items-center justify-end gap-1">
                         {transitions.map((t) => (

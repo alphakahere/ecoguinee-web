@@ -80,8 +80,8 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   address?: string;
-  smeId?: string;
-  memberSmeId?: string;
+  organizationId?: string;
+  memberOrganizationId?: string;
   territoire?: string;
   createdAt: string;
   updatedAt?: string;

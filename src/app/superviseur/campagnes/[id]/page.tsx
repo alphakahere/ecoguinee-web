@@ -13,9 +13,9 @@ interface Props {
 export default function SuperviseurCampagneDetailPage({ params }: Props) {
   const { id } = use(params);
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-  const smeId = overview?.pme.id;
+  const organizationId = overview?.pme.id;
 
-  if (overviewLoading || !smeId) {
+  if (overviewLoading || !organizationId) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <span className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -42,8 +42,8 @@ export default function SuperviseurCampagneDetailPage({ params }: Props) {
     <AdminCampaignDetail
       id={id}
       listPath="/superviseur/campagnes"
-      enforceSmeId={smeId}
-      enforceSmeName={overview.pme.name}
+      enforceOrganizationId={organizationId}
+      enforceOrganizationName={overview.pme.name}
     />
   );
 }

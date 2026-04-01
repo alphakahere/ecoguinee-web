@@ -46,12 +46,12 @@ export interface ApiZone {
   parentId: string | null;
   parent?: ApiZone;
   children?: ApiZone[];
-  _count?: { reports: number; campaigns: number; smes: number };
+  _count?: { reports: number; campaigns: number; organizations: number };
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ApiSME {
+export interface ApiOrganization {
   id: string;
   name: string;
   email?: string | null;
@@ -97,8 +97,8 @@ export interface ApiIntervention {
   report?: { id: string; address?: string | null; severity?: ApiSeverity };
   agentId: string;
   agent?: { id: string; name: string };
-  smeId: string;
-  sme?: { id: string; name: string };
+  organizationId: string;
+  organization?: { id: string; name: string };
   assignedDate?: string | null;
   resolutionDate?: string | null;
   pvDocument?: string | null;
@@ -125,8 +125,8 @@ export interface ApiCampaign {
   creator?: { id: string; name: string };
   agentId?: string | null;
   agent?: { id: string; name: string };
-  smeId?: string | null;
-  sme?: { id: string; name: string };
+  organizationId?: string | null;
+  organization?: { id: string; name: string };
   documents: string[];
   photos: string[];
   proofDocument?: string | null;
@@ -145,7 +145,7 @@ export interface ZoneFilters {
   limit?: number;
 }
 
-export interface SMEFilters {
+export interface OrganizationFilters {
   search?: string;
   active?: boolean;
   page?: number;
@@ -157,7 +157,7 @@ export interface ApiReportFilters {
   severity?: ApiSeverity;
   type?: ApiWasteType;
   zoneId?: string;
-  smeId?: string;
+  organizationId?: string;
   source?: ReportSource;
   search?: string;
   page?: number;
@@ -168,7 +168,7 @@ export interface ApiCampaignFilters {
   status?: ApiCampaignStatus;
   type?: ApiCampaignType;
   zoneId?: string;
-  smeId?: string;
+  organizationId?: string;
   agentId?: string;
   search?: string;
   page?: number;
@@ -184,7 +184,7 @@ export interface CreateZonePayload {
 }
 export type UpdateZonePayload = Partial<CreateZonePayload>;
 
-export interface CreateSMEPayload {
+export interface CreateOrganizationPayload {
   name: string;
   email?: string;
   phone?: string;
@@ -194,7 +194,7 @@ export interface CreateSMEPayload {
   active?: boolean;
   zoneIds?: string[];
 }
-export type UpdateSMEPayload = Partial<CreateSMEPayload>;
+export type UpdateOrganizationPayload = Partial<CreateOrganizationPayload>;
 
 export interface CreateCampaignPayload {
   title: string;
@@ -207,7 +207,7 @@ export interface CreateCampaignPayload {
   endDate?: string;
   creatorId: string;
   agentId?: string;
-  smeId?: string;
+  organizationId?: string;
   photos?: string[];
   documents?: string[];
   proofDocument?: string;
