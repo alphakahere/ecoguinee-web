@@ -52,7 +52,7 @@ export default function AdminInterventionsPage() {
   };
 
   const columns: Column<ApiIntervention>[] = [
-    { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/hotspots/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.address ?? iv.reportId.slice(0, 8) + '…'}</Link> },
+    { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.address ?? iv.reportId.slice(0, 8) + '…'}</Link> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'sme', label: 'PME', render: (iv) => <span className="text-sm font-mono">{iv.sme?.name ?? iv.smeId.slice(0, 8)}</span> },
     { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? iv.agentId.slice(0, 8)}</span> },

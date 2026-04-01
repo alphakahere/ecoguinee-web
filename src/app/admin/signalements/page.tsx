@@ -61,7 +61,7 @@ export default function AdminHotspotsPage() {
   };
 
   const columns: Column<ApiReport>[] = [
-    { key: 'id', label: 'ID', render: (r) => <Link href={`/admin/hotspots/${r.id}`} className="font-mono text-xs text-primary hover:underline">#SIG-{r.id.slice(0, 6)}</Link> },
+    { key: 'id', label: 'ID', render: (r) => <Link href={`/admin/signalements/${r.id}`} className="font-mono text-xs text-primary hover:underline">#SIG-{r.id.slice(0, 6)}</Link> },
     { key: 'type', label: 'Type', render: (r) => <Badge className={`${WASTE_TYPE_META[r.type].bg} ${WASTE_TYPE_META[r.type].color} border-0`}>{WASTE_TYPE_META[r.type].label}</Badge> },
     { key: 'severity', label: 'Gravité', render: (r) => <Badge className={`${SEVERITY_META_API[r.severity].bg} ${SEVERITY_META_API[r.severity].color} border-0`}>{SEVERITY_META_API[r.severity].label}</Badge> },
     { key: 'zone', label: 'Zone', render: (r) => <span className="text-sm font-mono">{r.zone?.name ?? '—'}</span> },
@@ -73,7 +73,7 @@ export default function AdminHotspotsPage() {
       className: 'text-right',
       render: (r) => (
         <div className="flex items-center justify-end gap-1">
-          <Link href={`/admin/hotspots/${r.id}`} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><Eye className="h-4 w-4" /></Link>
+          <Link href={`/admin/signalements/${r.id}`} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><Eye className="h-4 w-4" /></Link>
           <button type="button" onClick={() => handleDelete(r)} disabled={deleteReport.isPending} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"><Trash2 className="h-4 w-4" /></button>
         </div>
       ),

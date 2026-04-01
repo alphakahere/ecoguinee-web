@@ -112,7 +112,7 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
                     <Building2 className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-sm">{sme ? 'Modifier la PME' : 'Nouvelle PME'}</h2>
+                    <h2 className="font-semibold text-sm">{sme ? 'Modifier l\'organisation' : 'Nouvelle organisation'}</h2>
                     <p className="text-xs text-muted-foreground font-mono">{sme ? `ID: ${sme.id}` : 'Remplir les informations'}</p>
                   </div>
                 </div>
@@ -124,7 +124,7 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
               <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
                 <Field label="Nom *" error={errors.name}>
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input className={`${inputCls} ${errors.name ? 'border-[#D94035]' : ''}`} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Nom de la PME" />
+                  <input className={`${inputCls} ${errors.name ? 'border-[#D94035]' : ''}`} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Nom de l'organisation" />
                 </Field>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -155,7 +155,7 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
                     rows={3}
                     value={form.description}
                     onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                    placeholder="Description de la PME…"
+                    placeholder="Description de l'organisation…"
                   />
                 </div>
 

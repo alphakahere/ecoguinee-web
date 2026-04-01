@@ -37,7 +37,11 @@ export const SUPERVISEUR_NAV: NavItem[] = [
 export const ADMIN_NAV: NavItem[] = [
 	{ label: "Tableau de bord", href: "/admin", icon: "LayoutDashboard" },
 	{ label: "Utilisateurs", href: "/admin/users", icon: "Users" },
-	{ label: "PME", href: "/admin/pme", icon: "Building2" },
+	{
+		label: "Organisations",
+		href: "/admin/organisations",
+		icon: "Building2",
+	},
 	{
 		label: "Campagnes",
 		href: "/admin/campagnes",
@@ -45,7 +49,7 @@ export const ADMIN_NAV: NavItem[] = [
 	},
 	{
 		label: "Signalements",
-		href: "/admin/hotspots",
+		href: "/admin/signalements",
 		icon: "AlertTriangle",
 	},
 	{ label: "Interventions", href: "/admin/interventions", icon: "Wrench" },

@@ -187,11 +187,11 @@ export default function AdminPMEPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Gestion des PME</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">{total} PME enregistrée{total !== 1 ? 's' : ''}</p>
+          <h2 className="text-lg font-semibold tracking-tight">Gestion des organisations</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">{total} organisation enregistrée{total !== 1 ? 's' : ''}</p>
         </div>
         <Button type="button" onClick={openCreate} className="font-mono text-xs">
-          <Plus className="mr-2 h-4 w-4" /> Nouvelle PME
+          <Plus className="mr-2 h-4 w-4" /> Nouvelle organisation
         </Button>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

@@ -135,7 +135,7 @@ export function DashboardSummary() {
             {[
               { label: 'Utilisateurs', href: '/admin/users',       icon: Users,         count: counts?.users ?? 0 },
               { label: 'Territoires',  href: '/admin/territoires', icon: MapIcon,      count: '—' },
-              { label: 'PME',          href: '/admin/pme',         icon: Building2,     count: counts?.smes ?? 0 },
+              { label: 'Organisations', href: '/admin/organisations', icon: Building2, count: counts?.smes ?? 0 },
               { label: 'Signalements', href: '/admin/hotspots',    icon: AlertTriangle, count: counts?.reports ?? 0 },
             ].map((link) => (
               <Link
@@ -165,7 +165,7 @@ export function DashboardSummary() {
               return (
                 <Link
                   key={r.id}
-                  href={`/admin/hotspots/${r.id}`}
+                  href={`/admin/signalements/${r.id}`}
                   className="flex items-center justify-between px-5 py-3 hover:bg-muted/20 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">

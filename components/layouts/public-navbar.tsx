@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MapPin, FileText, LogIn, Map, Megaphone } from 'lucide-react';
+import { MapPin, FileText, LogIn, Map, Megaphone, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth.store';
 
 const NAV_LINKS = [
   { href: '/carte',     label: 'Carte',     icon: Map },
@@ -11,6 +12,7 @@ const NAV_LINKS = [
 
 export function PublicNavbar() {
   const pathname = usePathname();
+  const { user, logout } = useAuthStore();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
@@ -46,9 +48,20 @@ export function PublicNavbar() {
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
-            <LogIn className="w-3.5 h-3.5" /> Connexion
-          </Link>
+          {user ? (
+            <>
+              <Link href={`/${user.role}`} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
+                Tableau de bord
+              </Link>
+              <button onClick={logout} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
+                <LogOut className="w-3.5 h-3.5" /> Déconnexion
+              </button>
+            </>
+          ) : (
+              <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-mono text-muted-foreground hover:bg-muted/50 transition-all">
+                <LogIn className="w-3.5 h-3.5" /> Connexion
+              </Link>
+          )}
           <Link href="/signaler" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-mono hover:bg-primary/90 transition-all hover:shadow-md hover:shadow-primary/30">
             <FileText className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Signaler</span>
