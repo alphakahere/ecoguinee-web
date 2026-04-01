@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { DataTable, type Column } from '@/components/shared/data-table';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select } from '@/components/ui/select';
 import { useSMEs } from '@/hooks/queries/useSMEs';
-import { useZones } from '@/hooks/queries/useZones';
+import { useZoneTree } from '@/hooks/queries/useZones';
 import { useCreateSME } from '@/hooks/mutations/useCreateSME';
 import { useUpdateSME } from '@/hooks/mutations/useUpdateSME';
 import { useDeleteSME } from '@/hooks/mutations/useDeleteSME';
@@ -41,8 +42,7 @@ export default function AdminPMEPage() {
   const canNext = page < totalPages;
   const canPrev = page > 1;
 
-  const { data: zonesData } = useZones();
-  const zonesList = zonesData?.data ?? [];
+  const { data: tree = [] } = useZoneTree();
 
   const createSME = useCreateSME();
   const updateSME = useUpdateSME();
@@ -152,6 +152,13 @@ export default function AdminPMEPage() {
       className: 'text-right',
       render: (s) => (
         <div className="flex items-center justify-end gap-1">
+          <Link
+            href={`/admin/organisations/${s.id}`}
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            title="Voir les détails"
+          >
+            <Eye className="h-4 w-4" />
+          </Link>
           <button
             type="button"
             title="Modifier"
@@ -233,7 +240,7 @@ export default function AdminPMEPage() {
       <SMEModal
         open={modalOpen}
         sme={editSME}
-        zones={zonesList}
+        zones={tree[0]?.children ?? []}
         onClose={close}
         onSave={handleSave}
         isSubmitting={isMutating}

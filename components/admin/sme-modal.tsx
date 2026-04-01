@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { X, Building2, Mail, Phone, MapPin, FileText, ToggleLeft } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { X, Building2, Mail, Phone, MapPin, FileText, ToggleLeft, ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ApiSME, ApiZone, CreateSMEPayload, UpdateSMEPayload } from '@/types/api';
 
@@ -37,6 +37,19 @@ const empty: FormState = {
 export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = false }: SMEModalProps) {
   const [form, setForm] = useState<FormState>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [expandedMunicipalities, setExpandedMunicipalities] = useState<Set<string>>(new Set());
+
+  const toggleMunicipalityExpanded = (municipalityId: string) => {
+    setExpandedMunicipalities((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(municipalityId)) {
+        newSet.delete(municipalityId);
+      } else {
+        newSet.add(municipalityId);
+      }
+      return newSet;
+    });
+  };
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -81,12 +94,50 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
     await onSave(payload, sme?.id);
   };
 
-  const toggleZone = (zoneId: string) => {
+  // Get municipalities and their neighborhoods
+  const municipalities = useMemo(() => {
+    return zones.filter((z) => z.type === "MUNICIPALITY");
+  }, [zones]);
+
+  const getNeighborhoodsForMunicipality = (municipalityId: string): ApiZone[] => {
+    const municipality = zones.find((z) => z.id === municipalityId);
+    return municipality?.children?.filter((z) => z.type === 'NEIGHBORHOOD') ?? [];
+  };
+
+  const toggleMunicipality = (municipalityId: string) => {
+    const neighborhoods = getNeighborhoodsForMunicipality(municipalityId);
+    const neighborhoodIds = neighborhoods.map((n) => n.id);
+
+    // Don't allow selection if no neighborhoods exist
+    if (neighborhoodIds.length === 0) return;
+
+    setForm((f) => {
+      const allNeighborhoodsSelected = neighborhoodIds.every((id) => f.zoneIds.includes(id));
+
+      if (allNeighborhoodsSelected) {
+        // Deselect all neighborhoods
+        return {
+          ...f,
+          zoneIds: f.zoneIds.filter((id) => !neighborhoodIds.includes(id)),
+        };
+      } else {
+        // Select all neighborhoods
+        const newZoneIds = new Set(f.zoneIds);
+        neighborhoodIds.forEach((id) => newZoneIds.add(id));
+        return {
+          ...f,
+          zoneIds: Array.from(newZoneIds),
+        };
+      }
+    });
+  };
+
+  const toggleNeighborhood = (neighborhoodId: string) => {
     setForm((f) => ({
       ...f,
-      zoneIds: f.zoneIds.includes(zoneId)
-        ? f.zoneIds.filter((id) => id !== zoneId)
-        : [...f.zoneIds, zoneId],
+      zoneIds: f.zoneIds.includes(neighborhoodId)
+        ? f.zoneIds.filter((id) => id !== neighborhoodId)
+        : [...f.zoneIds, neighborhoodId],
     }));
   };
 
@@ -105,7 +156,7 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
             transition={{ type: 'spring', stiffness: 350, damping: 30 }}
             className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
           >
-            <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto border border-border overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl pointer-events-auto border border-border overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -160,24 +211,83 @@ export function SMEModal({ open, sme, zones, onClose, onSave, isSubmitting = fal
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">Zones couvertes</label>
-                  <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                    {zones.map((z) => (
-                      <button
-                        key={z.id}
-                        type="button"
-                        onClick={() => toggleZone(z.id)}
-                        className={`text-xs font-mono px-3 py-1.5 rounded-lg border transition-all ${
-                          form.zoneIds.includes(z.id)
-                            ? 'bg-primary/10 border-primary text-primary'
-                            : 'border-border text-muted-foreground hover:bg-muted/50'
-                        }`}
-                      >
-                        {z.name}
-                      </button>
-                    ))}
-                    {zones.length === 0 && (
-                      <p className="text-xs text-muted-foreground">Aucune zone disponible</p>
+                  <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">
+                    Communes et quartiers couvertes
+                  </label>
+                  <div className="border border-border rounded-lg bg-muted/20 max-h-80 overflow-y-auto">
+                    {municipalities.length === 0 ? (
+                      <p className="text-xs text-muted-foreground p-3">Aucune commune disponible</p>
+                    ) : (
+                      municipalities.map((municipality) => {
+                        const neighborhoods = getNeighborhoodsForMunicipality(municipality.id);
+                        const isExpanded = expandedMunicipalities.has(municipality.id);
+                        const selectedCount = form.zoneIds.filter((id) => neighborhoods.some((n) => n.id === id)).length;
+
+                        // Check if all neighborhoods are selected
+                        const isMunicipalitySelected = neighborhoods.length > 0 && neighborhoods.every((n) => form.zoneIds.includes(n.id));
+
+                        return (
+                          <div key={municipality.id} className="border-b border-border last:border-b-0">
+                            {/* Municipality Header - Accordion Trigger */}
+                            <div className={`flex items-center gap-2 p-3 transition-colors ${neighborhoods.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/40'}`}>
+                              <input
+                                type="checkbox"
+                                checked={isMunicipalitySelected}
+                                onChange={() => toggleMunicipality(municipality.id)}
+                                disabled={neighborhoods.length === 0}
+                                className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0 disabled:cursor-not-allowed"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => toggleMunicipalityExpanded(municipality.id)}
+                                disabled={neighborhoods.length === 0}
+                                className="flex items-center gap-2 flex-1 text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <ChevronDown
+                                  className="w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0"
+                                  style={{
+                                    transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                                  }}
+                                />
+                                <span className="text-sm font-semibold flex-1">{municipality.name}</span>
+                              </button>
+                              {neighborhoods.length > 0 ? (
+                                <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+                                  {selectedCount}/{neighborhoods.length}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap italic">
+                                  Aucun quartier
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Neighborhoods - Accordion Content */}
+                            {isExpanded && neighborhoods.length > 0 && (
+                              <div className="bg-muted/10 border-t border-border space-y-1 p-2 pl-10">
+                                {neighborhoods.map((neighborhood) => (
+                                  <button
+                                    key={neighborhood.id}
+                                    type="button"
+                                    onClick={() => toggleNeighborhood(neighborhood.id)}
+                                    className="w-full flex items-center gap-2 p-2 rounded hover:bg-muted/50 transition-colors text-left"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={form.zoneIds.includes(neighborhood.id)}
+                                      onChange={() => { }}
+                                      className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
+                                    />
+                                    <span className="text-xs font-mono text-muted-foreground flex-1">
+                                      {neighborhood.name}
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
