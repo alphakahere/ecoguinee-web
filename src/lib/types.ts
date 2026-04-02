@@ -76,19 +76,18 @@ export interface DashboardStats {
 }
 
 export interface User {
-  id: string;
-  name: string;
-  email?: string;
-  phone: string;
-  role: UserRole;
-  status: UserStatus;
-  address?: string;
-  organizationId?: string;
-  memberOrganizationId?: string;
-  territoire?: string;
-  createdAt: string;
-  updatedAt?: string;
-  lastLogin?: string;
+	id: string;
+	name: string;
+	email?: string;
+	phone: string;
+	role: UserRole;
+	status: UserStatus;
+	address?: string;
+	organizationId?: string;
+	territoire?: string;
+	createdAt: string;
+	updatedAt?: string;
+	lastLogin?: string;
 }
 
 // ── Campaigns ───────────────────────────────────────────────────────────────

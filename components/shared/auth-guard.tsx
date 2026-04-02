@@ -9,7 +9,7 @@ import type { UserRole } from '@/lib/types';
 
 interface AuthGuardProps {
   allowedRoles: UserRole[];
-  /** Require the user to be linked to an organization (organizationId or memberOrganizationId). Shows an error if not. */
+  /** Require the user to be linked to an organization (organizationId). Shows an error if not. */
   requireOrganization?: boolean;
   children: React.ReactNode;
 }
@@ -18,20 +18,20 @@ export function AuthGuard({ allowedRoles, requireOrganization = false, children 
   const router = useRouter();
   const { user, token, setUser, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
-  const [rehydrating, setRehydrating] = useState(false);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount detection
   useEffect(() => { setMounted(true); }, []);
 
   // Rehydrate user from token when user is null (e.g. after page refresh)
   useEffect(() => {
-    if (!mounted || !token || user || rehydrating) return;
-    setRehydrating(true);
+    if (!mounted || !token || user) return;
     authService.me()
       .then((me) => { setUser(me, token); })
-      .catch(() => { logout(); })
-      .finally(() => { setRehydrating(false); });
-  }, [mounted, token, user, rehydrating, setUser, logout]);
+      .catch(() => { logout(); });
+  }, [mounted, token, user, setUser, logout]);
+
+  /** Token without user means persist restored session and /me is in flight (or about to run). */
+  const awaitingUser = mounted && !!token && !user;
 
   useEffect(() => {
     if (!mounted) return;
@@ -46,7 +46,7 @@ export function AuthGuard({ allowedRoles, requireOrganization = false, children 
     }
   }, [mounted, token, user, allowedRoles, router]);
 
-  if (!mounted || rehydrating) {
+  if (!mounted || awaitingUser) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <span className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -57,7 +57,7 @@ export function AuthGuard({ allowedRoles, requireOrganization = false, children 
   if (!token) return null;
   if (user && !allowedRoles.includes(user.role)) return null;
 
-  if (requireOrganization && user && !user.organizationId && !user.memberOrganizationId) {
+  if (requireOrganization && user && !user.organizationId) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center max-w-sm space-y-3">

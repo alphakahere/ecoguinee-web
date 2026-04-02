@@ -45,7 +45,7 @@ export function CampaignForm({ campaign }: Props) {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id ?? '';
-  const organizationId   = currentUser?.memberOrganizationId ?? '';
+  const organizationId = currentUser?.organizationId ?? '';
 
   const [proofFile, setProofFile]     = useState<File | null>(null);
   const [proofError, setProofError]   = useState('');

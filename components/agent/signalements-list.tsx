@@ -45,7 +45,7 @@ function OwnershipBadge({ report, currentUserId }: { report: ApiReport; currentU
 
 export function SignalementsList() {
   const currentUser = useAuthStore((s) => s.user);
-  const organizationId = currentUser?.memberOrganizationId;
+  const organizationId = currentUser?.organizationId;
   const assignReport = useAssignReport();
 
   const [view, setView] = useState<ViewMode>('table');
@@ -79,6 +79,8 @@ export function SignalementsList() {
   const mapQuery = useReports(mapFilters, {
     enabled: !!organizationId && view === 'map',
   });
+
+  console.log(tableQuery);
 
   const total = tableQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
