@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import { uploadFiles } from '@/services/uploads';
-import Image from 'next/image';
 
 const schema = z.object({
   resolutionNote: z.string().optional(),
@@ -208,7 +207,8 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
                     <div className="grid grid-cols-5 gap-1.5">
                       {photoFiles.map((f, i) => (
                         <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
-                          <Image src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
                           <button
                             type="button"
                             onClick={() => removePhoto(i)}

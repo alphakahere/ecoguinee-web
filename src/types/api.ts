@@ -106,6 +106,7 @@ export interface ApiIntervention {
   assignedDate?: string | null;
   resolutionDate?: string | null;
   pvDocument?: string | null;
+  photos?: string[];
   resolutionNote?: string | null;
   createdAt: string;
   updatedAt: string;
