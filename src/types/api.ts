@@ -98,7 +98,7 @@ export interface ApiIntervention {
   status: ApiInterventionStatus;
   notes?: string | null;
   reportId: string;
-  report?: { id: string; reference?: string; address?: string | null; severity?: ApiSeverity };
+  report?: { id: string; reference?: string; address?: string | null; severity?: ApiSeverity; contactName?: string | null; contactPhone?: string | null; zone?: ApiZone; agent?: { id: string; name: string } | null };
   agentId?: string | null;
   agent?: { id: string; name: string };
   organizationId: string;

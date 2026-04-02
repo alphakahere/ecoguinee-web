@@ -45,6 +45,7 @@ export function InterventionsList() {
 
   const updateIntervention = useUpdateIntervention();
   const [resolveTargetId, setResolveTargetId] = useState<string | null>(null);
+  console.log({ interventions });
 
   const handleStatusChange = async (id: string, status: ApiInterventionStatus) => {
     if (status === 'RESOLVED') {
@@ -60,13 +61,44 @@ export function InterventionsList() {
   };
 
   const columns: Column<ApiIntervention>[] = [
-    { key: 'address', label: 'Adresse', render: (iv) => <span className="text-sm font-mono">{iv.report?.address ?? iv.reportId.slice(0, 8)}</span> },
+    {
+      key: 'reference', label: 'Références', render: (iv) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xs font-mono">{iv.reference ?? `#${iv.id.slice(0, 8)}`}</span>
+          <span className="text-[10px] font-mono text-muted-foreground">{iv.report?.reference ?? `#${iv.reportId.slice(0, 8)}`}</span>
+        </div>
+      )
+    },
+    {
+      key: 'address', label: 'Lieu', render: (iv) => <div className="flex flex-col gap-0.5">
+        <span className="text-sm font-mono">{iv.report?.zone?.name}</span>
+        {iv.report?.address && (
+          <span className="text-[10px] font-mono text-muted-foreground">{iv.report?.address}</span>
+        )}
+      </div>
+    },
+    {
+      key: 'contact', label: 'Signalé par', render: (iv) => {
+        const agentReporter = iv.report?.agent;
+        const name = iv.report?.contactName ?? agentReporter?.name;
+        const phone = iv.report?.contactPhone;
+        const isAgent = !!agentReporter && !iv.report?.contactName;
+        if (!name && !phone) return <span className="text-xs text-muted-foreground">—</span>;
+        return (
+          <div className="flex flex-col">
+            <span className="text-xs font-mono">{name}</span>
+            {isAgent && <span className="text-[10px] font-mono text-muted-foreground">Agent</span>}
+            {phone && <span className="text-[10px] font-mono text-muted-foreground">{phone}</span>}
+          </div>
+        );
+      }
+    },
     { key: 'severity', label: 'Gravité', render: (iv) => {
       const sev = iv.report?.severity;
       const m = sev ? SEVERITY_META_API[sev] : null;
       return m ? <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge> : <span>—</span>;
-    } },
-    { key: 'organization', label: 'Organisation', render: (iv) => <span className="text-xs font-mono">{iv.organization?.name ?? '—'}</span> },
+    }
+    },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'date', label: 'Date', render: (iv) => <span className="text-xs font-mono text-muted-foreground">{iv.assignedDate ? formatDate(iv.assignedDate) : formatDate(iv.createdAt)}</span> },
     {
@@ -134,8 +166,16 @@ export function InterventionsList() {
                         </span>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-xs font-mono truncate">{iv.report?.address ?? `#${iv.reportId.slice(0, 8)}`}</span>
-                        {iv.organization && <span className="text-[10px] font-mono text-muted-foreground">{iv.organization.name}</span>}
+                        <span className="text-xs font-mono">{iv.reference ?? `#${iv.id.slice(0, 8)}`}</span>
+                        <span className="text-[10px] font-mono text-muted-foreground">{iv.report?.reference ?? `#${iv.reportId.slice(0, 8)}`}</span>
+                        <span className="text-xs font-mono truncate mt-0.5">{iv.report?.address ?? iv.report?.zone?.name ?? '—'}</span>
+                        {(iv.report?.contactName || iv.report?.contactPhone || iv.report?.agent) && (
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            {iv.report?.contactName ?? iv.report?.agent?.name}
+                            {iv.report?.agent && !iv.report?.contactName ? ' (Agent)' : ''}
+                            {iv.report?.contactPhone ? ` · ${iv.report.contactPhone}` : ''}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center justify-end gap-1">
                         {transitions.map((t) => (
