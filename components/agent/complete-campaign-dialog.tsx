@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, X, FileText, Upload } from 'lucide-react';
+import { CheckCircle, X, FileText, Upload, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -119,6 +119,7 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
 
               {/* Form */}
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+                <fieldset disabled={isPending} className="space-y-4 disabled:opacity-60">
                 {/* Proof document */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
@@ -167,11 +168,14 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
                   />
                 </div>
 
+                </fieldset>
+
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
-                  <button type="button" onClick={handleClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">
+                  <button type="button" onClick={handleClose} disabled={isPending} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50">
                     Annuler
                   </button>
                   <Button type="submit" disabled={isPending} className="font-mono text-xs">
+                    {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
                     {isUploading ? 'Envoi du document…' : updateCampaign.isPending ? 'En cours…' : 'Confirmer la clôture'}
                   </Button>
                 </div>

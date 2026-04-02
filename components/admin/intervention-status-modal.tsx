@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Wrench } from 'lucide-react';
+import { X, Wrench, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 import { INTERVENTION_STATUS_META } from '@/types/api';
@@ -62,6 +62,7 @@ export function InterventionStatusModal({ intervention, onClose, onSave, isSubmi
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <fieldset disabled={isSubmitting} className="space-y-4 disabled:opacity-60">
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Statut</label>
                   <select className={inputCls} value={status} onChange={(e) => setStatus(e.target.value as ApiInterventionStatus)}>
@@ -71,9 +72,12 @@ export function InterventionStatusModal({ intervention, onClose, onSave, isSubmi
                   </select>
                 </div>
 
+                </fieldset>
+
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
-                  <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>
-                  <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60">
+                  <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50">Annuler</button>
+                  <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5">
+                    {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {isSubmitting ? 'En cours…' : 'Enregistrer'}
                   </button>
                 </div>

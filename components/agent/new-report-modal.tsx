@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, MapPin, Navigation } from 'lucide-react';
+import { X, MapPin, Navigation, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -158,6 +158,8 @@ export function NewReportModal({ open, onClose }: Props) {
     setValue('secteur', secteurZones[0].id);
   }, [open, secteurZones, setValue]);
 
+  const isSubmitting = isUploading || createReport.isPending;
+
   const getLocation = () => {
     if (!navigator.geolocation) { toast.error('Géolocalisation non disponible'); return; }
     setGeoLoading(true);
@@ -238,6 +240,7 @@ export function NewReportModal({ open, onClose }: Props) {
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+                <fieldset disabled={isSubmitting} className="space-y-4 disabled:opacity-60">
                 {/* Commune */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Commune *</label>
@@ -348,9 +351,12 @@ export function NewReportModal({ open, onClose }: Props) {
                   <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="Décrivez le problème…" {...register('description')} />
                 </div>
 
+                </fieldset>
+
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
-                  <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>
-                  <Button type="submit" disabled={isUploading || createReport.isPending} className="font-mono text-xs">
+                  <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50">Annuler</button>
+                  <Button type="submit" disabled={isSubmitting} className="font-mono text-xs">
+                    {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
                     {isUploading ? 'Envoi des photos…' : createReport.isPending ? 'En cours…' : 'Créer le signalement'}
                   </Button>
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Megaphone } from 'lucide-react';
+import { X, Megaphone, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
@@ -126,6 +126,7 @@ export function CampaignEditModal({
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <fieldset disabled={updateCampaign.isPending} className="space-y-4 disabled:opacity-60">
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Titre *</label>
                   <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -193,9 +194,12 @@ export function CampaignEditModal({
                   label="Documents"
                 />
 
+                </fieldset>
+
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
-                  <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>
-                  <button type="submit" disabled={updateCampaign.isPending} className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60">
+                  <button type="button" onClick={onClose} disabled={updateCampaign.isPending} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50">Annuler</button>
+                  <button type="submit" disabled={updateCampaign.isPending} className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5">
+                    {updateCampaign.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {updateCampaign.isPending ? 'En cours…' : 'Enregistrer'}
                   </button>
                 </div>

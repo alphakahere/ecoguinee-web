@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useZoneTree } from '@/hooks/queries/useZones';
@@ -133,6 +133,7 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 space-y-5">
+      <fieldset disabled={isPending} className="space-y-5 disabled:opacity-60">
 
       <div>
         <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Titre *</label>
@@ -247,11 +248,14 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
         label="Documents"
       />
 
+      </fieldset>
+
       <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Link href={cancelHref}>
-          <Button type="button" variant="outline">Annuler</Button>
+          <Button type="button" variant="outline" disabled={isPending}>Annuler</Button>
         </Link>
         <Button type="submit" disabled={isPending}>
+          {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
           {isPending ? 'En cours…' : submitLabel}
         </Button>
       </div>

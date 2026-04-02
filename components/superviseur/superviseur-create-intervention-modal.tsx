@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Wrench } from 'lucide-react';
+import { X, Wrench, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -107,6 +107,7 @@ export function SuperviseurCreateInterventionModal({
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <fieldset disabled={createIntervention.isPending} className="space-y-4 disabled:opacity-60">
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
                     Agent assigné *
@@ -148,11 +149,14 @@ export function SuperviseurCreateInterventionModal({
                   />
                 </div>
 
+                </fieldset>
+
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors"
+                    disabled={createIntervention.isPending}
+                    className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50"
                   >
                     Annuler
                   </button>
@@ -163,8 +167,9 @@ export function SuperviseurCreateInterventionModal({
                       overviewLoading ||
                       agents.length === 0
                     }
-                    className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60"
+                    className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5"
                   >
+                    {createIntervention.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {createIntervention.isPending ? 'En cours…' : 'Créer l\'intervention'}
                   </button>
                 </div>

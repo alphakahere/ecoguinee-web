@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Map, Layers, ToggleLeft } from 'lucide-react';
+import { X, Map, Layers, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ApiZone, CreateZonePayload, UpdateZonePayload, ZoneType } from '@/types/api';
 import { ZONE_TYPE_META } from '@/types/api';
@@ -89,6 +89,7 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <fieldset disabled={isSubmitting} className="space-y-4 disabled:opacity-60">
                 <Field label="Nom *" error={errors.name}>
                   <Map className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input className={`${inputCls} ${errors.name ? 'border-[#D94035]' : ''}`} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Nom de la zone" />
@@ -118,10 +119,12 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
                   </Field>
                 )}
 
+                </fieldset>
+
                 <div className="flex justify-end gap-3 pt-2 border-t border-border">
-                  <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors">Annuler</button>
-                  <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-60">
-                    <ToggleLeft className="w-4 h-4" />
+                  <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50">Annuler</button>
+                  <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-1.5 disabled:opacity-60">
+                    {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {isSubmitting ? 'En cours…' : 'Enregistrer'}
                   </button>
                 </div>

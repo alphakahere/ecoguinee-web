@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, User as UserIcon, Mail, Phone, Shield, MapPin, ToggleLeft, Trash2, Lock, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
+import { X, User as UserIcon, Mail, Phone, Shield, MapPin, Loader2, Trash2, Lock, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROLE_META } from '@/lib/types';
 import type { User, UserRole, UserStatus } from '@/lib/types';
@@ -232,6 +232,7 @@ export function UserModal({
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <fieldset disabled={isSubmitting} className="space-y-4 disabled:opacity-60">
                 {variant === 'statusOnly' && user && (
                   <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3 text-sm">
                     <p className="font-semibold">{user.name}</p>
@@ -385,6 +386,8 @@ export function UserModal({
                   </>
                 )}
 
+                </fieldset>
+
                 <div className="flex flex-wrap justify-between gap-3 pt-2 border-t border-border">
                   <div>
                     {canDelete && onDelete && user && (
@@ -403,16 +406,17 @@ export function UserModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors"
+                      disabled={isSubmitting}
+                      className="px-4 py-2 rounded-lg text-sm font-mono border border-border hover:bg-muted/50 transition-colors disabled:opacity-50"
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-60"
+                      className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-1.5 disabled:opacity-60"
                     >
-                      <ToggleLeft className="w-4 h-4" />
+                      {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       {isSubmitting ? 'En cours…' : 'Enregistrer'}
                     </button>
                   </div>
