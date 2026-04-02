@@ -36,6 +36,7 @@ export function isActivePath(currentPath: string, href: string): boolean {
 
 export function getDocumentUrl(url: string): string {
 	const domain = process.env.NEXT_PUBLIC_API_URL;
+	if (!url) return "https://placehold.co/600x400";
 	return url.startsWith("http")
 		? url
 		: `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
@@ -56,6 +57,7 @@ export function documentLabel(url: string, index: number): string {
 // get Image URL
 export function getImageUrl(url: string): string {
 	const domain = process.env.NEXT_PUBLIC_API_URL;
+	if (!url) return "https://placehold.co/600x400";
 	return url.startsWith("http")
 		? url
 		: `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
