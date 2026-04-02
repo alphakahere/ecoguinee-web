@@ -38,7 +38,6 @@ export default function CartePage() {
     [activeData],
   );
 
-  console.log({ activeData });
 
   return (
     <div className="h-screen flex flex-col bg-background">

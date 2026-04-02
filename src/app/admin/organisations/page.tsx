@@ -187,7 +187,7 @@ export default function AdminPMEPage() {
           <h2 className="text-lg font-semibold tracking-tight">Gestion des organisations</h2>
           <p className="mt-0.5 text-sm text-muted-foreground">{total} organisation enregistrée{total !== 1 ? 's' : ''}</p>
         </div>
-        <Button type="button" onClick={() => router.push('/admin/organisations/new')} className="font-mono text-xs">
+        <Button type="button" onClick={() => router.push('/admin/organisations/nouvelle')} className="font-mono text-xs">
           <Plus className="mr-2 h-4 w-4" /> Nouvelle organisation
         </Button>
       </div>
