@@ -35,7 +35,7 @@ export function HotspotDetail({ id }: { id: string }) {
   if (isError || !report) {
     return (
       <div className="space-y-4">
-        <Link href="/admin/hotspots" className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
+        <Link href="/admin/signalements" className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-3.5 h-3.5" /> Retour
         </Link>
         <p className="text-sm font-mono text-muted-foreground py-8">Signalement introuvable.</p>
@@ -51,7 +51,7 @@ export function HotspotDetail({ id }: { id: string }) {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2">
-        <Link href="/admin/hotspots" className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
+        <Link href="/admin/signalements" className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-3.5 h-3.5" /> Signalements
         </Link>
         <span className="text-xs text-muted-foreground">/</span>

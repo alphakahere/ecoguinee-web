@@ -140,7 +140,7 @@ export function DashboardSummary() {
               { label: 'Utilisateurs', href: '/admin/users',       icon: Users,         count: counts?.users ?? 0 },
               { label: 'Territoires',  href: '/admin/territoires', icon: MapIcon,      count: '—' },
               { label: 'Organisations', href: '/admin/organisations', icon: Building2, count: counts?.organizations ?? 0 },
-              { label: 'Signalements', href: '/admin/hotspots',    icon: AlertTriangle, count: counts?.reports ?? 0 },
+              { label: 'Signalements', href: '/admin/signalements', icon: AlertTriangle, count: counts?.reports ?? 0 },
             ].map((link) => (
               <Link
                 key={link.href}
@@ -186,7 +186,7 @@ export function DashboardSummary() {
               );
             })}
             <div className="px-5 py-3">
-              <Link href="/admin/hotspots" className="text-xs font-mono text-primary flex items-center gap-1 hover:underline">
+              <Link href="/admin/signalements" className="text-xs font-mono text-primary flex items-center gap-1 hover:underline">
                 Voir tous <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
