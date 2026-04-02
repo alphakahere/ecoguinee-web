@@ -28,7 +28,7 @@ function toDatetimeLocal(iso?: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export default function AgentModifierCampagnePage({ params }: { params: Promise<{ id: string }> }) {
+export default function SuperviseurModifierCampagnePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
@@ -98,7 +98,7 @@ export default function AgentModifierCampagnePage({ params }: { params: Promise<
         },
       });
       toast.success('Campagne mise à jour !');
-      router.push(`/agent/campagnes/${id}`);
+      router.push(`/superviseur/campagnes/${id}`);
     } catch {
       toast.error('Erreur lors de la mise à jour.');
     }
@@ -123,7 +123,7 @@ export default function AgentModifierCampagnePage({ params }: { params: Promise<
   return (
     <div>
       <Link
-        href={`/agent/campagnes/${id}`}
+        href={`/superviseur/campagnes/${id}`}
         className="inline-flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" /> Retour à la campagne
@@ -136,7 +136,7 @@ export default function AgentModifierCampagnePage({ params }: { params: Promise<
         onSubmit={handleSubmit}
         isPending={updateCampaign.isPending}
         submitLabel="Enregistrer les modifications"
-        cancelHref={`/agent/campagnes/${id}`}
+        cancelHref={`/superviseur/campagnes/${id}`}
       />
     </div>
   );

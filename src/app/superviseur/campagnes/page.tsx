@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Eye, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
@@ -130,6 +130,13 @@ export default function SuperviseurCampagnesPage() {
             aria-label="Voir le détail"
           >
             <Eye className="h-4 w-4" />
+          </Link>
+          <Link
+            href={`/superviseur/campagnes/${c.id}/modifier`}
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label="Modifier"
+          >
+            <Pencil className="h-4 w-4" />
           </Link>
           <button
             type="button"
