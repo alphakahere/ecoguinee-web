@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo } from 'react';
-import { ChevronLeft, MapPin, Calendar, User, Phone } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, MapPin, Calendar, User, Phone, FileText, Download, CheckCircle, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, getImageUrl } from '@/lib/utils';
 import { useReport } from '@/hooks/queries/useReports';
@@ -25,6 +26,8 @@ export function SignalementDetail({ id }: { id: string }) {
   const interventions = (
     interventionsData?.data ?? (Array.isArray(interventionsData) ? interventionsData : [])
   ) as ApiIntervention[];
+  const resolvedIntervention = interventions.find((iv) => iv.status === 'RESOLVED');
+  const [lightboxSrc, setLightboxSrc] = useState<{ images: string[]; idx: number } | null>(null);
 
   const hotspots = useMemo(
     () => (report ? apiReportsToHotspots([report]) : []),
@@ -159,6 +162,91 @@ export function SignalementDetail({ id }: { id: string }) {
               </div>
             )}
           </div>
+
+          {/* Resolution section — visible when a resolved intervention exists */}
+          {resolvedIntervention && (
+            <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-5 space-y-5">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <h3 className="text-sm font-semibold text-green-700 dark:text-green-400">Résolution</h3>
+                {resolvedIntervention.resolutionDate && (
+                  <span className="ml-auto text-[10px] font-mono text-muted-foreground">
+                    {formatDate(resolvedIntervention.resolutionDate)}
+                  </span>
+                )}
+              </div>
+
+              {/* Before / After photos */}
+              {(report.photos.length > 0 || (resolvedIntervention.photos && resolvedIntervention.photos.length > 0)) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Before */}
+                  {report.photos.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Avant</span>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {report.photos.map((url, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setLightboxSrc({ images: report.photos.map(getImageUrl), idx: i })}
+                            className="relative aspect-video rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
+                          >
+                            <Image src={getImageUrl(url)} alt={`Avant ${i + 1}`} fill className="object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* After */}
+                  {resolvedIntervention.photos && resolvedIntervention.photos.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Après</span>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {resolvedIntervention.photos.map((url, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setLightboxSrc({ images: resolvedIntervention.photos!.map(getImageUrl), idx: i })}
+                            className="relative aspect-video rounded-lg overflow-hidden border border-green-500/30 hover:border-green-500 transition-colors"
+                          >
+                            <Image src={getImageUrl(url)} alt={`Après ${i + 1}`} fill className="object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* PV Document */}
+              {resolvedIntervention.pvDocument && (
+                <div className="space-y-1.5">
+                  <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Document PV</span>
+                  <a
+                    href={getImageUrl(resolvedIntervention.pvDocument)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-green-500/20 bg-white/50 dark:bg-white/5 hover:bg-green-500/10 transition-colors"
+                  >
+                    <FileText className="w-5 h-5 text-green-600 shrink-0" />
+                    <span className="text-sm font-mono truncate flex-1">Procès-verbal de clôture</span>
+                    <Download className="w-4 h-4 text-green-600 shrink-0" />
+                  </a>
+                </div>
+              )}
+
+              {/* Resolution note */}
+              {resolvedIntervention.resolutionNote && (
+                <div className="space-y-1.5">
+                  <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Note de clôture</span>
+                  <p className="text-sm font-mono text-muted-foreground whitespace-pre-wrap leading-relaxed bg-white/50 dark:bg-white/5 rounded-xl px-4 py-3 border border-border">
+                    {resolvedIntervention.resolutionNote}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right — info sidebar */}
@@ -218,6 +306,50 @@ export function SignalementDetail({ id }: { id: string }) {
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+          <div className="relative max-w-3xl max-h-[80vh] w-full" onClick={(e) => e.stopPropagation()}>
+            <Image
+              src={lightboxSrc.images[lightboxSrc.idx]}
+              alt=""
+              width={1200}
+              height={800}
+              className="w-full h-auto max-h-[80vh] object-contain rounded-xl"
+            />
+            {lightboxSrc.images.length > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-3">
+                <button
+                  type="button"
+                  onClick={() => setLightboxSrc((prev) => prev && ({ ...prev, idx: (prev.idx - 1 + prev.images.length) % prev.images.length }))}
+                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-mono transition-colors"
+                >
+                  ← Précédent
+                </button>
+                <span className="text-white/60 text-xs font-mono">{lightboxSrc.idx + 1} / {lightboxSrc.images.length}</span>
+                <button
+                  type="button"
+                  onClick={() => setLightboxSrc((prev) => prev && ({ ...prev, idx: (prev.idx + 1) % prev.images.length }))}
+                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-mono transition-colors"
+                >
+                  Suivant →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
