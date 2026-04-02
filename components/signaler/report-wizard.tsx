@@ -9,6 +9,7 @@ import { StepDetails } from './step-details';
 import { StepPhoto } from './step-photo';
 import { StepConfirm } from './step-confirm';
 import { useCreatePublicReport } from '@/hooks/mutations/useCreatePublicReport';
+import { useLocationLabel } from '@/hooks/useLocationLabel';
 import { uploadFiles } from '@/services/uploads';
 
 export type Step = 1 | 2 | 3 | 4;
@@ -47,6 +48,7 @@ export function ReportWizard() {
   const [submitted, setSubmitted] = useState(false);
 
   const createReport = useCreatePublicReport();
+  const locationLabel = useLocationLabel(data.commune, data.quartier, data.secteur);
 
   const update = (d: Partial<ReportData>) => setData((prev) => ({ ...prev, ...d }));
 
@@ -76,7 +78,7 @@ export function ReportWizard() {
         type: WASTE_MAP[data.wasteType] ?? 'SOLID',
         severity: SEVERITY_MAP[data.gravite] ?? 'MODERATE',
         description: data.description.trim() || undefined,
-        address: `${data.commune}, ${data.secteur}`,
+        address: locationLabel,
         latitude: data.latitude || 9.5370,
         longitude: data.longitude || -13.6785,
         zoneId: data.zoneId,

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, MapPin, Calendar, Building2, Users, FileText, Camera, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
-import { useCampaign } from '@/hooks/queries/useCampaigns';
+import { useCampaignBySlug } from '@/hooks/queries/useCampaigns';
 import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
 import { formatDate, getImageUrl } from '@/lib/utils';
 
@@ -14,7 +14,7 @@ interface Props { id: string; basePath?: string; }
 
 export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
-  const { data: campaign, isLoading, isError } = useCampaign(id);
+  const { data: campaign, isLoading, isError } = useCampaignBySlug(id);
 
   const closeLightbox = useCallback(() => setLightboxIdx(null), []);
 

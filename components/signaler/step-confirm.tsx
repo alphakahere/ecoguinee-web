@@ -1,9 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
 import { ChevronRight, Info } from 'lucide-react';
-import { useZoneTree } from '@/hooks/queries/useZones';
-import type { ApiZone } from '@/types/api';
+import { useLocationLabel } from '@/hooks/useLocationLabel';
 import type { ReportData, Step } from './report-wizard';
 
 const GRAVITE_LABEL: Record<string, string> = { faible: 'Faible', modere: 'Modéré', critique: 'Critique' };
@@ -14,22 +12,8 @@ interface Props {
   goTo: (step: Step) => void;
 }
 
-function flattenTree(nodes: ApiZone[]): ApiZone[] {
-  const result: ApiZone[] = [];
-  function walk(n: ApiZone) { result.push(n); n.children?.forEach(walk); }
-  nodes.forEach(walk);
-  return result;
-}
-
 export function StepConfirm({ data, goTo }: Props) {
-  const { data: tree = [] } = useZoneTree();
-  const flat = useMemo(() => flattenTree(tree), [tree]);
-
-  const communeName = flat.find(z => z.id === data.commune)?.name ?? data.commune;
-  const quartierName = flat.find(z => z.id === data.quartier)?.name;
-  const secteurName = flat.find(z => z.id === data.secteur)?.name;
-
-  const locationLabel = [communeName, quartierName, secteurName].filter(Boolean).join(' — ');
+  const locationLabel = useLocationLabel(data.commune, data.quartier, data.secteur);
 
   const summary = [
     { label: locationLabel, step: 1 as Step },
