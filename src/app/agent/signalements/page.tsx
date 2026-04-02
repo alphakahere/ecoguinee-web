@@ -8,7 +8,6 @@ import { useAgentOpenNewReport } from '@/contexts/agent-new-report-context';
 
 export default function AgentSignalementsPage() {
   const { openNewReportModal } = useAgentOpenNewReport();
-  console.log('AgentSignalementsPage');
 
   return (
     <div className="w-full">

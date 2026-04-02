@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Shield, Calendar, Lock } from 'lucide-react';
+import { Mail, Phone, MapPin, Shield, Calendar, Lock, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/stores/auth.store';
+import { useOrganization } from '@/hooks/queries/useOrganizations';
 import { useUpdateUser } from '@/hooks/mutations/useUpdateUser';
+import { ZONE_TYPE_META } from '@/types/api';
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -16,6 +19,8 @@ function initials(name: string): string {
 
 export default function AgentProfilPage() {
   const currentUser = useAuthStore((s) => s.user);
+  const organizationId = currentUser?.organizationId ?? '';
+  const { data: organization } = useOrganization(organizationId);
   const updateUser = useUpdateUser();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -78,6 +83,61 @@ export default function AgentProfilPage() {
           ))}
         </div>
       </div>
+
+      {organization && (
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Building2 className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">{organization.name}</h3>
+              <p className="text-xs text-muted-foreground font-mono">{organization.activityType ?? 'Organisation'}</p>
+            </div>
+          </div>
+          <div className="p-6 space-y-4">
+            {organization.email && (
+              <div className="flex items-center gap-4">
+                <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Email</p>
+                  <p className="text-sm font-mono">{organization.email}</p>
+                </div>
+              </div>
+            )}
+            {organization.phone && (
+              <div className="flex items-center gap-4">
+                <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Téléphone</p>
+                  <p className="text-sm font-mono">{organization.phone}</p>
+                </div>
+              </div>
+            )}
+            {organization.zones && organization.zones.length > 0 && (
+              <div className="flex items-start gap-4">
+                <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide mb-2">Zones d&apos;intervention</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {organization.zones.map((zone) => (
+                      <Badge key={zone.id} variant="outline" className="font-mono text-xs">
+                        {zone.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center gap-3">
