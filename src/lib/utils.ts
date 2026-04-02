@@ -57,7 +57,9 @@ export function documentLabel(url: string, index: number): string {
 // get Image URL
 export function getImageUrl(url: string): string {
 	const domain = process.env.NEXT_PUBLIC_API_URL;
-	if (!url) return "https://placehold.co/600x400";
+	// i don't want 600x400 placeholder image, i don't like the text in the image, i want a transparent image
+	if (!url)
+		return "https://placehold.co/600x400?text=&bg=transparent&fg=transparent";
 	return url.startsWith("http")
 		? url
 		: `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
