@@ -36,10 +36,17 @@ export function isActivePath(currentPath: string, href: string): boolean {
 
 export function getDocumentUrl(url: string): string {
 	const domain = process.env.NEXT_PUBLIC_API_URL;
-	if (!url) return "https://placehold.co/600x400";
-	return url.startsWith("http")
-		? url
-		: `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
+	if (!url) {
+		return (
+			"https://placehold.co/600x400?text=" +
+			encodeURIComponent("Aucun document") +
+			"&bg=transparent&fg=transparent"
+		);
+	} else if (url.startsWith("http")) {
+		return url;
+	} else {
+		return `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
+	}
 }
 
 export function documentLabel(url: string, index: number): string {
@@ -57,10 +64,15 @@ export function documentLabel(url: string, index: number): string {
 // get Image URL
 export function getImageUrl(url: string): string {
 	const domain = process.env.NEXT_PUBLIC_API_URL;
-	// i don't want 600x400 placeholder image, i don't like the text in the image, i want a transparent image
-	if (!url)
-		return "https://placehold.co/600x400?text=&bg=transparent&fg=transparent";
-	return url.startsWith("http")
-		? url
-		: `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
+	if (!url) {
+		return (
+			"https://placehold.co/600x400?text=" +
+			encodeURIComponent("Aucune image") +
+			"&bg=transparent&fg=transparent"
+		);
+	} else if (url.startsWith("http")) {
+		return url;
+	} else {
+		return `${domain}${url.startsWith("/") ? "" : "/"}${url}`;
+	}
 }

@@ -40,10 +40,12 @@ export default function AdminCampagneModifierPage({ params }: Props) {
 
   const flat = useMemo(() => flattenTree(tree), [tree]);
 
+  const zoneId = campaign?.zoneId;
+
   // Resolve commune/quartier/secteur from the campaign's zoneId
   const locationInit = useMemo(() => {
-    if (!campaign?.zoneId || flat.length === 0) return {};
-    const zone = flat.find((z) => z.id === campaign.zoneId);
+    if (!zoneId || flat.length === 0) return {};
+    const zone = flat.find((z) => z.id === zoneId);
     if (!zone) return {};
 
     if (zone.type === 'MUNICIPALITY') {
@@ -57,7 +59,7 @@ export default function AdminCampagneModifierPage({ params }: Props) {
       return { commune: quartier?.parentId ?? '', quartier: zone.parentId ?? '', secteur: zone.id };
     }
     return {};
-  }, [campaign?.zoneId, flat]);
+  }, [zoneId, flat]);
 
   const initialValues = campaign
     ? {

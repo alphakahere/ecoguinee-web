@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import { Upload, X, FileText } from 'lucide-react';
+import { getImageUrl } from '@/lib/utils';
 
 interface Props {
   files: File[];
@@ -89,8 +90,8 @@ export function FileUploadZone({
             >
               {isImageUrl(url) ? (
                 <Image
-                  src={`${apiBase}${url}`}
-                  alt=""
+                  src={getImageUrl(url)}
+                  alt={url}
                   className="w-full h-full object-cover"
                   fill
                   unoptimized
