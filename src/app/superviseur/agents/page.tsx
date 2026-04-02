@@ -118,8 +118,6 @@ export default function SuperviseurAgentsPage() {
             email: payload.email,
             phone: payload.phone,
             role: 'AGENT',
-            territoire: payload.territoire,
-            status: payload.status,
             organizationId: payload.organizationId,
           },
         });
@@ -130,8 +128,6 @@ export default function SuperviseurAgentsPage() {
           email: payload.email,
           phone: payload.phone,
           role: 'AGENT',
-          territoire: payload.territoire,
-          status: payload.status ?? 'ACTIVE',
           password: payload.password,
           organizationId: payload.organizationId,
         });
