@@ -120,7 +120,7 @@ export default function SuperviseurAgentsPage() {
             role: 'AGENT',
             territoire: payload.territoire,
             status: payload.status,
-            organizationId,
+            organizationId: payload.organizationId,
           },
         });
         toast.success('Agent mis à jour');
@@ -133,7 +133,7 @@ export default function SuperviseurAgentsPage() {
           territoire: payload.territoire,
           status: payload.status ?? 'ACTIVE',
           password: payload.password,
-          organizationId,
+          organizationId: payload.organizationId,
         });
         toast.success('Agent créé');
       }
@@ -391,6 +391,7 @@ export default function SuperviseurAgentsPage() {
         variant="full"
         roleLockedToAgent
         contextSubtitle={pmeName ? `Organisation : ${pmeName}` : undefined}
+        organizationId={organizationId}
         onClose={closeModal}
         onSaveFull={handleSaveFull}
         onDelete={canDelete ? handleDelete : undefined}

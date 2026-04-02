@@ -16,6 +16,7 @@ export interface UserSaveFullPayload {
   role: UserRole;
   address?: string;
   password?: string;
+  organizationId?: string;
 }
 
 interface UserModalProps {
@@ -28,6 +29,8 @@ interface UserModalProps {
   roleLockedToAgent?: boolean;
   /** Sous-titre contexte (ex. Organisation) */
   contextSubtitle?: string;
+  /** ID de l'organisation à rattacher automatiquement */
+  organizationId?: string;
   onClose: () => void;
   onSaveFull?: (payload: UserSaveFullPayload) => void | Promise<void>;
   onSaveStatus?: (id: string, status: UserStatus) => void | Promise<void>;
@@ -78,6 +81,7 @@ export function UserModal({
   roleLockedToAdmin = false,
   roleLockedToAgent = false,
   contextSubtitle,
+  organizationId,
   onClose,
   onSaveFull,
   onSaveStatus,
@@ -154,6 +158,7 @@ export function UserModal({
       role: roleLockedToAdmin ? 'ADMIN' : roleLockedToAgent ? 'AGENT' : form.role,
       address: form.address?.trim() || undefined,
       ...(showPasswordFields && password ? { password } : {}),
+      ...(organizationId ? { organizationId } : {}),
     };
     if ("status" in payload) {
       delete payload.status;
