@@ -9,6 +9,7 @@ export interface UpdateInterventionPayload {
   resolutionDate?: string;
   pvDocument?: string;
   resolutionNote?: string;
+  photos?: string[];
 }
 
 export function useUpdateIntervention() {

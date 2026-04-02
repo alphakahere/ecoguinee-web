@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, X, FileText, Upload } from 'lucide-react';
+import { CheckCircle, X, FileText, Upload, ImagePlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import { uploadFiles } from '@/services/uploads';
+import Image from 'next/image';
 
 const schema = z.object({
   resolutionNote: z.string().optional(),
@@ -26,11 +27,16 @@ interface Props {
 const inputCls = 'w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40';
 const errorCls = 'mt-1 text-[11px] font-mono text-destructive';
 
+const MAX_PHOTOS = 5;
+
 export function ResolveInterventionDialog({ open, interventionId, onClose }: Props) {
   const updateIntervention = useUpdateIntervention();
   const [pvFile, setPvFile] = useState<File | null>(null);
   const [pvError, setPvError] = useState('');
+  const [photoError, setPhotoError] = useState('');
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -41,7 +47,22 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
     reset();
     setPvFile(null);
     setPvError('');
+    setPhotoFiles([]);
     onClose();
+  };
+
+  const handleAddPhotos = (files: FileList | null) => {
+    if (!files) return;
+    const incoming = Array.from(files);
+    setPhotoFiles((prev) => {
+      const combined = [...prev, ...incoming];
+      return combined.slice(0, MAX_PHOTOS);
+    });
+    setPhotoError('');
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotoFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const onSubmit = async (values: FormValues) => {
@@ -53,11 +74,14 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
 
     setIsUploading(true);
     let pvDocument: string;
+    let photos: string[] = [];
     try {
-      const urls = await uploadFiles([pvFile]);
+      const toUpload: File[] = [pvFile, ...photoFiles];
+      const urls = await uploadFiles(toUpload);
       pvDocument = urls[0];
+      photos = urls.slice(1);
     } catch {
-      toast.error("Échec de l'envoi du document PV");
+      toast.error("Échec de l'envoi des fichiers");
       setIsUploading(false);
       return;
     }
@@ -69,6 +93,7 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
         payload: {
           status: 'RESOLVED',
           pvDocument,
+          photos: photos.length > 0 ? photos : undefined,
           resolutionNote: values.resolutionNote?.trim() || undefined,
         },
       });
@@ -98,7 +123,7 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
             className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
           >
             <div
-              className="bg-card rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto border border-border overflow-hidden"
+              className="bg-card rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto border border-border overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -118,7 +143,7 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
                 {/* PV document */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
@@ -153,6 +178,66 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
                     </label>
                   )}
                   {pvError && <p className={errorCls}>{pvError}</p>}
+                </div>
+
+                {/* Photos */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wide">
+                      Photos * ({photoFiles.length}/{MAX_PHOTOS})
+                    </label>
+                    {photoFiles.length < MAX_PHOTOS && (
+                      <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        className="flex items-center gap-1 text-[10px] font-mono text-primary hover:underline"
+                      >
+                        <ImagePlus className="w-3 h-3" /> Ajouter
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => { handleAddPhotos(e.target.files); e.target.value = ''; }}
+                  />
+                  {photoFiles.length > 0 ? (
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {photoFiles.map((f, i) => (
+                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
+                          <Image src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(i)}
+                            className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-2.5 h-2.5 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                      {photoFiles.length < MAX_PHOTOS && (
+                        <button
+                          type="button"
+                          onClick={() => photoInputRef.current?.click()}
+                          className="aspect-square rounded-lg border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-all"
+                        >
+                          <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => photoInputRef.current?.click()}
+                      className="w-full flex items-center justify-center gap-2 py-4 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all text-xs font-mono text-muted-foreground"
+                    >
+                      <ImagePlus className="w-4 h-4" /> Ajouter des photos
+                    </button>
+                  )}
+                  {photoError && <p className={errorCls}>{photoError}</p>}
                 </div>
 
                 {/* Resolution note */}
