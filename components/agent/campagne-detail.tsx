@@ -291,6 +291,7 @@ export function CampagneDetail({ id, basePath = '/agent/campagnes' }: CampagneDe
       <CompleteCampaignDialog
         open={completeOpen}
         campaignId={id}
+        existingPhotos={campaign.photos ?? []}
         onClose={() => setCompleteOpen(false)}
       />
     </div>

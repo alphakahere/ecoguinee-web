@@ -30,7 +30,7 @@ export function CampagnesList() {
 
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
-  const [completeCampaignId, setCompleteCampaignId] = useState<string | null>(null);
+  const [completeTarget, setCompleteTarget] = useState<{ id: string; photos: string[] } | null>(null);
   const pageSize = 15;
   const resetPage = () => setPage(1);
 
@@ -51,10 +51,13 @@ export function CampagnesList() {
   const deleteCampaign = useDeleteCampaign();
   const updateCampaign = useUpdateCampaign();
 
-  async function handleStatusChange(id: string, status: ApiCampaignStatus) {
-    if (status === 'COMPLETED') { setCompleteCampaignId(id); return; }
+  async function handleStatusChange(c: ApiCampaign, status: ApiCampaignStatus) {
+    if (status === 'COMPLETED') {
+      setCompleteTarget({ id: c.id, photos: c.photos ?? [] });
+      return;
+    }
     try {
-      await updateCampaign.mutateAsync({ id, payload: { status } });
+      await updateCampaign.mutateAsync({ id: c.id, payload: { status } });
       toast.success('Statut mis à jour');
     } catch {
       toast.error('Impossible de mettre à jour le statut');
@@ -105,7 +108,7 @@ export function CampagnesList() {
         return (
           <div className="flex items-center justify-end gap-1">
             {transitions.map((t) => (
-              <button key={t.status} type="button" onClick={() => handleStatusChange(c.id, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
+              <button key={t.status} type="button" onClick={() => handleStatusChange(c, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
             ))}
             <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
             <Link href={`/agent/campagnes/${c.id}/modifier`} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
@@ -153,7 +156,7 @@ export function CampagnesList() {
                       {c.zone && <p className="text-[10px] font-mono text-muted-foreground">{c.zone.name}</p>}
                       <div className="flex items-center justify-end gap-1 pt-1 flex-wrap">
                         {(NEXT_STATUS[c.status] ?? []).map((t) => (
-                          <button key={t.status} type="button" onClick={() => handleStatusChange(c.id, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
+                          <button key={t.status} type="button" onClick={() => handleStatusChange(c, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
                         ))}
                         <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
                         <Link href={`/agent/campagnes/${c.id}/modifier`} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
@@ -200,9 +203,10 @@ export function CampagnesList() {
       </div>
 
       <CompleteCampaignDialog
-        open={completeCampaignId !== null}
-        campaignId={completeCampaignId ?? ''}
-        onClose={() => setCompleteCampaignId(null)}
+        open={completeTarget !== null}
+        campaignId={completeTarget?.id ?? ''}
+        existingPhotos={completeTarget?.photos ?? []}
+        onClose={() => setCompleteTarget(null)}
       />
     </>
   );

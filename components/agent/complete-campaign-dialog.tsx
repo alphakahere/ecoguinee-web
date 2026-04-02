@@ -8,8 +8,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import { uploadFiles } from '@/services/uploads';
+import { MAX_PHOTO_BYTES, MAX_DOC_BYTES, MAX_PHOTOS } from '@/lib/constants';
 
 const schema = z.object({
   proofNote: z.string().optional(),
@@ -20,16 +22,19 @@ type FormValues = z.infer<typeof schema>;
 interface Props {
   open: boolean;
   campaignId: string;
+  /** Existing campaign photo URLs (merged with newly uploaded photos on submit). */
+  existingPhotos?: string[];
   onClose: () => void;
 }
 
 const inputCls = 'w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40';
 const errorCls = 'mt-1 text-[11px] font-mono text-destructive';
 
-export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
+export function CompleteCampaignDialog({ open, campaignId, existingPhotos = [], onClose }: Props) {
   const updateCampaign = useUpdateCampaign();
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofError, setProofError] = useState('');
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const { register, handleSubmit, reset } = useForm<FormValues>({
@@ -41,7 +46,21 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
     reset();
     setProofFile(null);
     setProofError('');
+    setPhotoFiles([]);
     onClose();
+  };
+
+  const handleAddPhotos = (files: File[]) => {
+    const accepted: File[] = [];
+    for (const f of files) {
+      if (f.size > MAX_PHOTO_BYTES) {
+        toast.error(`${f.name} dépasse la limite de 10 Mo`);
+        continue;
+      }
+      accepted.push(f);
+    }
+    if (accepted.length === 0) return;
+    setPhotoFiles((prev) => [...prev, ...accepted].slice(0, MAX_PHOTOS));
   };
 
   const onSubmit = async (values: FormValues) => {
@@ -53,11 +72,14 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
 
     setIsUploading(true);
     let proofDocument: string;
+    let newPhotoUrls: string[] = [];
     try {
-      const urls = await uploadFiles([proofFile]);
+      const toUpload: File[] = [proofFile, ...photoFiles];
+      const urls = await uploadFiles(toUpload);
       proofDocument = urls[0];
+      newPhotoUrls = urls.slice(1);
     } catch {
-      toast.error("Échec de l'envoi du document de preuve");
+      toast.error("Échec de l'envoi des fichiers");
       setIsUploading(false);
       return;
     }
@@ -70,6 +92,7 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
           status: 'COMPLETED',
           proofDocument,
           proofNote: values.proofNote?.trim() || undefined,
+          photos: [...existingPhotos, ...newPhotoUrls],
         },
       });
       toast.success('Campagne clôturée');
@@ -98,7 +121,7 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
             className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
           >
             <div
-              className="bg-card rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto border border-border overflow-hidden"
+              className="bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto pointer-events-auto border border-border overflow-x-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -109,7 +132,7 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
                   </div>
                   <div>
                     <h2 className="font-semibold text-sm">Clôturer la campagne</h2>
-                    <p className="text-xs text-muted-foreground font-mono">Joindre le document de preuve</p>
+                    <p className="text-xs text-muted-foreground font-mono">Document de preuve et photos optionnelles</p>
                   </div>
                 </div>
                 <button type="button" onClick={handleClose} className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
@@ -123,7 +146,7 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
                 {/* Proof document */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">
-                    Document de preuve *
+                      Document de preuve * (PDF, max 25 Mo)
                   </label>
                   {proofFile ? (
                     <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-primary/30 bg-primary/5">
@@ -143,11 +166,19 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
                       <span className="text-xs font-mono text-muted-foreground">Cliquer pour choisir un fichier</span>
                       <input
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif,image/jpg"
+                            accept="application/pdf"
                         className="hidden"
                         onChange={(e) => {
                           const f = e.target.files?.[0];
-                          if (f) { setProofFile(f); setProofError(''); }
+                          if (f) {
+                            if (f.size > MAX_DOC_BYTES) {
+                              setProofError('Le document ne doit pas dépasser 25 Mo');
+                              e.target.value = '';
+                              return;
+                            }
+                            setProofFile(f);
+                            setProofError('');
+                          }
                           e.target.value = '';
                         }}
                       />
@@ -155,6 +186,15 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
                   )}
                   {proofError && <p className={errorCls}>{proofError}</p>}
                 </div>
+
+                  <FileUploadZone
+                    files={photoFiles}
+                    onAddFiles={handleAddPhotos}
+                    onRemoveFile={(i) => setPhotoFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                    accept="image/*"
+                    max={MAX_PHOTOS}
+                    label="Photos de clôture (optionnel, max 10 Mo chacune)"
+                  />
 
                 {/* Proof note */}
                 <div>
@@ -176,7 +216,7 @@ export function CompleteCampaignDialog({ open, campaignId, onClose }: Props) {
                   </button>
                   <Button type="submit" disabled={isPending} className="font-mono text-xs">
                     {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
-                    {isUploading ? 'Envoi du document…' : updateCampaign.isPending ? 'En cours…' : 'Confirmer la clôture'}
+                    {isUploading ? 'Envoi des fichiers…' : updateCampaign.isPending ? 'En cours…' : 'Confirmer la clôture'}
                   </Button>
                 </div>
               </form>

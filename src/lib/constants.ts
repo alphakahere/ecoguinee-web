@@ -1,4 +1,4 @@
-import type { NavItem } from './types';
+import type { NavItem } from "./types";
 
 export const AGENT_NAV: NavItem[] = [
 	{ label: "Accueil", href: "/agent", icon: "Home" },
@@ -60,3 +60,7 @@ export const ADMIN_NAV: NavItem[] = [
 	},
 	{ label: "Paramètres", href: "/admin/parametres", icon: "Settings" },
 ];
+
+export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+export const MAX_DOC_BYTES = 25 * 1024 * 1024;
+export const MAX_PHOTOS = 5;
