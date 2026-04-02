@@ -21,9 +21,9 @@ import { cn } from '@/lib/utils';
 const MAP_PAGE_SIZE = 200;
 
 const OWNERSHIP_OPTIONS: { value: OwnershipFilter; label: string }[] = [
-  { value: 'all', label: 'Tous' },
+  { value: 'all', label: 'Tous les signalements' },
   { value: 'mine', label: 'Mes signalements' },
-  { value: 'organization', label: 'Organisation' },
+  { value: 'organization', label: 'Autres signalements' },
 ];
 
 function OwnershipBadge({ report, currentUserId }: { report: ApiReport; currentUserId?: string }) {
@@ -32,7 +32,7 @@ function OwnershipBadge({ report, currentUserId }: { report: ApiReport; currentU
   return (
     <span
       className={cn(
-        'text-[9px] font-mono px-1.5 py-0.5 rounded-full shrink-0',
+        'text-[9px] font-mono px-1.5 py-0.5 rounded-full shrink-0 w-min whitespace-nowrap',
         isOwn
           ? 'bg-[#6FCF4A]/15 text-[#6FCF4A]'
           : 'bg-muted text-muted-foreground',
@@ -80,7 +80,6 @@ export function SignalementsList() {
     enabled: !!organizationId && view === 'map',
   });
 
-  console.log(tableQuery);
 
   const total = tableQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -99,9 +98,19 @@ export function SignalementsList() {
   }
 
   const columns: Column<ApiReport>[] = [
+    { key: 'Reference', label: 'Référence', render: (r) => <span className="text-xs font-mono text-muted-foreground">{r.reference ?? `#${r.id.slice(0, 8)}`}</span> },
     { key: 'type', label: 'Type', render: (r) => <Badge className={`${WASTE_TYPE_META[r.type].bg} ${WASTE_TYPE_META[r.type].color} border-0`}>{WASTE_TYPE_META[r.type].label}</Badge> },
     { key: 'severity', label: 'Gravité', render: (r) => <Badge className={`${SEVERITY_META_API[r.severity].bg} ${SEVERITY_META_API[r.severity].color} border-0`}>{SEVERITY_META_API[r.severity].label}</Badge> },
-    { key: 'zone', label: 'Zone', render: (r) => <span className="text-sm font-mono">{r.zone?.name ?? '—'}</span> },
+    {
+      key: 'zone', label: 'Zone', render: (r) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-mono">{r.zone?.name ?? '—'}</span>
+          {r.zone?.parent && (
+            <span className="text-[10px] font-mono text-muted-foreground">{r.zone.parent.name}</span>
+          )}
+        </div>
+      )
+    },
     { key: 'source', label: 'Source', render: (r) => <span className="text-xs font-mono text-muted-foreground">{REPORT_SOURCE_META[r.source].label}</span> },
     {
       key: 'createdBy', label: 'Créé par',

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useMemo } from 'react';
 import { ChevronLeft, MapPin, Calendar, User, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getImageUrl } from '@/lib/utils';
 import { useReport } from '@/hooks/queries/useReports';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { MapLoader } from '@/components/maps/map-loader';
@@ -92,7 +92,7 @@ export function SignalementDetail({ id }: { id: string }) {
               <h3 className="text-sm font-semibold mb-3">Photos ({report.photos.length})</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {report.photos.map((url, i) => (
-                  <Image key={i} src={url} alt={`Photo ${i + 1}`} width={100} height={100} quality={100} priority loading="eager" unoptimized className="rounded-xl border border-border object-cover aspect-video w-full" />
+                  <Image key={i} src={getImageUrl(url)} alt={`Photo ${i + 1}`} width={100} height={100} quality={100} priority loading="eager" unoptimized className="rounded-xl border border-border object-cover aspect-video w-full" />
                 ))}
               </div>
             </div>
