@@ -97,6 +97,8 @@ export function SignalementsList() {
     );
   }
 
+  console.log({ data: tableQuery.data?.data });
+
   const columns: Column<ApiReport>[] = [
     { key: 'Reference', label: 'Référence', render: (r) => <span className="text-xs font-mono text-muted-foreground">{r.reference ?? `#${r.id.slice(0, 8)}`}</span> },
     { key: 'type', label: 'Type', render: (r) => <Badge className={`${WASTE_TYPE_META[r.type].bg} ${WASTE_TYPE_META[r.type].color} border-0`}>{WASTE_TYPE_META[r.type].label}</Badge> },

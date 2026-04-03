@@ -178,37 +178,18 @@ export function SignalementDetail({ id }: { id: string }) {
 
               {/* Before / After photos */}
               {(report.photos.length > 0 || (resolvedIntervention.photos && resolvedIntervention.photos.length > 0)) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Before */}
-                  {report.photos.length > 0 && (
-                    <div className="space-y-2">
-                      <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Avant</span>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {report.photos.map((url, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setLightboxSrc({ images: report.photos.map(getImageUrl), idx: i })}
-                            className="relative aspect-video rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
-                          >
-                            <Image src={getImageUrl(url)} alt={`Avant ${i + 1}`} fill className="object-cover" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
+                <div>
                   {/* After */}
                   {resolvedIntervention.photos && resolvedIntervention.photos.length > 0 && (
                     <div className="space-y-2">
-                      <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Après</span>
-                      <div className="grid grid-cols-2 gap-1.5">
+                      <span className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Photos</span>
+                      <div className="flex flex-wrap gap-1.5">
                         {resolvedIntervention.photos.map((url, i) => (
                           <button
                             key={i}
                             type="button"
                             onClick={() => setLightboxSrc({ images: resolvedIntervention.photos!.map(getImageUrl), idx: i })}
-                            className="relative aspect-video rounded-lg overflow-hidden border border-green-500/30 hover:border-green-500 transition-colors"
+                            className="relative aspect-video rounded-lg overflow-hidden border border-green-500/30 hover:border-green-500 transition-colors w-64 h-44"
                           >
                             <Image src={getImageUrl(url)} alt={`Après ${i + 1}`} fill className="object-cover" />
                           </button>

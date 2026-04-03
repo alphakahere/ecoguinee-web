@@ -88,6 +88,7 @@ export function flattenTree(nodes: ApiZone[]): ApiZone[] {
 	return result;
 }
 
+/** Attend des zones de type quartier (NEIGHBORHOOD), ex. `organization.zones` pour un agent. */
 export function getMunicipalitiesFromNeighborhoods(
 	agentZones: ApiZone[],
 	flat: ApiZone[],
