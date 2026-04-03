@@ -58,7 +58,7 @@ export default function AgentProfilPage() {
             <h2 className="font-bold text-lg">{name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <div className="w-2 h-2 rounded-full bg-[#6FCF4A]" />
-              <span className="text-xs font-mono text-muted-foreground">Agent{currentUser.territoire ? ` · ${currentUser.territoire}` : ''}</span>
+              <span className="text-xs font-mono text-muted-foreground">Agent{currentUser.address ? ` · ${currentUser.address}` : ''}</span>
             </div>
           </div>
         </div>
@@ -67,7 +67,7 @@ export default function AgentProfilPage() {
           {[
             { icon: Mail, label: 'Email', value: currentUser.email ?? '—' },
             { icon: Phone, label: 'Téléphone', value: currentUser.phone ?? '—' },
-            { icon: MapPin, label: 'Territoire', value: currentUser.territoire ?? '—' },
+            { icon: MapPin, label: 'Adresse', value: currentUser.address ?? '—' },
             { icon: Shield, label: 'Rôle', value: 'Agent' },
             { icon: Calendar, label: 'Membre depuis', value: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '—' },
           ].map((item) => (

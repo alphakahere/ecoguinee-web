@@ -42,8 +42,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
 
   const userName = currentUser?.name ?? 'Agent';
   const userInitials = initials(userName);
-  const territoire = currentUser?.territoire ?? '';
-  const profileSubtitle = territoire || currentUser?.email || currentUser?.phone || '';
+  const profileSubtitle = currentUser?.email || currentUser?.phone || '';
 
   const handleLogout = () => {
     logout();
@@ -66,7 +65,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
       <aside className="hidden lg:flex w-56 shrink-0 flex-col h-full">
         <SidebarNav
           items={TABS}
-          userInfo={{ name: userName, initials: userInitials, subtitle: `Agent${territoire ? ` · ${territoire}` : ''}` }}
+              userInfo={{ name: userName, initials: userInitials, subtitle: `Agent` }}
           roleLabel="Espace Agent"
           roleIcon="Activity"
           layoutId="agentActiveTabDesktop"
