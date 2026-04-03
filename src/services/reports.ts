@@ -15,27 +15,41 @@ function normalize(
 }
 
 export const reportsService = {
-  async getAll(filters?: ApiReportFilters): Promise<ApiPaginatedResponse<ApiReport>> {
-    const { data } = await api.get<ApiPaginatedResponse<ApiReport> | ApiReport[]>(
-      '/reports',
-      { params: filters },
-    );
-    return normalize(data);
-  },
+	async getAll(
+		filters?: ApiReportFilters,
+	): Promise<ApiPaginatedResponse<ApiReport>> {
+		const { data } = await api.get<
+			ApiPaginatedResponse<ApiReport> | ApiReport[]
+		>("/reports", { params: filters });
+		return normalize(data);
+	},
 
-  async getById(id: string): Promise<ApiReport> {
-    const { data } = await api.get<ApiReport>(`/reports/${id}`);
-    return data;
-  },
+	async getById(id: string): Promise<ApiReport> {
+		const { data } = await api.get<ApiReport>(`/reports/${id}`);
+		return data;
+	},
 
-  async getAvailable(): Promise<ApiPaginatedResponse<ApiReport>> {
-    const { data } = await api.get<ApiPaginatedResponse<ApiReport> | ApiReport[]>(
-      '/reports/available',
-    );
-    return normalize(data);
-  },
+	async getAvailable(): Promise<ApiPaginatedResponse<ApiReport>> {
+		const { data } = await api.get<
+			ApiPaginatedResponse<ApiReport> | ApiReport[]
+		>("/reports/available");
+		return normalize(data);
+	},
 
-  async delete(id: string): Promise<void> {
-    await api.delete(`/reports/${id}`);
-  },
+	async delete(id: string): Promise<void> {
+		await api.delete(`/reports/${id}`);
+	},
+
+	async assignOrganization(
+		id: string,
+		organizationId: string,
+	): Promise<ApiReport> {
+		const { data } = await api.put<ApiReport>(
+			`/reports/${id}/assign-organization`,
+			{
+				organizationId,
+			},
+		);
+		return data;
+	},
 };
