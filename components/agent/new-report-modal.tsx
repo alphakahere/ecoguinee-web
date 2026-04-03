@@ -13,14 +13,7 @@ import { useCreateReport } from '@/hooks/mutations/useCreateReport';
 import { useAuthStore } from '@/stores/auth.store';
 import { useZoneTree } from '@/hooks/queries/useZones';
 import { uploadFiles } from '@/services/uploads';
-import type { ApiZone } from '@/types/api';
-
-function flattenTree(nodes: ApiZone[]): ApiZone[] {
-  const result: ApiZone[] = [];
-  function walk(n: ApiZone) { result.push(n); n.children?.forEach(walk); }
-  nodes.forEach(walk);
-  return result;
-}
+import { flattenTree, getMunicipalitiesFromNeighborhoods } from '@/lib/utils';
 
 const schema = z.object({
   commune: z.string().min(1, 'Sélectionnez une commune'),
@@ -59,30 +52,14 @@ export function NewReportModal({ open, onClose }: Props) {
   const currentUser = useAuthStore((s) => s.user);
   const { data: tree = [] } = useZoneTree();
   const createReport = useCreateReport();
+  const organizationId = currentUser?.organization?.id;
 
   const flat = useMemo(() => flattenTree(tree), [tree]);
-  const territoire = currentUser?.territoire ?? '';
 
   // Find the agent's assigned zone and restrict selections accordingly
-  const agentZone = useMemo(() => {
-    if (!territoire || flat.length === 0) return null;
-    return flat.find((z) => z.name === territoire) ?? null;
-  }, [flat, territoire]);
+  const agentZones = currentUser?.organization?.zones;
+  const communeZones = useMemo(() => getMunicipalitiesFromNeighborhoods(agentZones ?? [], flat), [agentZones, flat]);
 
-  const communeZones = useMemo(() => {
-    if (!agentZone) return flat.filter((z) => z.type === 'MUNICIPALITY');
-    if (agentZone.type === 'MUNICIPALITY') return [agentZone];
-    if (agentZone.type === 'NEIGHBORHOOD') {
-      const parent = flat.find((z) => z.id === agentZone.parentId);
-      return parent ? [parent] : [];
-    }
-    if (agentZone.type === 'SECTOR') {
-      const quartier = flat.find((z) => z.id === agentZone.parentId);
-      const commune = quartier ? flat.find((z) => z.id === quartier.parentId) : null;
-      return commune ? [commune] : [];
-    }
-    return flat.filter((z) => z.type === 'MUNICIPALITY');
-  }, [flat, agentZone]);
 
   const [geoLoading, setGeoLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -116,24 +93,25 @@ export function NewReportModal({ open, onClose }: Props) {
   const latitude = watch('latitude');
   const longitude = watch('longitude');
 
+
   const quartierZones = useMemo(() => {
     if (!commune) return [];
     const communeZone = flat.find(z => z.id === commune);
     const quartiers = communeZone?.children?.filter(z => z.type === 'NEIGHBORHOOD') ?? [];
     // If agent zone is a quartier or sector, restrict to that quartier only
-    if (agentZone?.type === 'NEIGHBORHOOD') return quartiers.filter((z) => z.id === agentZone.id);
+    if (agentZones?.type === 'NEIGHBORHOOD') return quartiers.filter((z) => z.id === agentZones.id);
     if (agentZone?.type === 'SECTOR') return quartiers.filter((z) => z.id === agentZone.parentId);
     return quartiers;
   }, [flat, commune, agentZone]);
 
-  const secteurZones = useMemo(() => {
-    if (!quartier) return [];
-    const quartierZone = flat.find(z => z.id === quartier);
-    const secteurs = quartierZone?.children?.filter(z => z.type === 'SECTOR') ?? [];
-    // If agent zone is a sector, restrict to that sector only
-    if (agentZone?.type === 'SECTOR') return secteurs.filter((z) => z.id === agentZone.id);
-    return secteurs;
-  }, [flat, quartier, agentZone]);
+  // const secteurZones = useMemo(() => {
+  //   if (!quartier) return [];
+  //   const quartierZone = flat.find(z => z.id === quartier);
+  //   const secteurs = quartierZone?.children?.filter(z => z.type === 'SECTOR') ?? [];
+  //   // If agent zone is a sector, restrict to that sector only
+  //   if (agentZone?.type === 'SECTOR') return secteurs.filter((z) => z.id === agentZone.id);
+  //   return secteurs;
+  // }, [flat, quartier, agentZone]);
 
   // Auto-select when the agent's zone restricts to a single option
   useEffect(() => {
@@ -148,15 +126,15 @@ export function NewReportModal({ open, onClose }: Props) {
     setValue('commune', communeZones[0].id, { shouldValidate: true });
   }, [open, communeZones, setValue]);
 
-  useEffect(() => {
-    if (!open || quartierZones.length !== 1) return;
-    setValue('quartier', quartierZones[0].id, { shouldValidate: true });
-  }, [open, quartierZones, setValue]);
+  // useEffect(() => {
+  //   if (!open || quartierZones.length !== 1) return;
+  //   setValue('quartier', quartierZones[0].id, { shouldValidate: true });
+  // }, [open, quartierZones, setValue]);
 
-  useEffect(() => {
-    if (!open || secteurZones.length !== 1) return;
-    setValue('secteur', secteurZones[0].id);
-  }, [open, secteurZones, setValue]);
+  // useEffect(() => {
+  //   if (!open || secteurZones.length !== 1) return;
+  //   setValue('secteur', secteurZones[0].id);
+  // }, [open, secteurZones, setValue]);
 
   const isSubmitting = isUploading || createReport.isPending;
 
@@ -202,6 +180,7 @@ export function NewReportModal({ open, onClose }: Props) {
         longitude: values.longitude,
         zoneId,
         agentId: currentUser?.id,
+        organizationId,
         photos: photoUrls.length > 0 ? photoUrls : undefined,
       });
       toast.success('Signalement créé');
@@ -261,35 +240,39 @@ export function NewReportModal({ open, onClose }: Props) {
                 </div>
 
                 {/* Quartier */}
-                {commune && (
-                  <div>
-                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Quartier *</label>
-                    <select
-                      className={`${inputCls} appearance-none`}
-                      disabled={quartierZones.length <= 1}
-                      {...register('quartier')}
-                      onChange={(e) => {
-                        setValue('quartier', e.target.value, { shouldValidate: true });
-                        setValue('secteur', '', { shouldValidate: false });
-                      }}
-                    >
-                      <option value="">— Sélectionner —</option>
-                      {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                    {errors.quartier && <p className={errorCls}>{errors.quartier.message}</p>}
-                  </div>
-                )}
+                  {
+                    // commune && (
+                    //   <div>
+                    //     <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Quartier *</label>
+                    //     <select
+                    //       className={`${inputCls} appearance-none`}
+                    //       disabled={quartierZones.length <= 1}
+                    //       {...register('quartier')}
+                    //       onChange={(e) => {
+                    //         setValue('quartier', e.target.value, { shouldValidate: true });
+                    //         setValue('secteur', '', { shouldValidate: false });
+                    //       }}
+                    //     >
+                    //       <option value="">— Sélectionner —</option>
+                    //       {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                    //     </select>
+                    //     {errors.quartier && <p className={errorCls}>{errors.quartier.message}</p>}
+                    //   </div>
+                    // )
+                  }
 
                 {/* Secteur */}
-                {quartier && secteurZones.length > 0 && (
-                  <div>
-                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Secteur</label>
-                    <select className={`${inputCls} appearance-none`} disabled={secteurZones.length <= 1} {...register('secteur')}>
-                      <option value="">— Sélectionner —</option>
-                      {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                  </div>
-                )}
+                  {
+                    // quartier && secteurZones.length > 0 && (
+                    //   <div>
+                    //     <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Secteur</label>
+                    //     <select className={`${inputCls} appearance-none`} disabled={secteurZones.length <= 1} {...register('secteur')}>
+                    //       <option value="">— Sélectionner —</option>
+                    //       {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                    //     </select>
+                    //   </div>
+                    // )
+                  }
 
                 {/* Type + Gravité */}
                 <div className="grid grid-cols-2 gap-3">

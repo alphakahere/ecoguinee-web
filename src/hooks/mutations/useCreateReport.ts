@@ -4,18 +4,19 @@ import { api } from '@/services/api';
 import type { ApiReport } from '@/types/api';
 
 interface CreateReportPayload {
-  type: string;
-  severity: string;
-  source: string;
-  description?: string;
-  address?: string;
-  latitude: number;
-  longitude: number;
-  zoneId: string;
-  agentId?: string;
-  contactName?: string;
-  contactPhone?: string;
-  photos?: string[];
+	type: string;
+	severity: string;
+	source: string;
+	description?: string;
+	address?: string;
+	latitude: number;
+	longitude: number;
+	zoneId: string;
+	agentId?: string;
+	contactName?: string;
+	contactPhone?: string;
+	photos?: string[];
+	organizationId?: string;
 }
 
 export function useCreateReport() {
