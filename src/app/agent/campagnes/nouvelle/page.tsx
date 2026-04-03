@@ -61,6 +61,7 @@ export default function AgentNouvelCampagnePage() {
         isPending={createCampaign.isPending}
         submitLabel="Créer la campagne"
         cancelHref="/agent/campagnes"
+        organizationId={currentUser?.organizationId || ''}
       />
     </div>
   );

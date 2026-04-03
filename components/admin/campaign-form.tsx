@@ -5,19 +5,16 @@ import { ChevronDown, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useZoneTree } from '@/hooks/queries/useZones';
-import { useOrganizations } from '@/hooks/queries/useOrganizations';
+import { useOrganizations, useOrganization } from '@/hooks/queries/useOrganizations';
+import { useAuthStore } from '@/stores/auth.store';
 import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import type { ApiCampaignType, ApiZone } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META } from '@/types/api';
+import { flattenTree, getMunicipalitiesFromNeighborhoods } from '@/lib/utils';
 
 const TYPES = Object.entries(API_CAMPAIGN_TYPE_META) as [ApiCampaignType, { label: string }][];
 
-function flattenTree(nodes: ApiZone[]): ApiZone[] {
-  const result: ApiZone[] = [];
-  function walk(n: ApiZone) { result.push(n); n.children?.forEach(walk); }
-  nodes.forEach(walk);
-  return result;
-}
+const EMPTY_ZONES: ApiZone[] = [];
 
 function toDatetimeLocalValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -51,15 +48,18 @@ interface CampaignFormProps {
   isPending: boolean;
   submitLabel: string;
   cancelHref: string;
+  organizationId?: string;
 }
 
-export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls = [], existingDocUrls: initDocUrls = [], onSubmit, isPending, submitLabel, cancelHref }: CampaignFormProps) {
+export function CampaignForm(props: CampaignFormProps) {
+  const currentUser = useAuthStore((s) => s.user);
+  const { initialValues, existingPhotoUrls: initPhotoUrls = [], existingDocUrls: initDocUrls = [], onSubmit, isPending, submitLabel, cancelHref, organizationId } = props;  
   const { data: tree = [] } = useZoneTree();
   const { data: organizationsData } = useOrganizations();
-  const organizations = organizationsData?.data ?? [];
-
-  const flat = useMemo(() => flattenTree(tree), [tree]);
-  const communeZones = useMemo(() => flat.filter((z) => z.type === 'MUNICIPALITY'), [flat]);
+  const organizations = useMemo(
+    () => organizationsData?.data ?? [],
+    [organizationsData],
+  );
 
   const [form, setForm] = useState<CampaignFormState>({
     title: '',
@@ -69,7 +69,7 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
     quartier: '',
     secteur: '',
     address: '',
-    organizationId: '',
+    organizationId: organizationId ?? '',
     scheduledDate: '',
     endDate: '',
   });
@@ -77,6 +77,56 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
   const [docFiles, setDocFiles] = useState<File[]>([]);
   const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(initPhotoUrls);
   const [existingDocUrls, setExistingDocUrls] = useState<string[]>(initDocUrls);
+
+  /** Organisation du user connecté (zones déjà présentes, pas besoin de refetch). */
+  const orgDetail = currentUser?.organization;
+
+  const orgDetailQueryId = useMemo(() => {
+    if (!form.organizationId) return '';
+    if (
+      form.organizationId === currentUser?.organizationId ||
+      form.organizationId === orgDetail?.id
+    ) {
+      return '';
+    }
+    return form.organizationId;
+  }, [form.organizationId, currentUser?.organizationId, orgDetail?.id]);
+
+  const { data: orgDetailFromApi } = useOrganization(orgDetailQueryId);
+
+  const flat = useMemo(() => flattenTree(tree), [tree]);
+  const allMunicipalities = useMemo(() => flat.filter((z) => z.type === 'MUNICIPALITY'), [flat]);
+
+  const selectedOrgFromList = useMemo(
+    () => organizations.find((o) => o.id === form.organizationId),
+    [organizations, form.organizationId],
+  );
+
+  /** Quartiers rattachés à l’org (NEIGHBORHOOD). Priorité : `currentUser.organization` si même org, sinon API / liste. */
+  const orgQuartiers = useMemo(() => {
+    if (!form.organizationId) return EMPTY_ZONES;
+    const isUserOrg =
+      form.organizationId === currentUser?.organizationId ||
+      form.organizationId === orgDetail?.id;
+    if (isUserOrg && orgDetail?.zones && orgDetail.zones.length > 0) {
+      return orgDetail.zones;
+    }
+    const z = orgDetailFromApi?.zones ?? selectedOrgFromList?.zones;
+    return z && z.length > 0 ? z : EMPTY_ZONES;
+  }, [
+    form.organizationId,
+    currentUser?.organizationId,
+    orgDetail,
+    orgDetailFromApi?.zones,
+    selectedOrgFromList?.zones,
+  ]);
+
+  const restrictZones = Boolean(form.organizationId) && orgQuartiers.length > 0;
+
+  const communeZones = useMemo(() => {
+    if (!restrictZones) return allMunicipalities;
+    return getMunicipalitiesFromNeighborhoods(orgQuartiers, flat);
+  }, [allMunicipalities, flat, restrictZones, orgQuartiers]);
 
   // Seed form with initialValues once the zone tree is ready
   useEffect(() => {
@@ -105,20 +155,43 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
   }, [flat.length]);
 
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
+  const handleOrganizationChange = (id: string) =>
+    setForm((f) => ({ ...f, organizationId: id, commune: '', quartier: '', secteur: '' }));
   const handleCommuneChange = (id: string) => setForm((f) => ({ ...f, commune: id, quartier: '', secteur: '' }));
   const handleQuartierChange = (id: string) => setForm((f) => ({ ...f, quartier: id, secteur: '' }));
 
   const quartierZones = useMemo(() => {
     if (!form.commune) return [];
-    const commune = flat.find((z) => z.id === form.commune);
-    return commune?.children?.filter((z) => z.type === 'NEIGHBORHOOD') ?? [];
-  }, [flat, form.commune]);
+    const communeZone = flat.find((z) => z.id === form.commune);
+    const underCommune = communeZone?.children?.filter((z) => z.type === 'NEIGHBORHOOD') ?? [];
+    if (!restrictZones) return underCommune;
+    const allowed = new Set(orgQuartiers.map((z) => z.id));
+    return underCommune.filter((q) => allowed.has(q.id));
+  }, [flat, form.commune, restrictZones, orgQuartiers]);
 
   const secteurZones = useMemo(() => {
     if (!form.quartier) return [];
     const quartier = flat.find((z) => z.id === form.quartier);
     return quartier?.children?.filter((z) => z.type === 'SECTOR') ?? [];
   }, [flat, form.quartier]);
+
+  useEffect(() => {
+    if (communeZones.length !== 1) return;
+    const id = communeZones[0].id;
+    setForm((f) => (f.commune === id ? f : { ...f, commune: id, quartier: '', secteur: '' }));
+  }, [communeZones]);
+
+  useEffect(() => {
+    if (quartierZones.length !== 1 || !form.commune) return;
+    const id = quartierZones[0].id;
+    setForm((f) => (f.quartier === id ? f : { ...f, quartier: id, secteur: '' }));
+  }, [quartierZones, form.commune]);
+
+  useEffect(() => {
+    if (secteurZones.length !== 1 || !form.quartier) return;
+    const id = secteurZones[0].id;
+    setForm((f) => (f.secteur === id ? f : { ...f, secteur: id }));
+  }, [secteurZones, form.quartier]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,7 +231,7 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Organisation organisatrice</label>
           <div className="relative">
-            <select value={form.organizationId} onChange={(e) => update('organizationId', e.target.value)} className={selectCls}>
+              <select value={form.organizationId} onChange={(e) => handleOrganizationChange(e.target.value)} className={selectCls}>
               <option value="">— Aucune —</option>
               {organizations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -174,7 +247,12 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5">Commune</label>
           <div className="relative">
-            <select value={form.commune} onChange={(e) => handleCommuneChange(e.target.value)} className={selectCls}>
+              <select
+                value={form.commune}
+                onChange={(e) => handleCommuneChange(e.target.value)}
+                className={selectCls}
+                disabled={communeZones.length <= 1}
+              >
               <option value="">Choisir une commune…</option>
               {communeZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
             </select>
@@ -186,7 +264,12 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
           <div>
             <label className="block text-xs font-mono text-muted-foreground mb-1.5">Quartier</label>
             <div className="relative">
-              <select value={form.quartier} onChange={(e) => handleQuartierChange(e.target.value)} className={selectCls}>
+                <select
+                  value={form.quartier}
+                  onChange={(e) => handleQuartierChange(e.target.value)}
+                  className={selectCls}
+                  disabled={quartierZones.length <= 1}
+                >
                 <option value="">Choisir un quartier…</option>
                 {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
               </select>
@@ -199,7 +282,12 @@ export function CampaignForm({ initialValues, existingPhotoUrls: initPhotoUrls =
           <div>
             <label className="block text-xs font-mono text-muted-foreground mb-1.5">Secteur</label>
             <div className="relative">
-              <select value={form.secteur} onChange={(e) => update('secteur', e.target.value)} className={selectCls}>
+                <select
+                  value={form.secteur}
+                  onChange={(e) => update('secteur', e.target.value)}
+                  className={selectCls}
+                  disabled={secteurZones.length <= 1}
+                >
                 <option value="">Choisir un secteur…</option>
                 {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
               </select>
