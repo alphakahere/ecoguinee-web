@@ -17,6 +17,7 @@ import {
   INTERVENTION_STATUS_META,
   type ApiIntervention,
 } from '@/types/api';
+import { InterventionResolutionPanel } from '@/components/shared/intervention-resolution-panel';
 import { SuperviseurCreateInterventionModal } from './superviseur-create-intervention-modal';
 import Image from 'next/image';
 
@@ -26,11 +27,13 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
   const pmeName = overview?.pme.name;
 
   const { data: report, isLoading, isError } = useReport(id);
-  const { data: interventionsData } = useInterventions({ reportId: id });
+  const { data: interventionsData } = useInterventions({ reportId: report?.id as string });
   const interventions = (
     interventionsData?.data ??
     (Array.isArray(interventionsData) ? interventionsData : [])
   ) as ApiIntervention[];
+  const hasResolvedIntervention = interventions.some((iv) => iv.status === 'RESOLVED');
+  const resolvedIntervention = interventions.find((iv) => iv.status === 'RESOLVED');
   const [modalOpen, setModalOpen] = useState(false);
 
   if (isLoading) {
@@ -72,7 +75,7 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
         <span className="text-xs font-mono">#SIG-{id.slice(0, 6)}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
           {report.photos.length > 0 && (
             <div className="rounded-2xl border border-border bg-card p-5">
@@ -136,9 +139,15 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
               <Button
                 type="button"
                 onClick={() => setModalOpen(true)}
-                disabled={overviewLoading || !organizationId}
+                disabled={overviewLoading || !organizationId || hasResolvedIntervention}
                 className="font-mono text-xs h-8"
-                title={!organizationId && !overviewLoading ? 'Périmètre indisponible' : undefined}
+                title={
+                  hasResolvedIntervention
+                    ? "Impossible d'assigner : une intervention est déjà résolue"
+                    : !organizationId && !overviewLoading
+                      ? 'Périmètre indisponible'
+                      : undefined
+                }
               >
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
                 {overviewLoading ? 'Chargement…' : 'Assigner un agent'}
@@ -179,6 +188,8 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
               </div>
             )}
           </div>
+
+          <InterventionResolutionPanel intervention={resolvedIntervention} />
         </div>
 
         <div className="space-y-4">
@@ -245,12 +256,13 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
       {organizationId && (
         <SuperviseurCreateInterventionModal
           open={modalOpen}
-          reportId={id}
+          reportId={report.id as string}
           organizationId={organizationId}
           pmeName={pmeName}
           onClose={() => setModalOpen(false)}
         />
       )}
+
     </div>
   );
 }

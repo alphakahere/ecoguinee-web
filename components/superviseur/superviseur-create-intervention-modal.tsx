@@ -7,6 +7,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useCreateIntervention } from '@/hooks/mutations/useCreateIntervention';
 import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
+import { useUsers } from '@/hooks/queries/useUsers';
+import { useAuthStore } from '@/stores/auth.store';
 
 interface Props {
   open: boolean;
@@ -27,17 +29,10 @@ export function SuperviseurCreateInterventionModal({
   const [notes, setNotes] = useState('');
   const queryClient = useQueryClient();
   const createIntervention = useCreateIntervention();
-  const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
-
+  const currentUser = useAuthStore((s) => s.user);
+  const { data: agentsData, isLoading: isLoadingAgents } = useUsers({ roleGroup: 'agent', organizationId: currentUser?.organizationId, page: 1, limit: 100 });
   /** Agents de l'organisation (même source que la page Agents superviseur) */
-  const agents = overview?.agents ?? [];
-
-  useEffect(() => {
-    if (open) {
-      setAgentId('');
-      setNotes('');
-    }
-  }, [open]);
+  const agents = agentsData?.data ?? [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,16 +116,15 @@ export function SuperviseurCreateInterventionModal({
                     {agents.map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.name}
-                        {a.status && a.status !== 'ACTIVE' ? ` (${a.status === 'INACTIVE' ? 'inactif' : a.status})` : ''}
                       </option>
                     ))}
                   </select>
-                  {overviewLoading && agents.length === 0 && (
+                    {isLoadingAgents && agents.length === 0 && (
                     <p className="text-[11px] font-mono text-muted-foreground mt-1.5">
                       Chargement des agents…
                     </p>
                   )}
-                  {!overviewLoading && agents.length === 0 && (
+                    {!isLoadingAgents && agents.length === 0 && (
                     <p className="text-[11px] font-mono text-muted-foreground mt-1.5">
                       Aucun agent rattaché à votre organisation. Ajoutez des agents depuis l&apos;administration.
                     </p>
@@ -164,7 +158,7 @@ export function SuperviseurCreateInterventionModal({
                     type="submit"
                     disabled={
                       createIntervention.isPending ||
-                      overviewLoading ||
+                      isLoadingAgents ||
                       agents.length === 0
                     }
                     className="px-5 py-2 rounded-lg text-sm font-mono bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center gap-1.5"

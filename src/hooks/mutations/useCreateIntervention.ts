@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { interventionsService } from '@/services/interventions';
-import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
+import type { ApiInterventionStatus } from "@/types/api";
 
 /** Champs attendus par l’API pour créer une intervention */
 export type CreateInterventionInput = {
