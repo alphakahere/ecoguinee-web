@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Wrench, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -18,6 +18,15 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
   const [organizationId, setOrganizationId] = useState('');
   const [agentId, setAgentId] = useState('');
   const [notes, setNotes] = useState('');
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      setOrganizationId('');
+      setAgentId('');
+      setNotes('');
+    }
+  }
 
   const createIntervention = useCreateIntervention();
   const { data: organizationsData } = useOrganizations({ page: 1, limit: 100 });
@@ -25,10 +34,6 @@ export function CreateInterventionModal({ open, reportId, onClose }: Props) {
 
   const organizations = organizationsData?.data ?? [];
   const agents = agentsData?.data ?? [];
-
-  useEffect(() => {
-    if (open) { setOrganizationId(''); setAgentId(''); setNotes(''); }
-  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
