@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/stores/auth.store';
 import { useOrganization } from '@/hooks/queries/useOrganizations';
 import { useUpdateUser } from '@/hooks/mutations/useUpdateUser';
-import { ZONE_TYPE_META } from '@/types/api';
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);

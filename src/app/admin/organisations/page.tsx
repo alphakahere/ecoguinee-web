@@ -17,7 +17,7 @@ import { OrganizationModal } from '@/components/admin/organization-modal';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { ApiOrganization, UpdateOrganizationPayload } from '@/types/api';
 
-export default function AdminPMEPage() {
+export default function AdminOrganizationsPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);

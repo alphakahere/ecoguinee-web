@@ -1,24 +1,23 @@
 export type {
-  WasteType,
-  SeverityLevel,
-  InterventionStatus,
-  UserRole,
-  UserStatus,
-  CampaignStatus,
-  CampaignType,
-  Sector,
-  Territoire,
-  Hotspot,
-  Intervention,
-  PME,
-  DashboardStats,
-  User,
-  CampaignStatusEvent,
-  CampaignDocument,
-  CampaignPhoto,
-  Campaign,
-  NavItem,
-} from '@/lib/types';
+	WasteType,
+	SeverityLevel,
+	InterventionStatus,
+	UserRole,
+	UserStatus,
+	CampaignStatus,
+	CampaignType,
+	Sector,
+	Territoire,
+	Hotspot,
+	Intervention,
+	DashboardStats,
+	User,
+	CampaignStatusEvent,
+	CampaignDocument,
+	CampaignPhoto,
+	Campaign,
+	NavItem,
+} from "@/lib/types";
 
 export {
   CAMP_STATUS_META,
@@ -32,8 +31,8 @@ export {
 // ── API-layer aliases ──────────────────────────────────────────────────────
 /** A "report" in the API maps to a Hotspot in the UI */
 export type { Hotspot as Report } from '@/lib/types';
-/** A PME in the UI maps to an Organization in the API */
-export type { PME as Organization } from '@/lib/types';
+/** An Organization in the UI maps to an Organization in the API */
+export type { Organization } from "@/lib/types";
 
 // ── Offline queue ──────────────────────────────────────────────────────────
 export interface PendingReport {
@@ -105,16 +104,16 @@ export interface AuthResponse {
 
 /** Payload for POST /users */
 export interface CreateUserPayload {
-  name: string;
-  email?: string;
-  phone: string;
-  role: import('@/lib/types').UserRole;
-  address?: string;
-  territoire?: string;
-  status?: import('@/lib/types').UserStatus;
-  password?: string;
-  /** Lier l’utilisateur à une PME (agents, etc.) */
-  organizationId?: string;
+	name: string;
+	email?: string;
+	phone: string;
+	role: import("@/lib/types").UserRole;
+	address?: string;
+	territoire?: string;
+	status?: import("@/lib/types").UserStatus;
+	password?: string;
+	/** Lier l’utilisateur à une Organization (agents, etc.) */
+	organizationId?: string;
 }
 
 /** Payload for PATCH /users/:id */
