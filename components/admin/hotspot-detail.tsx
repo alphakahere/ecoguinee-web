@@ -59,6 +59,10 @@ export function HotspotDetail({ id }: { id: string }) {
   const severityMeta = SEVERITY_META_API[report.severity];
   const typeMeta = WASTE_TYPE_META[report.type];
   const canAssignOrganization = report.status === 'PENDING_VALIDATION';
+  const assignedOrg = report.assignedOrganisation ?? report.organization;
+  const assignedOrgLabel =
+    assignedOrg?.name ??
+    (report.organizationId ? `#${report.organizationId.slice(0, 8)}…` : null);
 
   async function handleAssignOrganization() {
     if (!organizationId || !report?.id) {
@@ -212,9 +216,9 @@ export function HotspotDetail({ id }: { id: string }) {
         </div>
 
         {/* Right — info sidebar */}
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-24">
           {/* Status card */}
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-4 lg:sticky lg:top-24">
+          <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-muted-foreground uppercase">Statut</span>
@@ -232,7 +236,7 @@ export function HotspotDetail({ id }: { id: string }) {
                 <span className="text-xs font-mono text-muted-foreground uppercase">Source</span>
                 <span className="text-xs font-mono">{REPORT_SOURCE_META[report.source].label}</span>
               </div>
-            </div>
+              i            </div>
 
             <div className="border-t border-border pt-3 space-y-2">
               {report.zone && (
@@ -268,6 +272,23 @@ export function HotspotDetail({ id }: { id: string }) {
               </div>
             )}
           </div>
+
+          {assignedOrgLabel && (
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <h3 className="text-xs font-mono font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+                Organisation assignée
+              </h3>
+              <div className="flex items-start gap-3">
+                <Building2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <p
+                  className="text-sm font-mono text-foreground leading-snug break-words"
+                  title={assignedOrg?.name ?? report.organizationId ?? undefined}
+                >
+                  {assignedOrgLabel}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

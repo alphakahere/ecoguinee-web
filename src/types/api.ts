@@ -85,6 +85,10 @@ export interface ApiReport {
   zone?: ApiZone;
   agentId?: string | null;
   agent?: { id: string; name: string };
+  organizationId?: string | null;
+  organization?: { id: string; name: string };
+  /** Alias possible côté API pour l’organisation assignée au signalement */
+  assignedOrganisation?: { id: string; name: string } | null;
   contactName?: string | null;
   contactPhone?: string | null;
   photos: string[];

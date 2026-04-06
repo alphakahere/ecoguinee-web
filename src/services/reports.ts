@@ -44,7 +44,7 @@ export const reportsService = {
 		id: string,
 		organizationId: string,
 	): Promise<ApiReport> {
-		const { data } = await api.put<ApiReport>(
+		const { data } = await api.patch<ApiReport>(
 			`/reports/${id}/assign-organization`,
 			{
 				organizationId,
