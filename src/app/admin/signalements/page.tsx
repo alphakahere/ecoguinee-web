@@ -73,7 +73,7 @@ export default function AdminHotspotsPage() {
           className="text-xs font-mono text-muted-foreground truncate max-w-[200px] block"
           title={r.organization?.name ?? undefined}
         >
-          {r.organization?.name ?? (r.organizationId ? `#${r.organizationId.slice(0, 8)}` : '—')}
+          {r.organization?.acronym ?? r.organization?.name}
         </span>
       ),
     },

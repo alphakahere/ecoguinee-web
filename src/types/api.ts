@@ -71,29 +71,29 @@ export interface ApiOrganization {
 }
 
 export interface ApiReport {
-  id: string;
-  reference?: string;
-  type: ApiWasteType;
-  severity: ApiSeverity;
-  status: ReportStatus;
-  source: ReportSource;
-  description?: string | null;
-  address?: string | null;
-  latitude: number;
-  longitude: number;
-  zoneId: string;
-  zone?: ApiZone;
-  agentId?: string | null;
-  agent?: { id: string; name: string };
-  organizationId?: string | null;
-  organization?: { id: string; name: string };
-  /** Alias possible côté API pour l’organisation assignée au signalement */
-  assignedOrganisation?: { id: string; name: string } | null;
-  contactName?: string | null;
-  contactPhone?: string | null;
-  photos: string[];
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	reference?: string;
+	type: ApiWasteType;
+	severity: ApiSeverity;
+	status: ReportStatus;
+	source: ReportSource;
+	description?: string | null;
+	address?: string | null;
+	latitude: number;
+	longitude: number;
+	zoneId: string;
+	zone?: ApiZone;
+	agentId?: string | null;
+	agent?: { id: string; name: string };
+	organizationId?: string | null;
+	organization?: { id: string; name: string; acronym?: string | null };
+	/** Alias possible côté API pour l’organisation assignée au signalement */
+	assignedOrganisation?: { id: string; name: string } | null;
+	contactName?: string | null;
+	contactPhone?: string | null;
+	photos: string[];
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ApiIntervention {
