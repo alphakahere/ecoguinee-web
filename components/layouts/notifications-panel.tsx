@@ -92,6 +92,11 @@ export function NotificationsPanel() {
     markAllRead.mutate();
   };
 
+  const handleViewAll = () => {
+    setOpen(false);
+    router.push(`${rolePrefix}/notifications`);
+  };
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -163,6 +168,17 @@ export function NotificationsPanel() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end px-4 py-2.5 border-t border-border bg-muted/10">
+              <button
+                type="button"
+                onClick={handleViewAll}
+                className="text-[10px] font-mono text-primary hover:underline"
+              >
+                Voir tout
+              </button>
             </div>
           </motion.div>
         )}
