@@ -55,8 +55,9 @@ export default function AdminHotspotsPage() {
     try {
       await deleteReport.mutateAsync(r.id);
       toast.success('Signalement supprimé');
-    } catch {
-      toast.error('Suppression impossible');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      toast.error(message);
     }
   };
 

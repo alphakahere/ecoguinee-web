@@ -99,8 +99,9 @@ export default function AgentModifierCampagnePage({ params }: { params: Promise<
       });
       toast.success('Campagne mise à jour !');
       router.push(`/agent/campagnes/${id}`);
-    } catch {
-      toast.error('Erreur lors de la mise à jour.');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la mise à jour.';
+      toast.error(message);
     }
   };
 

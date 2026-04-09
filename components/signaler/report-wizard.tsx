@@ -88,8 +88,9 @@ export function ReportWizard() {
       });
       setSubmitted(true);
       toast.success('Signalement envoyé avec succès !', { description: 'Les autorités ont été notifiées.' });
-    } catch {
-      toast.error('Impossible d\'envoyer le signalement. Réessayez.');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible d\'envoyer le signalement. Réessayez.';
+      toast.error(message);
     }
   };
 

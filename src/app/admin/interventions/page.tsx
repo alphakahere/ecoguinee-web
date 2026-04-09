@@ -45,8 +45,9 @@ export default function AdminInterventionsPage() {
       await updateIntervention.mutateAsync({ id, payload: { status } as never });
       toast.success('Statut mis à jour');
       setEditIntervention(null);
-    } catch {
-      toast.error('Impossible de mettre à jour le statut');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      toast.error(message);
     }
   };
 

@@ -50,8 +50,11 @@ export function SuperviseurCreateInterventionModal({
       await queryClient.invalidateQueries({ queryKey: ['dashboard', 'supervisor-overview'] });
       toast.success('Intervention créée');
       onClose();
-    } catch {
-      toast.error('Impossible de créer l\'intervention');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Impossible de créer l\'intervention';
+      toast.error(message);
     }
   };
 

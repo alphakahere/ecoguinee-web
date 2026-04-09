@@ -41,8 +41,9 @@ export default function AdminCampagneNouvellePage() {
       });
       toast.success('Campagne créée avec succès !');
       router.push('/admin/campagnes');
-    } catch {
-      toast.error('Erreur lors de la création.');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la création.';
+      toast.error(message);
     }
   };
 

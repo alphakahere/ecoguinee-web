@@ -237,8 +237,9 @@ export default function AdminTerritoiresPage() {
       }
       setModalOpen(false);
       setEditZone(null);
-    } catch {
-      toast.error('Une erreur est survenue');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      toast.error(message);
     }
   };
 
@@ -248,8 +249,9 @@ export default function AdminTerritoiresPage() {
       await deleteZone.mutateAsync(z.id);
       toast.success('Zone supprimée');
       if (selectedId === z.id) setSelectionOverride(null);
-    } catch {
-      toast.error('Suppression impossible — la zone a des sous-zones ou des signalements');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible — la zone a des sous-zones ou des signalements';
+      toast.error(message);
     }
   };
 

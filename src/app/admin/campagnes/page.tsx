@@ -49,8 +49,9 @@ export default function AdminCampagnesPage() {
     try {
       await deleteCampaign.mutateAsync(c.id);
       toast.success('Campagne supprimée');
-    } catch {
-      toast.error('Suppression impossible');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      toast.error(message);
     }
   };
 

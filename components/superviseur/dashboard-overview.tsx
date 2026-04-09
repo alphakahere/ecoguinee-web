@@ -183,7 +183,8 @@ function AvailableReportsSection() {
           if (error instanceof AxiosError && error.response?.status === 409) {
             toast.error('Ce signalement vient d\'être pris en charge par une autre organisation.');
           } else {
-            toast.error('Erreur lors de la prise en charge.');
+            const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la prise en charge.';
+            toast.error(message);
           }
         },
       },

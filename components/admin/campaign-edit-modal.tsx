@@ -89,8 +89,9 @@ export function CampaignEditModal({
       });
       toast.success('Campagne mise à jour');
       onClose();
-    } catch {
-      toast.error('Impossible de mettre à jour la campagne');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour la campagne';
+      toast.error(message);
     }
   };
 

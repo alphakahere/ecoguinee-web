@@ -58,8 +58,9 @@ function LoginPageContent() {
       setUser(user, token);
       toast.success(`Bienvenue, ${user.name} !`);
       router.push(nextPath ?? redirectByRole(user.role));
-    } catch {
-      toast.error('Identifiants incorrects. Veuillez réessayer.');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Identifiants incorrects. Veuillez réessayer.';
+      toast.error(message);
     }
   }
 

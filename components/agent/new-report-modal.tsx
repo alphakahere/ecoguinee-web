@@ -163,8 +163,9 @@ export function NewReportModal({ open, onClose }: Props) {
       setIsUploading(true);
       try {
         photoUrls = await uploadFiles(photoFiles);
-      } catch {
-        toast.error("Échec de l'envoi des photos");
+      } catch (err: unknown) {
+        const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Échec de l'envoi des photos";
+        toast.error(message);
         setIsUploading(false);
         return;
       }
@@ -187,8 +188,9 @@ export function NewReportModal({ open, onClose }: Props) {
       });
       toast.success('Signalement créé');
       onClose();
-    } catch {
-      toast.error('Impossible de créer le signalement');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de créer le signalement';
+      toast.error(message);
     }
   };
 

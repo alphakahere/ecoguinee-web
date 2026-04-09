@@ -107,24 +107,24 @@ export default function AdminUsersPage() {
         toast.success('Utilisateur créé');
       }
       closeModal();
-    } catch { toast.error('Une erreur est survenue'); }
+    } catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue'; toast.error(msg); }
   };
 
   const handleSaveStatus = async (id: string, status: User['status']) => {
     try { await updateUserStatus.mutateAsync({ id, status }); toast.success('Statut mis à jour'); closeModal(); }
-    catch { toast.error('Impossible de mettre à jour le statut'); }
+    catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut'; toast.error(msg); }
   };
 
   const handleDelete = async (id: string) => {
     try { await deleteUser.mutateAsync(id); toast.success('Utilisateur supprimé'); closeModal(); }
-    catch { toast.error('Suppression impossible'); }
+    catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible'; toast.error(msg); }
   };
 
   const handleDeleteRow = async (u: User) => {
     if (u.id === currentUser?.id) return;
     if (!window.confirm(`Supprimer ${u.name} ?`)) return;
     try { await deleteUser.mutateAsync(u.id); toast.success('Utilisateur supprimé'); }
-    catch { toast.error('Suppression impossible'); }
+    catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible'; toast.error(msg); }
   };
 
   const handleToggleActive = async (u: User) => {
@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
     try {
       await updateUserStatus.mutateAsync({ id: u.id, status: u.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' });
       toast.success(u.status === 'ACTIVE' ? 'Compte désactivé' : 'Compte réactivé');
-    } catch { toast.error('Une erreur est survenue'); }
+    } catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue'; toast.error(msg); }
   };
 
   const onExportCsv = useCallback(() => {

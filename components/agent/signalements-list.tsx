@@ -92,7 +92,7 @@ export function SignalementsList() {
       { reportId: r.id, agentId: currentUser.id, organizationId },
       {
         onSuccess: () => toast.success('Signalement pris en charge'),
-        onError: () => toast.error('Erreur lors de la prise en charge'),
+        onError: (err: unknown) => { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la prise en charge'; toast.error(msg); },
       },
     );
   }

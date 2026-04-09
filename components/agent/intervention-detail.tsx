@@ -55,8 +55,9 @@ export function InterventionDetail({ id }: { id: string }) {
       await updateIntervention.mutateAsync({ id, payload: { notes } as never });
       setDraftNotes(null);
       toast.success('Notes enregistrées');
-    } catch {
-      toast.error('Impossible d\'enregistrer');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible d\'enregistrer';
+      toast.error(message);
     }
   }
 

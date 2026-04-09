@@ -55,8 +55,9 @@ export function InterventionsList() {
     try {
       await updateIntervention.mutateAsync({ id, payload: { status } });
       toast.success('Statut mis à jour');
-    } catch {
-      toast.error('Impossible de mettre à jour');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour';
+      toast.error(message);
     }
   };
 

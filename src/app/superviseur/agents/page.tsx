@@ -134,8 +134,9 @@ export default function SuperviseurAgentsPage() {
         toast.success('Agent créé');
       }
       closeModal();
-    } catch {
-      toast.error('Une erreur est survenue');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      toast.error(message);
     }
   };
 
@@ -144,8 +145,9 @@ export default function SuperviseurAgentsPage() {
       await deleteUser.mutateAsync(id);
       toast.success('Agent supprimé');
       closeModal();
-    } catch {
-      toast.error('Suppression impossible');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      toast.error(message);
     }
   };
 
@@ -155,8 +157,9 @@ export default function SuperviseurAgentsPage() {
     try {
       await deleteUser.mutateAsync(u.id);
       toast.success('Agent supprimé');
-    } catch {
-      toast.error('Suppression impossible');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      toast.error(message);
     }
   };
 
@@ -168,8 +171,9 @@ export default function SuperviseurAgentsPage() {
         status: u.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
       });
       toast.success(u.status === 'ACTIVE' ? 'Compte désactivé' : 'Compte réactivé');
-    } catch {
-      toast.error('Une erreur est survenue');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      toast.error(message);
     }
   };
 

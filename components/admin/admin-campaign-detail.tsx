@@ -46,8 +46,9 @@ export function AdminCampaignDetail({
     try {
       await updateCampaign.mutateAsync({ id, payload: { status } });
       toast.success('Statut mis à jour');
-    } catch {
-      toast.error('Impossible de mettre à jour le statut');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      toast.error(message);
     }
   };
 

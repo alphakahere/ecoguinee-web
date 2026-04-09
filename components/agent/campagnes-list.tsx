@@ -59,8 +59,9 @@ export function CampagnesList() {
     try {
       await updateCampaign.mutateAsync({ id: c.id, payload: { status } });
       toast.success('Statut mis à jour');
-    } catch {
-      toast.error('Impossible de mettre à jour le statut');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      toast.error(message);
     }
   }
 
@@ -69,8 +70,9 @@ export function CampagnesList() {
     try {
       await deleteCampaign.mutateAsync(c.id);
       toast.success('Campagne supprimée');
-    } catch {
-      toast.error('Impossible de supprimer la campagne');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de supprimer la campagne';
+      toast.error(message);
     }
   }
 

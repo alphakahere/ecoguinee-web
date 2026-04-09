@@ -78,8 +78,9 @@ export function CompleteCampaignDialog({ open, campaignId, existingPhotos = [], 
       const urls = await uploadFiles(toUpload);
       proofDocument = urls[0];
       newPhotoUrls = urls.slice(1);
-    } catch {
-      toast.error("Échec de l'envoi des fichiers");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Échec de l'envoi des fichiers";
+      toast.error(message);
       setIsUploading(false);
       return;
     }
@@ -97,8 +98,9 @@ export function CompleteCampaignDialog({ open, campaignId, existingPhotos = [], 
       });
       toast.success('Campagne clôturée');
       handleClose();
-    } catch {
-      toast.error('Impossible de clôturer la campagne');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de clôturer la campagne';
+      toast.error(message);
     }
   };
 

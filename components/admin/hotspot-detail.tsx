@@ -73,8 +73,9 @@ export function HotspotDetail({ id }: { id: string }) {
       await assignOrg.mutateAsync({ reportId: report.id, organizationId });
       toast.success("Signalement attribué à l'organisation");
       setOrganizationId('');
-    } catch {
-      toast.error("Impossible d'attribuer le signalement");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Impossible d'attribuer le signalement";
+      toast.error(message);
     }
   }
 

@@ -79,8 +79,9 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
       const urls = await uploadFiles(toUpload);
       pvDocument = urls[0];
       photos = urls.slice(1);
-    } catch {
-      toast.error("Échec de l'envoi des fichiers");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Échec de l'envoi des fichiers";
+      toast.error(message);
       setIsUploading(false);
       return;
     }
@@ -98,8 +99,9 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
       });
       toast.success('Intervention résolue');
       handleClose();
-    } catch {
-      toast.error("Impossible de résoudre l'intervention");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Impossible de résoudre l'intervention";
+      toast.error(message);
     }
   };
 

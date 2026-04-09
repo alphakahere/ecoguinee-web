@@ -80,8 +80,9 @@ export function InterventionsBoard({ organizationId }: InterventionsBoardProps) 
         payload: { status: targetStatus } as never,
       });
       toast.success('Statut mis à jour');
-    } catch {
-      toast.error('Impossible de déplacer l\'intervention');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de déplacer l\'intervention';
+      toast.error(message);
     }
   };
 

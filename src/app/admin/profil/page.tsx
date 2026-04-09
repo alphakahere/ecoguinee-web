@@ -63,8 +63,9 @@ export default function AdminProfilPage() {
       toast.success('Mot de passe mis à jour');
       setNewPassword('');
       setConfirmPassword('');
-    } catch {
-      toast.error('Impossible de changer le mot de passe');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de changer le mot de passe';
+      toast.error(message);
     }
   };
 

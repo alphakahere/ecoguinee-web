@@ -39,7 +39,7 @@ export default function AgentProfilPage() {
       toast.success('Mot de passe mis à jour');
       setNewPassword('');
       setConfirmPassword('');
-    } catch { toast.error('Impossible de changer le mot de passe'); }
+    } catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de changer le mot de passe'; toast.error(msg); }
   };
 
   const inputCls = 'w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40';

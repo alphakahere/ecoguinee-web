@@ -61,8 +61,9 @@ export default function AdminOrganizationsPage() {
       await updateOrganization.mutateAsync({ id, payload });
       toast.success('Organisation mise à jour');
       close();
-    } catch {
-      toast.error('Une erreur est survenue');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      toast.error(message);
     }
   };
 
@@ -71,8 +72,9 @@ export default function AdminOrganizationsPage() {
     try {
       await deleteOrganization.mutateAsync(s.id);
       toast.success('Organisation supprimée');
-    } catch {
-      toast.error('Suppression impossible');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      toast.error(message);
     }
   };
 
@@ -80,8 +82,9 @@ export default function AdminOrganizationsPage() {
     try {
       await updateOrganization.mutateAsync({ id: s.id, payload: { active: !s.active } });
       toast.success(s.active ? 'Organisation désactivée' : 'Organisation réactivée');
-    } catch {
-      toast.error('Une erreur est survenue');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      toast.error(message);
     }
   };
 
