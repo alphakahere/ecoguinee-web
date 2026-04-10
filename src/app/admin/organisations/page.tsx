@@ -16,6 +16,7 @@ import { useDeleteOrganization } from '@/hooks/mutations/useDeleteOrganization';
 import { OrganizationModal } from '@/components/admin/organization-modal';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { ApiOrganization, UpdateOrganizationPayload } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 export default function AdminOrganizationsPage() {
   const router = useRouter();
@@ -62,7 +63,7 @@ export default function AdminOrganizationsPage() {
       toast.success('Organisation mise à jour');
       close();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      const message = getErrorMessage(err, 'Une erreur est survenue');
       toast.error(message);
     }
   };
@@ -73,7 +74,7 @@ export default function AdminOrganizationsPage() {
       await deleteOrganization.mutateAsync(s.id);
       toast.success('Organisation supprimée');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      const message = getErrorMessage(err, 'Suppression impossible');
       toast.error(message);
     }
   };
@@ -83,7 +84,7 @@ export default function AdminOrganizationsPage() {
       await updateOrganization.mutateAsync({ id: s.id, payload: { active: !s.active } });
       toast.success(s.active ? 'Organisation désactivée' : 'Organisation réactivée');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      const message = getErrorMessage(err, 'Une erreur est survenue');
       toast.error(message);
     }
   };

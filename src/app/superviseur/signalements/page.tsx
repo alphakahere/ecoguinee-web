@@ -22,6 +22,7 @@ import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
 import type { ApiReport, ReportStatus, ApiSeverity } from '@/types/api';
 import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META, REPORT_SOURCE_META } from '@/types/api';
 import { AxiosError } from 'axios';
+import { getErrorMessage } from '@/services/api';
 
 const MAP_PAGE_SIZE = 200;
 
@@ -97,7 +98,7 @@ export default function SuperviseurSignalementsPage() {
           if (error instanceof AxiosError && error.response?.status === 409) {
             toast.error('Ce signalement vient d\'être pris en charge par une autre organisation.');
           } else {
-            const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la prise en charge.';
+            const message = getErrorMessage(error, 'Erreur lors de la prise en charge.');
             toast.error(message);
           }
         },

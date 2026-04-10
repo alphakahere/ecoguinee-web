@@ -15,6 +15,7 @@ import { useDeleteZone } from '@/hooks/mutations/useDeleteZone';
 import { ZoneModal } from '@/components/admin/zone-modal';
 import type { ApiZone, CreateZonePayload, UpdateZonePayload, ZoneType } from '@/types/api';
 import { ZONE_TYPE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 // ── Utilities ────────────────────────────────────────────────────────────────
 
@@ -238,7 +239,7 @@ export default function AdminTerritoiresPage() {
       setModalOpen(false);
       setEditZone(null);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      const message = getErrorMessage(err, 'Une erreur est survenue');
       toast.error(message);
     }
   };
@@ -250,7 +251,7 @@ export default function AdminTerritoiresPage() {
       toast.success('Zone supprimée');
       if (selectedId === z.id) setSelectionOverride(null);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible — la zone a des sous-zones ou des signalements';
+      const message = getErrorMessage(err, 'Suppression impossible — la zone a des sous-zones ou des signalements');
       toast.error(message);
     }
   };

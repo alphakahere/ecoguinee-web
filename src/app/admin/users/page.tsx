@@ -32,6 +32,7 @@ import { useCreateUser } from '@/hooks/mutations/useCreateUser';
 import { useUpdateUser } from '@/hooks/mutations/useUpdateUser';
 import { useUpdateUserStatus } from '@/hooks/mutations/useUpdateUserStatus';
 import { useDeleteUser } from '@/hooks/mutations/useDeleteUser';
+import { getErrorMessage } from '@/services/api';
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-[#6FCF4A]/10 text-[#6FCF4A]',
@@ -107,24 +108,24 @@ export default function AdminUsersPage() {
         toast.success('Utilisateur créé');
       }
       closeModal();
-    } catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue'; toast.error(msg); }
+    } catch (err: unknown) { const msg = getErrorMessage(err, 'Une erreur est survenue'); toast.error(msg); }
   };
 
   const handleSaveStatus = async (id: string, status: User['status']) => {
     try { await updateUserStatus.mutateAsync({ id, status }); toast.success('Statut mis à jour'); closeModal(); }
-    catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut'; toast.error(msg); }
+    catch (err: unknown) { const msg = getErrorMessage(err, 'Impossible de mettre à jour le statut'); toast.error(msg); }
   };
 
   const handleDelete = async (id: string) => {
     try { await deleteUser.mutateAsync(id); toast.success('Utilisateur supprimé'); closeModal(); }
-    catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible'; toast.error(msg); }
+    catch (err: unknown) { const msg = getErrorMessage(err, 'Suppression impossible'); toast.error(msg); }
   };
 
   const handleDeleteRow = async (u: User) => {
     if (u.id === currentUser?.id) return;
     if (!window.confirm(`Supprimer ${u.name} ?`)) return;
     try { await deleteUser.mutateAsync(u.id); toast.success('Utilisateur supprimé'); }
-    catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible'; toast.error(msg); }
+    catch (err: unknown) { const msg = getErrorMessage(err, 'Suppression impossible'); toast.error(msg); }
   };
 
   const handleToggleActive = async (u: User) => {
@@ -132,7 +133,7 @@ export default function AdminUsersPage() {
     try {
       await updateUserStatus.mutateAsync({ id: u.id, status: u.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' });
       toast.success(u.status === 'ACTIVE' ? 'Compte désactivé' : 'Compte réactivé');
-    } catch (err: unknown) { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue'; toast.error(msg); }
+    } catch (err: unknown) { const msg = getErrorMessage(err, 'Une erreur est survenue'); toast.error(msg); }
   };
 
   const onExportCsv = useCallback(() => {

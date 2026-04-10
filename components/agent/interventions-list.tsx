@@ -13,6 +13,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { ResolveInterventionDialog } from '@/components/agent/resolve-intervention-dialog';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 import { INTERVENTION_STATUS_META, SEVERITY_META_API } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 const NEXT_STATUS: Record<string, { status: ApiInterventionStatus; label: string }[]> = {
   ASSIGNED:    [{ status: 'IN_PROGRESS', label: 'Démarrer' }],
@@ -56,7 +57,7 @@ export function InterventionsList() {
       await updateIntervention.mutateAsync({ id, payload: { status } });
       toast.success('Statut mis à jour');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour';
+      const message = getErrorMessage(err, 'Impossible de mettre à jour');
       toast.error(message);
     }
   };

@@ -1,6 +1,17 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth.store';
 
+/** Extract a user-facing error message from Axios errors or plain Errors. */
+export function getErrorMessage(err: unknown, fallback: string): string {
+  if (axios.isAxiosError(err)) {
+    return err.response?.data?.message ?? fallback;
+  }
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return fallback;
+}
+
 export const api = axios.create({
 	baseURL: process.env.NEXT_PUBLIC_API_URL + "/api",
 	headers: { "Content-Type": "application/json" },

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { useUpdateUser } from '@/hooks/mutations/useUpdateUser';
+import { getErrorMessage } from '@/services/api';
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'Super Admin',
@@ -64,7 +65,7 @@ export default function AdminProfilPage() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de changer le mot de passe';
+      const message = getErrorMessage(err, 'Impossible de changer le mot de passe');
       toast.error(message);
     }
   };

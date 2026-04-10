@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useCreateCampaign } from '@/hooks/mutations/useCreateCampaign';
 import { uploadFiles } from '@/services/uploads';
 import { CampaignForm, type CampaignFormValues } from '@/components/admin/campaign-form';
+import { getErrorMessage } from '@/services/api';
 
 export default function AgentNouvelCampagnePage() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function AgentNouvelCampagnePage() {
       toast.success('Campagne créée avec succès !');
       router.push('/agent/campagnes');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la création.';
+      const message = getErrorMessage(err, 'Erreur lors de la création.');
       toast.error(message);
     }
   };

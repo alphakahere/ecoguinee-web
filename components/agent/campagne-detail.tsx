@@ -14,6 +14,7 @@ import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import { CompleteCampaignDialog } from './complete-campaign-dialog';
 import type { ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 const TRANSITIONS: Record<string, { status: ApiCampaignStatus; label: string; color: string }[]> = {
   PLANNED:     [
@@ -48,7 +49,7 @@ export function CampagneDetail({ id, basePath = '/agent/campagnes' }: CampagneDe
       await updateCampaign.mutateAsync({ id, payload: { status } });
       toast.success('Statut mis à jour');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      const message = getErrorMessage(err, 'Impossible de mettre à jour le statut');
       toast.error(message);
     }
   }
@@ -61,7 +62,7 @@ export function CampagneDetail({ id, basePath = '/agent/campagnes' }: CampagneDe
       toast.success('Campagne supprimée');
       router.push(basePath);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de supprimer la campagne';
+      const message = getErrorMessage(err, 'Impossible de supprimer la campagne');
       toast.error(message);
     }
   }

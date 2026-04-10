@@ -17,6 +17,7 @@ import type { ApiReport, ReportStatus, ApiSeverity, OwnershipFilter } from '@/ty
 import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META, REPORT_SOURCE_META } from '@/types/api';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { getErrorMessage } from '@/services/api';
 
 const MAP_PAGE_SIZE = 200;
 
@@ -92,7 +93,7 @@ export function SignalementsList() {
       { reportId: r.id, agentId: currentUser.id, organizationId },
       {
         onSuccess: () => toast.success('Signalement pris en charge'),
-        onError: (err: unknown) => { const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la prise en charge'; toast.error(msg); },
+        onError: (err: unknown) => { const msg = getErrorMessage(err, 'Erreur lors de la prise en charge'); toast.error(msg); },
       },
     );
   }

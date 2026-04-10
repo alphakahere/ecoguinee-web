@@ -15,6 +15,7 @@ import { useCampaigns } from '@/hooks/queries/useCampaigns';
 import { useDeleteCampaign } from '@/hooks/mutations/useDeleteCampaign';
 import type { ApiCampaign, ApiCampaignStatus, ApiCampaignType } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 export default function AdminCampagnesPage() {
   const [search, setSearch] = useState('');
@@ -50,7 +51,7 @@ export default function AdminCampagnesPage() {
       await deleteCampaign.mutateAsync(c.id);
       toast.success('Campagne supprimée');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      const message = getErrorMessage(err, 'Suppression impossible');
       toast.error(message);
     }
   };

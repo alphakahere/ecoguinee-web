@@ -15,6 +15,7 @@ import { BarChart } from '@/components/charts/bar-chart';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AxiosError } from 'axios';
+import { getErrorMessage } from '@/services/api';
 
 const SEV_COLOR: Record<string, string> = { LOW: '#6B7280', MODERATE: '#E8A020', CRITICAL: '#D94035' };
 
@@ -183,7 +184,7 @@ function AvailableReportsSection() {
           if (error instanceof AxiosError && error.response?.status === 409) {
             toast.error('Ce signalement vient d\'être pris en charge par une autre organisation.');
           } else {
-            const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la prise en charge.';
+            const message = getErrorMessage(error, 'Erreur lors de la prise en charge.');
             toast.error(message);
           }
         },

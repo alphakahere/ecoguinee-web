@@ -13,6 +13,7 @@ import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
 import { INTERVENTION_STATUS_META } from '@/types/api';
 import { InterventionStatusModal } from '@/components/admin/intervention-status-modal';
+import { getErrorMessage } from '@/services/api';
 
 export default function AdminInterventionsPage() {
   const [statusFilter, setStatusFilter] = useState('');
@@ -46,7 +47,7 @@ export default function AdminInterventionsPage() {
       toast.success('Statut mis à jour');
       setEditIntervention(null);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      const message = getErrorMessage(err, 'Impossible de mettre à jour le statut');
       toast.error(message);
     }
   };

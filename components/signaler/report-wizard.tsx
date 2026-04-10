@@ -11,6 +11,7 @@ import { StepConfirm } from './step-confirm';
 import { useCreatePublicReport } from '@/hooks/mutations/useCreatePublicReport';
 import { useLocationLabel } from '@/hooks/useLocationLabel';
 import { uploadFiles } from '@/services/uploads';
+import { getErrorMessage } from '@/services/api';
 
 export type Step = 1 | 2 | 3 | 4;
 export type WasteType = 'liquid' | 'solid';
@@ -89,7 +90,7 @@ export function ReportWizard() {
       setSubmitted(true);
       toast.success('Signalement envoyé avec succès !', { description: 'Les autorités ont été notifiées.' });
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible d\'envoyer le signalement. Réessayez.';
+      const message = getErrorMessage(err, 'Impossible d\'envoyer le signalement. Réessayez.');
       toast.error(message);
     }
   };

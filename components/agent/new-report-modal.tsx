@@ -15,6 +15,7 @@ import { useZoneTree } from '@/hooks/queries/useZones';
 import { uploadFiles } from '@/services/uploads';
 import type { ApiZone } from '@/types/api';
 import { flattenTree, getMunicipalitiesFromNeighborhoods } from '@/lib/utils';
+import { getErrorMessage } from '@/services/api';
 
 const EMPTY_ZONES: ApiZone[] = [];
 
@@ -164,7 +165,7 @@ export function NewReportModal({ open, onClose }: Props) {
       try {
         photoUrls = await uploadFiles(photoFiles);
       } catch (err: unknown) {
-        const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Échec de l'envoi des photos";
+        const message = getErrorMessage(err, "Échec de l'envoi des photos");
         toast.error(message);
         setIsUploading(false);
         return;
@@ -189,7 +190,7 @@ export function NewReportModal({ open, onClose }: Props) {
       toast.success('Signalement créé');
       onClose();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de créer le signalement';
+      const message = getErrorMessage(err, 'Impossible de créer le signalement');
       toast.error(message);
     }
   };

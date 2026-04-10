@@ -17,6 +17,7 @@ import { useDeleteCampaign } from '@/hooks/mutations/useDeleteCampaign';
 import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
 import type { ApiCampaign, ApiCampaignStatus, ApiCampaignType } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 const pageSize = 15;
 
@@ -58,7 +59,7 @@ export default function SuperviseurCampagnesPage() {
       await deleteCampaign.mutateAsync(c.id);
       toast.success('Campagne supprimée');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      const message = getErrorMessage(err, 'Suppression impossible');
       toast.error(message);
     }
   };

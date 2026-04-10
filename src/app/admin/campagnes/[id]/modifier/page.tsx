@@ -12,6 +12,7 @@ import { useZoneTree } from '@/hooks/queries/useZones';
 import { uploadFiles } from '@/services/uploads';
 import { CampaignForm, type CampaignFormValues } from '@/components/admin/campaign-form';
 import type { ApiZone } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -103,7 +104,7 @@ export default function AdminCampagneModifierPage({ params }: Props) {
       toast.success('Campagne mise à jour !');
       router.push(`/admin/campagnes/${id}`);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la mise à jour.';
+      const message = getErrorMessage(err, 'Erreur lors de la mise à jour.');
       toast.error(message);
     }
   };

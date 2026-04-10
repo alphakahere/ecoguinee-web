@@ -16,6 +16,7 @@ import { useReports } from '@/hooks/queries/useReports';
 import { useDeleteReport } from '@/hooks/mutations/useDeleteReport';
 import type { ApiReport, ReportStatus, ApiSeverity, ApiWasteType } from '@/types/api';
 import { REPORT_STATUS_META, SEVERITY_META_API, WASTE_TYPE_META, REPORT_SOURCE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 const MAP_PAGE_SIZE = 200;
 
@@ -56,7 +57,7 @@ export default function AdminHotspotsPage() {
       await deleteReport.mutateAsync(r.id);
       toast.success('Signalement supprimé');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      const message = getErrorMessage(err, 'Suppression impossible');
       toast.error(message);
     }
   };

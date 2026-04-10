@@ -29,6 +29,7 @@ import { useUpdateUser } from '@/hooks/mutations/useUpdateUser';
 import { useUpdateUserStatus } from '@/hooks/mutations/useUpdateUserStatus';
 import { useDeleteUser } from '@/hooks/mutations/useDeleteUser';
 import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
+import { getErrorMessage } from '@/services/api';
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-[#6FCF4A]/10 text-[#6FCF4A]',
@@ -135,7 +136,7 @@ export default function SuperviseurAgentsPage() {
       }
       closeModal();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      const message = getErrorMessage(err, 'Une erreur est survenue');
       toast.error(message);
     }
   };
@@ -146,7 +147,7 @@ export default function SuperviseurAgentsPage() {
       toast.success('Agent supprimé');
       closeModal();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      const message = getErrorMessage(err, 'Suppression impossible');
       toast.error(message);
     }
   };
@@ -158,7 +159,7 @@ export default function SuperviseurAgentsPage() {
       await deleteUser.mutateAsync(u.id);
       toast.success('Agent supprimé');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Suppression impossible';
+      const message = getErrorMessage(err, 'Suppression impossible');
       toast.error(message);
     }
   };
@@ -172,7 +173,7 @@ export default function SuperviseurAgentsPage() {
       });
       toast.success(u.status === 'ACTIVE' ? 'Compte désactivé' : 'Compte réactivé');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Une erreur est survenue';
+      const message = getErrorMessage(err, 'Une erreur est survenue');
       toast.error(message);
     }
   };

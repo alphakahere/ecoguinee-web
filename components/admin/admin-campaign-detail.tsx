@@ -10,6 +10,7 @@ import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import type { ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
 import Image from 'next/image';
+import { getErrorMessage } from '@/services/api';
 
 // Valid status transitions
 const TRANSITIONS: Record<string, { status: ApiCampaignStatus; label: string; color: string }[]> = {
@@ -47,7 +48,7 @@ export function AdminCampaignDetail({
       await updateCampaign.mutateAsync({ id, payload: { status } });
       toast.success('Statut mis à jour');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      const message = getErrorMessage(err, 'Impossible de mettre à jour le statut');
       toast.error(message);
     }
   };

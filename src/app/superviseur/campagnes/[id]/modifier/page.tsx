@@ -13,6 +13,7 @@ import { useZoneTree } from '@/hooks/queries/useZones';
 import { uploadFiles } from '@/services/uploads';
 import { CampaignForm, type CampaignFormValues } from '@/components/admin/campaign-form';
 import type { ApiZone } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 function flattenTree(nodes: ApiZone[]): ApiZone[] {
   const result: ApiZone[] = [];
@@ -100,7 +101,7 @@ export default function SuperviseurModifierCampagnePage({ params }: { params: Pr
       toast.success('Campagne mise à jour !');
       router.push(`/superviseur/campagnes/${id}`);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Erreur lors de la mise à jour.';
+      const message = getErrorMessage(err, 'Erreur lors de la mise à jour.');
       toast.error(message);
     }
   };

@@ -18,6 +18,7 @@ import {
   type ApiIntervention,
 } from '@/types/api';
 import type { ApiReport } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 export function InterventionDetail({ id }: { id: string }) {
   const { data: rawIntervention, isLoading, isError } = useIntervention(id);
@@ -56,7 +57,7 @@ export function InterventionDetail({ id }: { id: string }) {
       setDraftNotes(null);
       toast.success('Notes enregistrées');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible d\'enregistrer';
+      const message = getErrorMessage(err, 'Impossible d\'enregistrer');
       toast.error(message);
     }
   }

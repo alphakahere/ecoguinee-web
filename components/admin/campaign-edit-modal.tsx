@@ -11,6 +11,7 @@ import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import { uploadFiles } from '@/services/uploads';
 import type { ApiCampaign, ApiCampaignType } from '@/types/api';
 import { API_CAMPAIGN_TYPE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 interface Props {
   open: boolean;
@@ -90,7 +91,7 @@ export function CampaignEditModal({
       toast.success('Campagne mise à jour');
       onClose();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour la campagne';
+      const message = getErrorMessage(err, 'Impossible de mettre à jour la campagne');
       toast.error(message);
     }
   };

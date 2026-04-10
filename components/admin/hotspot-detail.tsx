@@ -20,6 +20,7 @@ import {
   type ApiIntervention,
 } from '@/types/api';
 import Image from 'next/image';
+import { getErrorMessage } from '@/services/api';
 
 const selectCls =
   'w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none pr-10';
@@ -74,7 +75,7 @@ export function HotspotDetail({ id }: { id: string }) {
       toast.success("Signalement attribué à l'organisation");
       setOrganizationId('');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Impossible d'attribuer le signalement";
+      const message = getErrorMessage(err, "Impossible d'attribuer le signalement");
       toast.error(message);
     }
   }

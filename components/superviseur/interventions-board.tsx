@@ -19,6 +19,7 @@ import { formatDate } from '@/lib/utils';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import type { ApiIntervention, ApiInterventionStatus } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 const COLUMNS: { status: ApiInterventionStatus; label: string; icon: typeof AlertTriangle; color: string }[] = [
   { status: 'ASSIGNED', label: 'Assignées', icon: AlertTriangle, color: '#3B82F6' },
@@ -81,7 +82,7 @@ export function InterventionsBoard({ organizationId }: InterventionsBoardProps) 
       });
       toast.success('Statut mis à jour');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de déplacer l\'intervention';
+      const message = getErrorMessage(err, 'Impossible de déplacer l\'intervention');
       toast.error(message);
     }
   };

@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Wrench, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useCreateIntervention } from '@/hooks/mutations/useCreateIntervention';
-import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
 import { useUsers } from '@/hooks/queries/useUsers';
 import { useAuthStore } from '@/stores/auth.store';
+import { getErrorMessage } from '@/services/api';
 
 interface Props {
   open: boolean;
@@ -51,9 +51,7 @@ export function SuperviseurCreateInterventionModal({
       toast.success('Intervention créée');
       onClose();
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        ?? 'Impossible de créer l\'intervention';
+      const message = getErrorMessage(err, 'Impossible de créer l\'intervention');
       toast.error(message);
     }
   };

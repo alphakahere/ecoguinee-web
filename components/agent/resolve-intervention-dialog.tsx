@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
 import { uploadFiles } from '@/services/uploads';
+import { getErrorMessage } from '@/services/api';
 
 const schema = z.object({
   resolutionNote: z.string().optional(),
@@ -80,7 +81,7 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
       pvDocument = urls[0];
       photos = urls.slice(1);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Échec de l'envoi des fichiers";
+      const message = getErrorMessage(err, "Échec de l'envoi des fichiers");
       toast.error(message);
       setIsUploading(false);
       return;
@@ -100,7 +101,7 @@ export function ResolveInterventionDialog({ open, interventionId, onClose }: Pro
       toast.success('Intervention résolue');
       handleClose();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Impossible de résoudre l'intervention";
+      const message = getErrorMessage(err, "Impossible de résoudre l'intervention");
       toast.error(message);
     }
   };

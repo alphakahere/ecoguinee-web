@@ -12,6 +12,7 @@ import { loginSchema, type LoginInput } from '@/lib/validations/auth.schema';
 import { authService } from '@/services/auth';
 import { useAuthStore } from '@/stores/auth.store';
 import { redirectByRole } from '@/lib/types';
+import { getErrorMessage } from '@/services/api';
 
 function looksLikePhone(value: string) {
   return /^[+\d]/.test(value.trim()) && /\d{6,}/.test(value.replace(/\s/g, ''));
@@ -59,7 +60,7 @@ function LoginPageContent() {
       toast.success(`Bienvenue, ${user.name} !`);
       router.push(nextPath ?? redirectByRole(user.role));
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Identifiants incorrects. Veuillez réessayer.';
+      const message = getErrorMessage(err, 'Identifiants incorrects. Veuillez réessayer.');
       toast.error(message);
     }
   }

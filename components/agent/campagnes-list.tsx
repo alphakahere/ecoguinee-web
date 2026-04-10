@@ -14,6 +14,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { CompleteCampaignDialog } from './complete-campaign-dialog';
 import type { ApiCampaign, ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
+import { getErrorMessage } from '@/services/api';
 
 const STATUS_FILTER_OPTIONS = Object.entries(API_CAMPAIGN_STATUS_META) as [ApiCampaignStatus, { label: string }][];
 
@@ -60,7 +61,7 @@ export function CampagnesList() {
       await updateCampaign.mutateAsync({ id: c.id, payload: { status } });
       toast.success('Statut mis à jour');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de mettre à jour le statut';
+      const message = getErrorMessage(err, 'Impossible de mettre à jour le statut');
       toast.error(message);
     }
   }
@@ -71,7 +72,7 @@ export function CampagnesList() {
       await deleteCampaign.mutateAsync(c.id);
       toast.success('Campagne supprimée');
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de supprimer la campagne';
+      const message = getErrorMessage(err, 'Impossible de supprimer la campagne');
       toast.error(message);
     }
   }

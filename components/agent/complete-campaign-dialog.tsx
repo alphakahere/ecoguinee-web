@@ -12,6 +12,7 @@ import { FileUploadZone } from '@/components/shared/file-upload-zone';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import { uploadFiles } from '@/services/uploads';
 import { MAX_PHOTO_BYTES, MAX_DOC_BYTES, MAX_PHOTOS } from '@/lib/constants';
+import { getErrorMessage } from '@/services/api';
 
 const schema = z.object({
   proofNote: z.string().optional(),
@@ -79,7 +80,7 @@ export function CompleteCampaignDialog({ open, campaignId, existingPhotos = [], 
       proofDocument = urls[0];
       newPhotoUrls = urls.slice(1);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Échec de l'envoi des fichiers";
+      const message = getErrorMessage(err, "Échec de l'envoi des fichiers");
       toast.error(message);
       setIsUploading(false);
       return;
@@ -99,7 +100,7 @@ export function CompleteCampaignDialog({ open, campaignId, existingPhotos = [], 
       toast.success('Campagne clôturée');
       handleClose();
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Impossible de clôturer la campagne';
+      const message = getErrorMessage(err, 'Impossible de clôturer la campagne');
       toast.error(message);
     }
   };
