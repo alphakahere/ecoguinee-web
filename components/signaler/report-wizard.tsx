@@ -10,7 +10,6 @@ import { StepPhoto } from './step-photo';
 import { StepConfirm } from './step-confirm';
 import { useCreatePublicReport } from '@/hooks/mutations/useCreatePublicReport';
 import { useLocationLabel } from '@/hooks/useLocationLabel';
-import { uploadFiles } from '@/services/uploads';
 import { getErrorMessage } from '@/services/api';
 
 export type Step = 1 | 2 | 3 | 4;
@@ -46,7 +45,6 @@ const STEP_LABELS = ['Localisation', 'Type & Gravité', 'Photos & Description', 
 export function ReportWizard() {
   const [step, setStep] = useState<Step>(1);
   const [data, setData] = useState<ReportData>(INITIAL);
-  const [submitted, setSubmitted] = useState(false);
 
   const createReport = useCreatePublicReport();
   const locationLabel = useLocationLabel(data.commune, data.quartier, data.secteur);
@@ -72,9 +70,6 @@ export function ReportWizard() {
     if (!data.zoneId || !data.wasteType || !data.gravite) return;
 
     try {
-      const photoFiles = data.photos.map((p) => p.file).filter(Boolean) as File[];
-      const photoUrls = await uploadFiles(photoFiles);
-
       await createReport.mutateAsync({
         type: WASTE_MAP[data.wasteType] ?? 'SOLID',
         severity: SEVERITY_MAP[data.gravite] ?? 'MODERATE',
@@ -85,9 +80,8 @@ export function ReportWizard() {
         zoneId: data.zoneId,
         contactName: data.prenom.trim() || undefined,
         contactPhone: data.telephone.trim() || undefined,
-        photos: photoUrls.length > 0 ? photoUrls : undefined,
+        photoFiles: data.photos.map((p) => p.file).filter(Boolean) as File[],
       });
-      setSubmitted(true);
       toast.success('Signalement envoyé avec succès !', { description: 'Les autorités ont été notifiées.' });
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Impossible d\'envoyer le signalement. Réessayez.');
@@ -98,11 +92,11 @@ export function ReportWizard() {
   const handleReset = () => {
     setData(INITIAL);
     setStep(1);
-    setSubmitted(false);
+    createReport.reset();
     window.scrollTo(0, 0);
   };
 
-  if (submitted) {
+  if (createReport.isSuccess) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-5 text-center py-20">
         <div className="w-24 h-24 rounded-full bg-[#6FCF4A]/15 border-2 border-[#6FCF4A]/30 flex items-center justify-center mb-6">
