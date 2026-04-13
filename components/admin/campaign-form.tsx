@@ -218,7 +218,7 @@ export function CampaignForm(props: CampaignFormProps) {
         <textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={3} placeholder="Description détaillée..." className={`${inputCls} resize-none`} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className={organizationId ? '' : 'grid grid-cols-2 gap-4'}>
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Type *</label>
           <div className="relative">
@@ -228,16 +228,18 @@ export function CampaignForm(props: CampaignFormProps) {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
         </div>
-        <div>
-          <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Organisation organisatrice</label>
-          <div className="relative">
+        {!organizationId && (
+          <div>
+            <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Organisation organisatrice</label>
+            <div className="relative">
               <select value={form.organizationId} onChange={(e) => handleOrganizationChange(e.target.value)} className={selectCls}>
-              <option value="">— Aucune —</option>
-              {organizations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <option value="">— Aucune —</option>
+                {organizations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Cascading location */}

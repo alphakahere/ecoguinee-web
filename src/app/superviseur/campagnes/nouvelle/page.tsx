@@ -62,6 +62,7 @@ export default function SuperviseurCampagneNouvellePage() {
         isPending={createCampaign.isPending}
         submitLabel="Créer la campagne"
         cancelHref="/superviseur/campagnes"
+        organizationId={currentUser?.organizationId || ''}
       />
     </div>
   );
