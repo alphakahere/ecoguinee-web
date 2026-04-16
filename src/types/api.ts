@@ -10,6 +10,8 @@ export type ZoneType =
   | 'NEIGHBORHOOD'
   | 'DISTRICT';
 
+export type FloodRisk = 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+
 export type ApiWasteType = 'LIQUID' | 'SOLID';
 
 export type ApiSeverity = 'LOW' | 'MODERATE' | 'CRITICAL';
@@ -43,6 +45,9 @@ export interface ApiZone {
   name: string;
   code?: string | null;
   type: ZoneType;
+  floodRisk?: FloodRisk | null;
+  leadOrganizationId?: string | null;
+  leadOrganization?: { id: string; name: string; acronym?: string | null; slug: string } | null;
   parentId: string | null;
   parent?: ApiZone;
   children?: ApiZone[];
@@ -240,6 +245,7 @@ export interface CreateZonePayload {
   name: string;
   code?: string;
   type: ZoneType;
+  floodRisk?: FloodRisk;
   parentId?: string;
 }
 export type UpdateZonePayload = Partial<CreateZonePayload>;

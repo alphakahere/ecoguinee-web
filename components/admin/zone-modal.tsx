@@ -3,8 +3,15 @@
 import { useEffect, useState } from 'react';
 import { X, Map, Layers, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { ApiZone, CreateZonePayload, UpdateZonePayload, ZoneType } from '@/types/api';
+import type { ApiZone, CreateZonePayload, FloodRisk, UpdateZonePayload, ZoneType } from '@/types/api';
 import { ZONE_TYPE_META } from '@/types/api';
+
+const FLOOD_RISK_OPTIONS: { value: FloodRisk; label: string }[] = [
+  { value: 'LOW',       label: 'Low' },
+  { value: 'MEDIUM',    label: 'Medium' },
+  { value: 'HIGH',      label: 'High' },
+  { value: 'VERY_HIGH', label: 'Very High' },
+];
 
 interface ZoneModalProps {
   open: boolean;
@@ -22,10 +29,11 @@ interface FormState {
   name: string;
   code: string;
   type: ZoneType;
+  floodRisk: FloodRisk | '';
   parentId: string;
 }
 
-const empty: FormState = { name: '', code: '', type: 'MUNICIPALITY', parentId: '' };
+const empty: FormState = { name: '', code: '', type: 'MUNICIPALITY', floodRisk: '', parentId: '' };
 
 export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose, onSave, isSubmitting = false }: ZoneModalProps) {
   const [form, setForm] = useState<FormState>(empty);
@@ -34,7 +42,7 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (zone) {
-      setForm({ name: zone.name, code: zone.code ?? '', type: zone.type, parentId: zone.parentId ?? '' });
+      setForm({ name: zone.name, code: zone.code ?? '', type: zone.type, floodRisk: zone.floodRisk ?? '', parentId: zone.parentId ?? '' });
     } else {
       setForm({ ...empty, parentId: defaultParentId });
     }
@@ -54,6 +62,7 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
       name: form.name.trim(),
       code: form.code.trim() || undefined,
       type: form.type,
+      floodRisk: form.floodRisk || undefined,
       parentId: form.parentId || undefined,
     };
     await onSave(payload, zone?.id);
@@ -100,6 +109,14 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
                 <Field label="Code officiel">
                   <Map className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input className={inputCls} value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} placeholder="Ex: CKY0101" />
+                </Field>
+
+                <Field label="Flood risk">
+                  <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <select className={`${inputCls} appearance-none`} value={form.floodRisk} onChange={(e) => setForm((f) => ({ ...f, floodRisk: e.target.value as FloodRisk | '' }))}>
+                    <option value="">— None —</option>
+                    {FLOOD_RISK_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
                 </Field>
 
                 <Field label="Type">

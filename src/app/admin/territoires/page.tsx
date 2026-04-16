@@ -410,6 +410,17 @@ export default function AdminTerritoiresPage() {
                   </div>
                 </div>
 
+                {/* Lead organization badge */}
+                {zoneDetail?.leadOrganization && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-muted/30">
+                    <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="text-xs font-mono text-muted-foreground">Chef de file :</span>
+                    <span className="text-xs font-mono font-semibold text-foreground">
+                      {zoneDetail.leadOrganization.acronym ?? zoneDetail.leadOrganization.name}
+                    </span>
+                  </div>
+                )}
+
                 {/* Stats */}
                 {zoneDetail?._count && (
                   <div className="grid grid-cols-3 gap-3">
