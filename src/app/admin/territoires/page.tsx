@@ -49,7 +49,6 @@ const TYPE_COLORS: Record<ZoneType, string> = {
   MUNICIPALITY:   'bg-[#2D7D46]/10 text-[#2D7D46]',
   NEIGHBORHOOD:   'bg-[#E8A020]/10 text-[#E8A020]',
   DISTRICT:       'bg-orange-500/10 text-orange-600',
-  SECTOR:         'bg-muted text-muted-foreground',
 };
 
 // ── TreeNode ──────────────────────────────────────────────────────────────────
@@ -432,8 +431,8 @@ export default function AdminTerritoiresPage() {
                   </div>
                 )}
 
-                {/* Children — sectors are leaf nodes */}
-                {selectedNode?.type !== 'SECTOR' && (
+                {/* Children — neighborhoods/districts are leaf nodes */}
+                {selectedNode?.type !== 'NEIGHBORHOOD' && selectedNode?.type !== 'DISTRICT' && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-semibold">

@@ -43,7 +43,7 @@ export default function AdminCampagneModifierPage({ params }: Props) {
 
   const zoneId = campaign?.zoneId;
 
-  // Resolve commune/quartier/secteur from the campaign's zoneId
+  // Resolve commune/quartier from the campaign's zoneId
   const locationInit = useMemo(() => {
     if (!zoneId || flat.length === 0) return {};
     const zone = flat.find((z) => z.id === zoneId);
@@ -54,10 +54,6 @@ export default function AdminCampagneModifierPage({ params }: Props) {
     }
     if (zone.type === 'NEIGHBORHOOD') {
       return { commune: zone.parentId ?? '', quartier: zone.id };
-    }
-    if (zone.type === 'SECTOR') {
-      const quartier = flat.find((z) => z.id === zone.parentId);
-      return { commune: quartier?.parentId ?? '', quartier: zone.parentId ?? '', secteur: zone.id };
     }
     return {};
   }, [zoneId, flat]);
@@ -85,7 +81,7 @@ export default function AdminCampagneModifierPage({ params }: Props) {
         uploadFiles(values.photoFiles),
         uploadFiles(values.docFiles),
       ]);
-      const zoneId = values.secteur || values.quartier || values.commune || undefined;
+      const zoneId = values.quartier || values.commune || undefined;
       await updateCampaign.mutateAsync({
         id,
         payload: {

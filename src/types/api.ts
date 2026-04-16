@@ -8,8 +8,7 @@ export type ZoneType =
   | 'SUB_PREFECTURE'
   | 'MUNICIPALITY'
   | 'NEIGHBORHOOD'
-  | 'DISTRICT'
-  | 'SECTOR';
+  | 'DISTRICT';
 
 export type ApiWasteType = 'LIQUID' | 'SOLID';
 
@@ -42,6 +41,7 @@ export type ApiCampaignType = 'AWARENESS' | 'PROMOTION' | 'TRAINING';
 export interface ApiZone {
   id: string;
   name: string;
+  code?: string | null;
   type: ZoneType;
   parentId: string | null;
   parent?: ApiZone;
@@ -238,6 +238,7 @@ export interface ApiCampaignFilters {
 
 export interface CreateZonePayload {
   name: string;
+  code?: string;
   type: ZoneType;
   parentId?: string;
 }
@@ -305,7 +306,6 @@ export const ZONE_TYPE_META: Record<ZoneType, { label: string }> = {
   MUNICIPALITY:    { label: 'Commune' },
   NEIGHBORHOOD:    { label: 'Quartier' },
   DISTRICT:        { label: 'District' },
-  SECTOR:          { label: 'Secteur' },
 };
 
 export const REPORT_STATUS_META: Record<ReportStatus, { label: string; color: string; bg: string }> = {

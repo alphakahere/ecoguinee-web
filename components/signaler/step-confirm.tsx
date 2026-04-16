@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function StepConfirm({ data, goTo }: Props) {
-  const locationLabel = useLocationLabel(data.commune, data.quartier, data.secteur);
+  const locationLabel = useLocationLabel(data.commune, data.quartier);
 
   const summary = [
     { label: locationLabel, step: 1 as Step },

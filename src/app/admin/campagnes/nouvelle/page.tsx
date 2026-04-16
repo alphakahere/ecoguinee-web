@@ -26,7 +26,7 @@ export default function AdminCampagneNouvellePage() {
         uploadFiles(values.photoFiles),
         uploadFiles(values.docFiles),
       ]);
-      const zoneId = values.secteur || values.quartier || values.commune || undefined;
+      const zoneId = values.quartier || values.commune || undefined;
       await createCampaign.mutateAsync({
         title: values.title,
         description: values.description || undefined,

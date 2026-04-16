@@ -24,22 +24,13 @@ export function StepLocation({ data, update }: Props) {
 
   const flat = useMemo(() => flattenTree(tree), [tree]);
 
-  // Build commune (MUNICIPALITY/REGION) → secteur (NEIGHBORHOOD/SECTOR) mapping from zone tree
-  const communeZones = useMemo(() => flat.filter(z =>
-    z.type === 'MUNICIPALITY',
-  ), [flat]);
+  const communeZones = useMemo(() => flat.filter(z => z.type === 'MUNICIPALITY'), [flat]);
 
   const quartierZones = useMemo(() => {
     if (!data.commune) return [];
     const communeZone = flat.find(z => z.id === data.commune);
     return communeZone?.children?.filter(z => z.type === 'NEIGHBORHOOD') ?? [];
   }, [flat, data.commune]);
-
-  const secteurZones = useMemo(() => {
-    if (!data.quartier) return [];
-    const quartierZone = flat.find(z => z.id === data.quartier);
-    return quartierZone?.children?.filter(z => z.type === 'SECTOR') ?? [];
-  }, [flat, data.quartier]);
 
   const handleGPS = () => {
     if (!navigator.geolocation) { setGpsState('denied'); return; }
@@ -58,20 +49,15 @@ export function StepLocation({ data, update }: Props) {
   };
 
   const handleCommuneChange = (zoneId: string) => {
-    update({ commune: zoneId, quartier: '', secteur: '', zoneId: '' });
+    update({ commune: zoneId, quartier: '', zoneId: '' });
   };
 
   const handleQuartierChange = (zoneId: string) => {
-    update({ quartier: zoneId, secteur: '', zoneId: zoneId });
-  };
-
-  const handleSecteurChange = (zoneId: string) => {
-    update({ secteur: zoneId, zoneId });
+    update({ quartier: zoneId, zoneId });
   };
 
   const selectedCommune = flat.find(z => z.id === data.commune);
   const selectedQuartier = flat.find(z => z.id === data.quartier);
-  const selectedSecteur = flat.find(z => z.id === data.secteur);
   const hasLocation = !!(data.commune && data.quartier);
 
   return (
@@ -156,7 +142,6 @@ export function StepLocation({ data, update }: Props) {
             <span className="text-[11px] font-mono font-semibold text-foreground">
               {selectedCommune?.name ?? data.commune}
               {selectedQuartier && ` — ${selectedQuartier.name}`}
-              {selectedSecteur && ` — ${selectedSecteur.name}`}
             </span>
           </div>
         </div>
@@ -204,22 +189,6 @@ export function StepLocation({ data, update }: Props) {
             </div>
           )}
 
-          {data.quartier && secteurZones.length > 0 && (
-            <div>
-              <label className="block text-sm font-mono text-muted-foreground mb-2">Secteur</label>
-              <div className="relative">
-                <select
-                  value={data.secteur}
-                  onChange={(e) => handleSecteurChange(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-xl border border-border bg-background text-base font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none pr-10"
-                >
-                  <option value="">Choisir un secteur...</option>
-                  {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

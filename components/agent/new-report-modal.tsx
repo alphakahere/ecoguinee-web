@@ -22,7 +22,6 @@ const EMPTY_ZONES: ApiZone[] = [];
 const schema = z.object({
   commune: z.string().min(1, 'Sélectionnez une commune'),
   quartier: z.string().min(1, 'Sélectionnez un quartier'),
-  secteur: z.string().optional(),
   wasteType: z.enum(['SOLID', 'LIQUID']),
   severity: z.enum(['LOW', 'MODERATE', 'CRITICAL']),
   address: z.string().optional(),
@@ -84,7 +83,6 @@ export function NewReportModal({ open, onClose }: Props) {
     defaultValues: {
       commune: '',
       quartier: '',
-      secteur: '',
       wasteType: 'SOLID',
       severity: 'MODERATE',
       address: '',
@@ -110,12 +108,6 @@ export function NewReportModal({ open, onClose }: Props) {
     return underCommune.filter((q) => allowed.has(q.id));
   }, [flat, commune, agentQuartiers]);
 
-  const secteurZones = useMemo(() => {
-    if (!quartier) return [];
-    const quartierZone = flat.find((z) => z.id === quartier);
-    return quartierZone?.children?.filter((z) => z.type === 'SECTOR') ?? [];
-  }, [flat, quartier]);
-
   // Auto-select when the agent's zone restricts to a single option
   useEffect(() => {
     if (open) {
@@ -133,11 +125,6 @@ export function NewReportModal({ open, onClose }: Props) {
     if (!open || quartierZones.length !== 1) return;
     setValue('quartier', quartierZones[0].id, { shouldValidate: true });
   }, [open, quartierZones, setValue]);
-
-  useEffect(() => {
-    if (!open || secteurZones.length !== 1) return;
-    setValue('secteur', secteurZones[0].id);
-  }, [open, secteurZones, setValue]);
 
   const isSubmitting = isUploading || createReport.isPending;
 
@@ -157,7 +144,7 @@ export function NewReportModal({ open, onClose }: Props) {
   };
 
   const onSubmit = async (values: FormValues) => {
-    const zoneId = values.secteur || values.quartier;
+    const zoneId = values.quartier;
     let photoUrls: string[] = [];
 
     if (photoFiles.length > 0) {
@@ -235,7 +222,6 @@ export function NewReportModal({ open, onClose }: Props) {
                     onChange={(e) => {
                       setValue('commune', e.target.value, { shouldValidate: true });
                       setValue('quartier', '', { shouldValidate: false });
-                      setValue('secteur', '', { shouldValidate: false });
                     }}
                   >
                     <option value="">— Sélectionner —</option>
@@ -253,23 +239,12 @@ export function NewReportModal({ open, onClose }: Props) {
                       {...register('quartier')}
                       onChange={(e) => {
                         setValue('quartier', e.target.value, { shouldValidate: true });
-                        setValue('secteur', '', { shouldValidate: false });
                       }}
                     >
                       <option value="">— Sélectionner —</option>
                       {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
                     </select>
                     {errors.quartier && <p className={errorCls}>{errors.quartier.message}</p>}
-                  </div>
-                )}
-
-                {quartier && secteurZones.length > 0 && (
-                  <div>
-                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Secteur</label>
-                    <select className={`${inputCls} appearance-none`} disabled={secteurZones.length <= 1} {...register('secteur')}>
-                      <option value="">— Sélectionner —</option>
-                      {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
                   </div>
                 )}
 

@@ -9,13 +9,12 @@ function flattenTree(nodes: ApiZone[]): ApiZone[] {
   return result;
 }
 
-export function useLocationLabel(communeId: string, quartierId: string, secteurId: string) {
+export function useLocationLabel(communeId: string, quartierId: string) {
   const { data: tree = [] } = useZoneTree();
   const flat = useMemo(() => flattenTree(tree), [tree]);
 
   const communeName = flat.find(z => z.id === communeId)?.name ?? communeId;
   const quartierName = flat.find(z => z.id === quartierId)?.name;
-  const secteurName = flat.find(z => z.id === secteurId)?.name;
 
-  return [communeName, quartierName, secteurName].filter(Boolean).join(' — ');
+  return [communeName, quartierName].filter(Boolean).join(' — ');
 }

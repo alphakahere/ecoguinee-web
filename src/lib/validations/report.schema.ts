@@ -5,8 +5,8 @@ export const createReportSchema = z.object({
     lat: z.number(),
     lng: z.number(),
     address: z.string().min(1, 'Adresse requise'),
-    territoire: z.string().min(1, 'Territoire requis'),
-    sector: z.string().min(1, 'Secteur requis'),
+    commune: z.string().min(1, 'Commune requise'),
+    quartier: z.string().min(1, 'Quartier requis'),
   }),
   wasteType: z.enum(['solid', 'liquid', 'mixed'], {
     error: 'Type de déchet requis',

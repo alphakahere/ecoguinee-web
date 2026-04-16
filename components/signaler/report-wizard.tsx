@@ -19,7 +19,6 @@ export type Gravite = 'faible' | 'modere' | 'critique';
 export interface ReportData {
   commune: string;
   quartier: string;
-  secteur: string;
   zoneId: string;
   latitude: number;
   longitude: number;
@@ -32,7 +31,7 @@ export interface ReportData {
 }
 
 const INITIAL: ReportData = {
-  commune: '', quartier: '', secteur: '', zoneId: '', latitude: 0, longitude: 0,
+  commune: '', quartier: '', zoneId: '', latitude: 0, longitude: 0,
   wasteType: null, gravite: null,
   photos: [], description: '', prenom: '', telephone: '',
 };
@@ -47,12 +46,12 @@ export function ReportWizard() {
   const [data, setData] = useState<ReportData>(INITIAL);
 
   const createReport = useCreatePublicReport();
-  const locationLabel = useLocationLabel(data.commune, data.quartier, data.secteur);
+  const locationLabel = useLocationLabel(data.commune, data.quartier);
 
   const update = (d: Partial<ReportData>) => setData((prev) => ({ ...prev, ...d }));
 
   const canNext = (): boolean => {
-    if (step === 1) return !!(data.commune && data.secteur && data.zoneId);
+    if (step === 1) return !!(data.commune && data.quartier && data.zoneId);
     if (step === 2) return !!(data.wasteType && data.gravite);
     return true;
   };

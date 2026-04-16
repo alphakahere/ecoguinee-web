@@ -27,7 +27,6 @@ export interface CampaignFormValues {
   type: ApiCampaignType;
   commune: string;
   quartier: string;
-  secteur: string;
   address: string;
   organizationId: string;
   scheduledDate: string;
@@ -53,7 +52,7 @@ interface CampaignFormProps {
 
 export function CampaignForm(props: CampaignFormProps) {
   const currentUser = useAuthStore((s) => s.user);
-  const { initialValues, existingPhotoUrls: initPhotoUrls = [], existingDocUrls: initDocUrls = [], onSubmit, isPending, submitLabel, cancelHref, organizationId } = props;  
+  const { initialValues, existingPhotoUrls: initPhotoUrls = [], existingDocUrls: initDocUrls = [], onSubmit, isPending, submitLabel, cancelHref, organizationId } = props;
   const { data: tree = [] } = useZoneTree();
   const { data: organizationsData } = useOrganizations();
   const organizations = useMemo(
@@ -67,7 +66,6 @@ export function CampaignForm(props: CampaignFormProps) {
     type: 'AWARENESS',
     commune: '',
     quartier: '',
-    secteur: '',
     address: '',
     organizationId: organizationId ?? '',
     scheduledDate: '',
@@ -78,7 +76,6 @@ export function CampaignForm(props: CampaignFormProps) {
   const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(initPhotoUrls);
   const [existingDocUrls, setExistingDocUrls] = useState<string[]>(initDocUrls);
 
-  /** Organisation du user connecté (zones déjà présentes, pas besoin de refetch). */
   const orgDetail = currentUser?.organization;
 
   const orgDetailQueryId = useMemo(() => {
@@ -102,7 +99,6 @@ export function CampaignForm(props: CampaignFormProps) {
     [organizations, form.organizationId],
   );
 
-  /** Quartiers rattachés à l’org (NEIGHBORHOOD). Priorité : `currentUser.organization` si même org, sinon API / liste. */
   const orgQuartiers = useMemo(() => {
     if (!form.organizationId) return EMPTY_ZONES;
     const isUserOrg =
@@ -132,20 +128,13 @@ export function CampaignForm(props: CampaignFormProps) {
   useEffect(() => {
     if (!initialValues || flat.length === 0) return;
 
-    const commune = initialValues.commune ?? '';
-    const quartier = initialValues.quartier ?? '';
-    const secteur = initialValues.secteur ?? '';
-
-    // If cascading fields not provided but we have zoneId-level info in initialValues,
-    // treat commune/quartier/secteur as already resolved by the parent page.
     setForm((prev) => ({
       ...prev,
       title: initialValues.title ?? prev.title,
       description: initialValues.description ?? prev.description,
       type: initialValues.type ?? prev.type,
-      commune,
-      quartier,
-      secteur,
+      commune: initialValues.commune ?? '',
+      quartier: initialValues.quartier ?? '',
       address: initialValues.address ?? prev.address,
       organizationId: initialValues.organizationId ?? prev.organizationId,
       scheduledDate: initialValues.scheduledDate ?? prev.scheduledDate,
@@ -156,9 +145,8 @@ export function CampaignForm(props: CampaignFormProps) {
 
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
   const handleOrganizationChange = (id: string) =>
-    setForm((f) => ({ ...f, organizationId: id, commune: '', quartier: '', secteur: '' }));
-  const handleCommuneChange = (id: string) => setForm((f) => ({ ...f, commune: id, quartier: '', secteur: '' }));
-  const handleQuartierChange = (id: string) => setForm((f) => ({ ...f, quartier: id, secteur: '' }));
+    setForm((f) => ({ ...f, organizationId: id, commune: '', quartier: '' }));
+  const handleCommuneChange = (id: string) => setForm((f) => ({ ...f, commune: id, quartier: '' }));
 
   const quartierZones = useMemo(() => {
     if (!form.commune) return [];
@@ -169,29 +157,17 @@ export function CampaignForm(props: CampaignFormProps) {
     return underCommune.filter((q) => allowed.has(q.id));
   }, [flat, form.commune, restrictZones, orgQuartiers]);
 
-  const secteurZones = useMemo(() => {
-    if (!form.quartier) return [];
-    const quartier = flat.find((z) => z.id === form.quartier);
-    return quartier?.children?.filter((z) => z.type === 'SECTOR') ?? [];
-  }, [flat, form.quartier]);
-
   useEffect(() => {
     if (communeZones.length !== 1) return;
     const id = communeZones[0].id;
-    setForm((f) => (f.commune === id ? f : { ...f, commune: id, quartier: '', secteur: '' }));
+    setForm((f) => (f.commune === id ? f : { ...f, commune: id, quartier: '' }));
   }, [communeZones]);
 
   useEffect(() => {
     if (quartierZones.length !== 1 || !form.commune) return;
     const id = quartierZones[0].id;
-    setForm((f) => (f.quartier === id ? f : { ...f, quartier: id, secteur: '' }));
+    setForm((f) => (f.quartier === id ? f : { ...f, quartier: id }));
   }, [quartierZones, form.commune]);
-
-  useEffect(() => {
-    if (secteurZones.length !== 1 || !form.quartier) return;
-    const id = secteurZones[0].id;
-    setForm((f) => (f.secteur === id ? f : { ...f, secteur: id }));
-  }, [secteurZones, form.quartier]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,12 +225,12 @@ export function CampaignForm(props: CampaignFormProps) {
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5">Commune</label>
           <div className="relative">
-              <select
-                value={form.commune}
-                onChange={(e) => handleCommuneChange(e.target.value)}
-                className={selectCls}
-                disabled={communeZones.length <= 1}
-              >
+            <select
+              value={form.commune}
+              onChange={(e) => handleCommuneChange(e.target.value)}
+              className={selectCls}
+              disabled={communeZones.length <= 1}
+            >
               <option value="">Choisir une commune…</option>
               {communeZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
             </select>
@@ -266,32 +242,18 @@ export function CampaignForm(props: CampaignFormProps) {
           <div>
             <label className="block text-xs font-mono text-muted-foreground mb-1.5">Quartier</label>
             <div className="relative">
-                <select
-                  value={form.quartier}
-                  onChange={(e) => handleQuartierChange(e.target.value)}
-                  className={selectCls}
-                  disabled={quartierZones.length <= 1}
-                >
+              <select
+                value={form.quartier}
+                onChange={(e) => update('quartier', e.target.value)}
+                className={selectCls}
+                disabled={quartierZones.length <= 1}
+              >
                 <option value="">Choisir un quartier…</option>
-                {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            </div>
-          </div>
-        )}
-
-        {form.quartier && secteurZones.length > 0 && (
-          <div>
-            <label className="block text-xs font-mono text-muted-foreground mb-1.5">Secteur</label>
-            <div className="relative">
-                <select
-                  value={form.secteur}
-                  onChange={(e) => update('secteur', e.target.value)}
-                  className={selectCls}
-                  disabled={secteurZones.length <= 1}
-                >
-                <option value="">Choisir un secteur…</option>
-                {secteurZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                {quartierZones.map((z) => (
+                  <option key={z.id} value={z.id}>
+                    {z.code ? `${z.name} (${z.code})` : z.name}
+                  </option>
+                ))}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             </div>

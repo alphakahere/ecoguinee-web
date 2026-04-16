@@ -20,11 +20,12 @@ const ZONE_TYPES = Object.entries(ZONE_TYPE_META) as [ZoneType, { label: string 
 
 interface FormState {
   name: string;
+  code: string;
   type: ZoneType;
   parentId: string;
 }
 
-const empty: FormState = { name: '', type: 'MUNICIPALITY', parentId: '' };
+const empty: FormState = { name: '', code: '', type: 'MUNICIPALITY', parentId: '' };
 
 export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose, onSave, isSubmitting = false }: ZoneModalProps) {
   const [form, setForm] = useState<FormState>(empty);
@@ -33,7 +34,7 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (zone) {
-      setForm({ name: zone.name, type: zone.type, parentId: zone.parentId ?? '' });
+      setForm({ name: zone.name, code: zone.code ?? '', type: zone.type, parentId: zone.parentId ?? '' });
     } else {
       setForm({ ...empty, parentId: defaultParentId });
     }
@@ -51,6 +52,7 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
 
     const payload: CreateZonePayload = {
       name: form.name.trim(),
+      code: form.code.trim() || undefined,
       type: form.type,
       parentId: form.parentId || undefined,
     };
@@ -93,6 +95,11 @@ export function ZoneModal({ open, zone, allZones, defaultParentId = '', onClose,
                 <Field label="Nom *" error={errors.name}>
                   <Map className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input className={`${inputCls} ${errors.name ? 'border-[#D94035]' : ''}`} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Nom de la zone" />
+                </Field>
+
+                <Field label="Code officiel">
+                  <Map className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input className={inputCls} value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} placeholder="Ex: CKY0101" />
                 </Field>
 
                 <Field label="Type">

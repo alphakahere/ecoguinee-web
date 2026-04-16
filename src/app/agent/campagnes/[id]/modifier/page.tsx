@@ -52,10 +52,6 @@ export default function AgentModifierCampagnePage({ params }: { params: Promise<
     if (zone.type === 'NEIGHBORHOOD') {
       return { commune: zone.parentId ?? '', quartier: zone.id };
     }
-    if (zone.type === 'SECTOR') {
-      const quartier = flat.find((z) => z.id === zone.parentId);
-      return { commune: quartier?.parentId ?? '', quartier: zone.parentId ?? '', secteur: zone.id };
-    }
     return {};
   }, [zoneId, flat]);
 
@@ -82,7 +78,7 @@ export default function AgentModifierCampagnePage({ params }: { params: Promise<
         uploadFiles(values.photoFiles),
         uploadFiles(values.docFiles),
       ]);
-      const zoneId = values.secteur || values.quartier || values.commune || undefined;
+      const zoneId = values.quartier || values.commune || undefined;
       await updateCampaign.mutateAsync({
         id,
         payload: {

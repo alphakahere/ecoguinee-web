@@ -7,7 +7,7 @@ export const createCampaignSchema = z.object({
     error: 'Type de campagne requis',
   }),
   commune: z.string().min(1, 'Commune requise'),
-  secteur: z.string().min(1, 'Secteur requis'),
+  quartier: z.string().min(1, 'Quartier requis'),
   datePrevue: z.string().min(1, 'Date prévue requise'),
   dateFinEstimee: z.string().optional(),
   pmeOrganisatrice: z.string().optional(),

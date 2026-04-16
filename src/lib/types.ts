@@ -16,21 +16,13 @@ export type CampaignStatus = "planifiee" | "en-cours" | "terminee" | "annulee";
 export type CampaignType = "sensibilisation" | "promotion" | "formation";
 
 // ── Core interfaces ─────────────────────────────────────────────────────────
-export interface Sector {
-	id: string;
-	name: string;
-	hotspotCount: number;
-	resolvedCount: number;
-	population?: number;
-}
-
 export interface Territoire {
 	id: string;
 	name: string;
 	hotspotCount: number;
 	resolvedCount: number;
 	coordinates: [number, number];
-	sectors: Sector[];
+	quartiers: { id: string; name: string; code?: string | null }[];
 }
 
 export interface Hotspot {
@@ -40,8 +32,8 @@ export interface Hotspot {
 		lat: number;
 		lng: number;
 		address: string;
-		territoire: string;
-		sector: string;
+		commune: string;
+		quartier: string;
 	};
 	wasteType: WasteType;
 	severity: SeverityLevel;
@@ -72,7 +64,6 @@ export interface Organization {
 	contact: string;
 	activeInterventions: number;
 	completedInterventions: number;
-	sectors: string[];
 	zones: ApiZone[];
 }
 
@@ -129,7 +120,7 @@ export interface Campaign {
 	description: string;
 	type: CampaignType;
 	commune: string;
-	secteur: string;
+	quartier?: string;
 	datePrevue: string;
 	dateFinEstimee?: string;
 	agentId: string;
