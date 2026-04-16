@@ -114,120 +114,197 @@ export function HeroSection() {
     prefersReducedMotion ? { duration: 0 } : { duration: d, delay };
 
   return (
-    <section
-      className="relative flex flex-col justify-center overflow-hidden min-h-[calc(100vh-4rem)]"
-      style={{ background: '#0A1A10' }}
-    >
-      <TopoSVG />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: '70vw', height: '70vw', maxWidth: 900, maxHeight: 900,
-          background: 'radial-gradient(circle, rgba(45,125,70,0.22) 0%, rgba(111,207,74,0.08) 40%, transparent 72%)',
-          top: '50%', left: '50%', transform: 'translate(-50%, -56%)',
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, transparent, #0A1A10)' }}
-      />
+		<section
+			className="relative flex flex-col justify-center overflow-hidden min-h-[calc(100vh-4rem)]"
+			style={{ background: "#0A1A10" }}
+		>
+			<TopoSVG />
+			<div
+				className="absolute pointer-events-none"
+				style={{
+					width: "70vw",
+					height: "70vw",
+					maxWidth: 900,
+					maxHeight: 900,
+					background:
+						"radial-gradient(circle, rgba(45,125,70,0.22) 0%, rgba(111,207,74,0.08) 40%, transparent 72%)",
+					top: "50%",
+					left: "50%",
+					transform: "translate(-50%, -56%)",
+				}}
+			/>
+			<div
+				className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+				style={{
+					background:
+						"linear-gradient(to bottom, transparent, #0A1A10)",
+				}}
+			/>
 
-      <div className="relative max-w-7xl mx-auto px-5 py-24 md:py-32 w-full">
-        <div className="max-w-5xl">
-          <motion.div
-            initial={enter ?? { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={trans(0.5)}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border mb-7"
-            style={{ borderColor: 'rgba(111,207,74,0.3)', background: 'rgba(111,207,74,0.08)' }}
-          >
-            <Leaf className="w-3.5 h-3.5" style={{ color: '#6FCF4A' }} />
-            <span className="text-xs font-mono uppercase tracking-widest" style={{ color: '#6FCF4A' }}>
-              Plateforme officielle · République de Guinée
-            </span>
-          </motion.div>
+			<div className="relative max-w-7xl mx-auto px-5 py-24 md:py-32 w-full">
+				<div className="max-w-5xl">
+					<motion.div
+						initial={enter ?? { opacity: 0, y: 16 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={trans(0.5)}
+						className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border mb-7"
+						style={{
+							borderColor: "rgba(111,207,74,0.3)",
+							background: "rgba(111,207,74,0.08)",
+						}}
+					>
+						<Leaf
+							className="w-3.5 h-3.5"
+							style={{ color: "#6FCF4A" }}
+						/>
+						<span
+							className="text-xs font-mono uppercase tracking-widest"
+							style={{ color: "#6FCF4A" }}
+						>
+							Plateforme officielle · République de
+							Guinée
+						</span>
+					</motion.div>
 
-          <motion.h1
-            initial={enter ?? { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}
-            className="font-bold text-white mb-5"
-            style={{ fontSize: 'clamp(2.2rem, 5.5vw, 4rem)', lineHeight: 1.12, letterSpacing: '-0.02em' }}
-          >
-            Ensemble pour une Guinée
-            <br />
-            <span style={{ color: '#6FCF4A' }}>plus propre</span>
-          </motion.h1>
+					<motion.h1
+						initial={enter ?? { opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={
+							prefersReducedMotion
+								? { duration: 0 }
+								: { duration: 0.6, delay: 0.1 }
+						}
+						className="font-bold text-white mb-5"
+						style={{
+							fontSize: "clamp(2.2rem, 5.5vw, 4rem)",
+							lineHeight: 1.12,
+							letterSpacing: "-0.02em",
+						}}
+					>
+						Ensemble pour une Guinée
+						<br />
+						<span style={{ color: "#6FCF4A" }}>
+							plus propre
+						</span>
+					</motion.h1>
 
-          <motion.p
-            initial={enter ?? { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
-            className="font-mono mb-9 max-w-xl"
-            style={{ color: 'rgba(245,240,232,0.6)', fontSize: '1rem', lineHeight: 1.7 }}
-          >
-            EcoGuinée connecte les citoyens, les agents de terrain et les autorités
-            pour éliminer les points noirs environnementaux à travers tout le pays.
-          </motion.p>
+					<motion.p
+						initial={enter ?? { opacity: 0, y: 16 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={
+							prefersReducedMotion
+								? { duration: 0 }
+								: { duration: 0.5, delay: 0.2 }
+						}
+						className="font-mono mb-9 max-w-xl"
+						style={{
+							color: "rgba(245,240,232,0.6)",
+							fontSize: "1rem",
+							lineHeight: 1.7,
+						}}
+					>
+						EcoGuinée connecte les citoyens, les agents
+						de terrain et les autorités pour éliminer
+						les points noirs environnementaux à travers
+						tout le pays.
+					</motion.p>
 
-          <motion.div
-            initial={enter ?? { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, delay: 0.3 }}
-            className="flex flex-wrap gap-3 mb-16"
-          >
-            <Link
-              href="/signaler"
-              className={`group flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-white font-mono transition-all ${prefersReducedMotion ? '' : 'hover:scale-105'}`}
-              style={{ background: '#2D7D46', boxShadow: '0 4px 24px rgba(45,125,70,0.45)' }}
-            >
-              <FileText className="w-4 h-4" />
-              Signaler un point noir
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/carte"
-              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-mono transition-all ${prefersReducedMotion ? '' : 'hover:scale-105'}`}
-              style={{
-                border: '1px solid rgba(255,255,255,0.18)',
-                color: 'rgba(245,240,232,0.85)',
-                background: 'rgba(255,255,255,0.06)',
-              }}
-            >
-              <Map className="w-4 h-4" aria-hidden />
-              Voir la carte
-            </Link>
-          </motion.div>
+					<motion.div
+						initial={enter ?? { opacity: 0, y: 12 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={
+							prefersReducedMotion
+								? { duration: 0 }
+								: { duration: 0.5, delay: 0.3 }
+						}
+						className="flex flex-wrap gap-3 mb-16"
+					>
+						<Link
+							href="/"
+							className={`group flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-white font-mono transition-all ${prefersReducedMotion ? "" : "hover:scale-105"}`}
+							style={{
+								background: "#2D7D46",
+								boxShadow:
+									"0 4px 24px rgba(45,125,70,0.45)",
+							}}
+						>
+							<FileText className="w-4 h-4" />
+							Signaler un point noir
+							<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+						</Link>
+						<Link
+							href="/carte"
+							className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-mono transition-all ${prefersReducedMotion ? "" : "hover:scale-105"}`}
+							style={{
+								border: "1px solid rgba(255,255,255,0.18)",
+								color: "rgba(245,240,232,0.85)",
+								background:
+									"rgba(255,255,255,0.06)",
+							}}
+						>
+							<Map
+								className="w-4 h-4"
+								aria-hidden
+							/>
+							Voir la carte
+						</Link>
+					</motion.div>
 
-          <p className="text-[11px] font-mono uppercase tracking-widest text-white/40 mb-3">
-            Aperçu en direct
-          </p>
-          <motion.div
-            initial={enter ?? { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.5 }}
-            className="inline-flex flex-col md:flex-row flex-wrap md:flex-nowrap rounded-2xl overflow-hidden divide-x divide-white/10 w-full md:w-auto"
-            style={{
-              border: '1px solid rgba(111,207,74,0.18)',
-              background: 'rgba(15,31,21,0.7)',
-              backdropFilter: 'blur(12px)',
-            }}
-          >
-            <CounterItem value={stats?.totalReports ?? 0} label="Points noirs signalés" delay={0} skipAnimation={!!prefersReducedMotion} />
-            <CounterItem value={stats?.resolvedReports ?? 0} label="Interventions résolues" delay={150} skipAnimation={!!prefersReducedMotion} />
-            <CounterItem value={stats?.communes ?? 0} label="Communes couvertes" delay={300} skipAnimation={!!prefersReducedMotion} />
-            <CounterItem value={stats?.activeOrganizations ?? 0} label="Organisations partenaires" delay={450} skipAnimation={!!prefersReducedMotion} />
-          </motion.div>
-          <p className="mt-4 text-center md:text-left">
-            <a
-              href="#impact"
-              className="text-xs font-mono text-[#6FCF4A]/80 hover:text-[#6FCF4A] underline-offset-4 hover:underline transition-colors"
-            >
-              Indicateurs détaillés et tendances →
-            </a>
-          </p>
-        </div>
-      </div>
-    </section>
+					<p className="text-[11px] font-mono uppercase tracking-widest text-white/40 mb-3">
+						Aperçu en direct
+					</p>
+					<motion.div
+						initial={enter ?? { opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={
+							prefersReducedMotion
+								? { duration: 0 }
+								: { delay: 0.5 }
+						}
+						className="inline-flex flex-col md:flex-row flex-wrap md:flex-nowrap rounded-2xl overflow-hidden divide-x divide-white/10 w-full md:w-auto"
+						style={{
+							border: "1px solid rgba(111,207,74,0.18)",
+							background: "rgba(15,31,21,0.7)",
+							backdropFilter: "blur(12px)",
+						}}
+					>
+						<CounterItem
+							value={stats?.totalReports ?? 0}
+							label="Points noirs signalés"
+							delay={0}
+							skipAnimation={!!prefersReducedMotion}
+						/>
+						<CounterItem
+							value={stats?.resolvedReports ?? 0}
+							label="Interventions résolues"
+							delay={150}
+							skipAnimation={!!prefersReducedMotion}
+						/>
+						<CounterItem
+							value={stats?.communes ?? 0}
+							label="Communes couvertes"
+							delay={300}
+							skipAnimation={!!prefersReducedMotion}
+						/>
+						<CounterItem
+							value={
+								stats?.activeOrganizations ?? 0
+							}
+							label="Organisations partenaires"
+							delay={450}
+							skipAnimation={!!prefersReducedMotion}
+						/>
+					</motion.div>
+					<p className="mt-4 text-center md:text-left">
+						<a
+							href="#impact"
+							className="text-xs font-mono text-[#6FCF4A]/80 hover:text-[#6FCF4A] underline-offset-4 hover:underline transition-colors"
+						>
+							Indicateurs détaillés et tendances →
+						</a>
+					</p>
+				</div>
+			</div>
+		</section>
   );
 }
