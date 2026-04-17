@@ -5,22 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Building2,
-  Mail,
-  Phone,
-  MapPin,
-  FileText,
-  ChevronDown,
-  ArrowLeft,
-  ArrowRight,
-  Copy,
-  Eye,
-  EyeOff,
-  Check,
-  User,
-  Lock,
-  Loader2,
-} from 'lucide-react';
+	Building2,
+	Mail,
+	Phone,
+	MapPin,
+	FileText,
+	ArrowLeft,
+	ArrowRight,
+	Copy,
+	Eye,
+	EyeOff,
+	Check,
+	User,
+	Lock,
+	Loader2,
+} from "lucide-react";
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useZoneTree } from '@/hooks/queries/useZones';
@@ -134,146 +133,72 @@ function Field({
 // ── Zone Picker (reused from modal pattern) ────────────────────────────────
 
 function ZonePicker({
-  zones,
-  selectedIds,
-  onChange,
-  error,
+	zones,
+	selectedIds,
+	onChange,
+	error,
 }: {
-  zones: ApiZone[];
-  selectedIds: string[];
-  onChange: (ids: string[]) => void;
-  error?: string;
+	zones: ApiZone[];
+	selectedIds: string[];
+	onChange: (ids: string[]) => void;
+	error?: string;
 }) {
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+	const municipalities = useMemo(
+		() => zones.filter((z) => z.type === "MUNICIPALITY"),
+		[zones],
+	);
 
-  const municipalities = useMemo(
-    () => zones.filter((z) => z.type === 'MUNICIPALITY'),
-    [zones],
-  );
+	const toggleMunicipality = (municipalityId: string) => {
+		if (selectedIds.includes(municipalityId)) {
+			onChange(selectedIds.filter((id) => id !== municipalityId));
+		} else {
+			onChange([...selectedIds, municipalityId]);
+		}
+	};
 
-  const getNeighborhoods = (municipalityId: string): ApiZone[] => {
-    const m = zones.find((z) => z.id === municipalityId);
-    return m?.children?.filter((z) => z.type === 'NEIGHBORHOOD') ?? [];
-  };
-
-  const toggleMunicipality = (municipalityId: string) => {
-    const nhIds = getNeighborhoods(municipalityId).map((n) => n.id);
-    if (nhIds.length === 0) return;
-    const allSelected = nhIds.every((id) => selectedIds.includes(id));
-    if (allSelected) {
-      onChange(selectedIds.filter((id) => !nhIds.includes(id)));
-    } else {
-      onChange(Array.from(new Set([...selectedIds, ...nhIds])));
-    }
-  };
-
-  const toggleNeighborhood = (neighborhoodId: string) => {
-    if (selectedIds.includes(neighborhoodId)) {
-      onChange(selectedIds.filter((id) => id !== neighborhoodId));
-    } else {
-      onChange([...selectedIds, neighborhoodId]);
-    }
-  };
-
-  const toggleExpanded = (municipalityId: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(municipalityId)) next.delete(municipalityId);
-      else next.add(municipalityId);
-      return next;
-    });
-  };
-
-  return (
-    <div>
-      <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">
-        Communes et quartiers couverts *
-      </label>
-      <div className="border border-border rounded-lg bg-muted/20 max-h-72 overflow-y-auto">
-        {municipalities.length === 0 ? (
-          <p className="text-xs text-muted-foreground p-3">Aucune commune disponible</p>
-        ) : (
-          municipalities.map((municipality) => {
-            const neighborhoods = getNeighborhoods(municipality.id);
-            const isExpanded = expanded.has(municipality.id);
-            const selectedCount = selectedIds.filter((id) =>
-              neighborhoods.some((n) => n.id === id),
-            ).length;
-            const isMunSelected =
-              neighborhoods.length > 0 &&
-              neighborhoods.every((n) => selectedIds.includes(n.id));
-
-            return (
-              <div key={municipality.id} className="border-b border-border last:border-b-0">
-                <div
-                  className={`flex items-center gap-2 p-3 transition-colors ${
-                    neighborhoods.length === 0
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-muted/40'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isMunSelected}
-                    onChange={() => toggleMunicipality(municipality.id)}
-                    disabled={neighborhoods.length === 0}
-                    className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0 disabled:cursor-not-allowed"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => toggleExpanded(municipality.id)}
-                    disabled={neighborhoods.length === 0}
-                    className="flex items-center gap-2 flex-1 text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronDown
-                      className="w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0"
-                      style={{
-                        transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-                      }}
-                    />
-                    <span className="text-sm font-semibold flex-1">{municipality.name}</span>
-                  </button>
-                  {neighborhoods.length > 0 ? (
-                    <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
-                      {selectedCount}/{neighborhoods.length}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap italic">
-                      Aucun quartier
-                    </span>
-                  )}
-                </div>
-
-                {isExpanded && neighborhoods.length > 0 && (
-                  <div className="bg-muted/10 border-t border-border space-y-1 p-2 pl-10">
-                    {neighborhoods.map((neighborhood) => (
-                      <button
-                        key={neighborhood.id}
-                        type="button"
-                        onClick={() => toggleNeighborhood(neighborhood.id)}
-                        className="w-full flex items-center gap-2 p-2 rounded hover:bg-muted/50 transition-colors text-left"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(neighborhood.id)}
-                          onChange={() => {}}
-                          className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
-                        />
-                        <span className="text-xs font-mono text-muted-foreground flex-1">
-                          {neighborhood.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
-      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
-    </div>
-  );
+	return (
+		<div>
+			<label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">
+				Communes couvertes *
+			</label>
+			<div className="border border-border rounded-lg bg-muted/20 max-h-72 overflow-y-auto flex flex-wrap">
+				{municipalities.length === 0 ? (
+					<p className="text-xs text-muted-foreground p-3">
+						Aucune commune disponible
+					</p>
+				) : (
+					municipalities.map((municipality) => {
+						const isSelected = selectedIds.includes(
+							municipality.id,
+						);
+						return (
+							<label
+								key={municipality.id}
+								className="flex items-center gap-2 p-3 border-b border-border last:border-b-0 hover:bg-muted/40 cursor-pointer transition-colors"
+							>
+								<input
+									type="checkbox"
+									checked={isSelected}
+									onChange={() =>
+										toggleMunicipality(
+											municipality.id,
+										)
+									}
+									className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
+								/>
+								<span className="text-sm font-semibold flex-1">
+									{municipality.name}
+								</span>
+							</label>
+						);
+					})
+				)}
+			</div>
+			{error && (
+				<p className="text-xs text-destructive mt-1">{error}</p>
+			)}
+		</div>
+	);
 }
 
 // ── Main Page ──────────────────────────────────────────────────────────────

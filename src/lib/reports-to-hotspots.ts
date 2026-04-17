@@ -2,7 +2,7 @@ import type { Hotspot, SeverityLevel, WasteType, InterventionStatus } from '@/li
 import type { ApiReport } from '@/types/api';
 
 const SEV_MAP: Record<string, SeverityLevel> = { LOW: 'low', MODERATE: 'medium', CRITICAL: 'critical' };
-const TYPE_MAP: Record<string, WasteType> = { SOLID: 'solid', LIQUID: 'liquid' };
+const TYPE_MAP: Record<string, WasteType> = { SOLID: 'solid', LIQUID: 'liquid', MIXED: 'mixed' };
 const STATUS_MAP: Record<string, InterventionStatus> = {
   PENDING_VALIDATION: 'reported',
   REPORTED: 'reported',

@@ -130,21 +130,39 @@ export default function AdminOrganizationsPage() {
     },
     {
       key: 'zones',
-      label: 'Zones',
-      render: (s) => (
-        <div className="flex flex-wrap gap-1">
-          {(s.zones ?? []).slice(0, 3).map((z) => (
-            <span key={z.id} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              {z.name}
-            </span>
-          ))}
-          {(s.zones ?? []).length > 3 && (
-            <span className="text-[10px] font-mono text-muted-foreground">
-              +{(s.zones ?? []).length - 3}
-            </span>
-          )}
-        </div>
-      ),
+      label: 'Communes',
+      render: (s) => {
+        const leadIds = new Set((s.leadZones ?? []).map((z) => z.id));
+        const communes = Array.from(
+          new Map(
+            (s.zones ?? [])
+              .map((z) => (z.type === 'MUNICIPALITY' ? z : (z.parent ?? null)))
+              .filter(Boolean)
+              .map((c) => [c!.id, c!]),
+          ).values(),
+        );
+        if (communes.length === 0) return <span className="text-xs text-muted-foreground font-mono">—</span>;
+        const sorted = [...communes].sort((a, b) => (leadIds.has(b.id) ? 1 : 0) - (leadIds.has(a.id) ? 1 : 0));
+        return (
+          <div className="flex flex-wrap gap-1">
+            {sorted.slice(0, 4).map((c) => (
+              <span
+                key={c.id}
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                  leadIds.has(c.id)
+                    ? 'bg-[#2D7D46]/10 text-[#2D7D46] font-semibold'
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
+                {leadIds.has(c.id) ? '★ ' : ''}{c.name}
+              </span>
+            ))}
+            {sorted.length > 4 && (
+              <span className="text-[10px] font-mono text-muted-foreground">+{sorted.length - 4}</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'actions',

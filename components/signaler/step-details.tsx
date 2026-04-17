@@ -6,6 +6,7 @@ import type { ReportData, WasteType, Gravite } from './report-wizard';
 const WASTE_TYPES: { id: WasteType; emoji: string; label: string; sub: string }[] = [
   { id: 'liquid', emoji: '\uD83D\uDCA7', label: 'Déchets Liquides', sub: 'Déversement, eaux usées, pollution liquide...' },
   { id: 'solid',  emoji: '\uD83D\uDDD1', label: 'Déchets Solides',  sub: 'Dépôt sauvage, ordures ménagères, encombrants...' },
+  { id: 'mixed',  emoji: '♻️',           label: 'Déchets Mixtes',   sub: 'Mélange de déchets liquides et solides...' },
 ];
 
 const GRAVITES: { id: Gravite; color: string; label: string; sub: string }[] = [

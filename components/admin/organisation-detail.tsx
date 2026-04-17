@@ -1,10 +1,17 @@
 'use client';
 
-import { ChevronLeft, Mail, Phone, MapPin, FileText, User, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { ChevronLeft, Mail, Phone, MapPin, FileText, User, Shield, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/shared/page-header';
 import { useZoneTree } from '@/hooks/queries/useZones';
+import { useCreateUser } from '@/hooks/mutations/useCreateUser';
+import { ManagerModal } from '@/components/admin/manager-modal';
+import { queryKeys } from '@/lib/query-keys';
 import type { ApiOrganization, ApiZone } from '@/types/api';
 
 interface OrganisationDetailProps {
@@ -12,7 +19,34 @@ interface OrganisationDetailProps {
 }
 
 export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
+  const queryClient = useQueryClient();
+  const [managerModalOpen, setManagerModalOpen] = useState(false);
+  const createUser = useCreateUser();
   const { data: tree = [] } = useZoneTree();
+
+  const handleCreateManager = async (data: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+  }) => {
+    try {
+      await createUser.mutateAsync({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        role: 'MANAGER',
+        organizationId: organisation.id,
+      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organisation.id) });
+      toast.success('Manager créé avec succès');
+      setManagerModalOpen(false);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Une erreur est survenue';
+      toast.error(message);
+    }
+  };
 
   // Build a flat id→name map from the zone tree
   const zoneNameMap = (() => {
@@ -49,14 +83,14 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
   const manager = (organisation.supervisors ?? []).find((s) => s.role === 'MANAGER');
   const otherSupervisors = (organisation.supervisors ?? []).filter((s) => s.role !== 'MANAGER');
 
-  const managerCard = (manager || otherSupervisors.length > 0) && (
+  const managerCard = (
     <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
         <Shield className="w-4 h-4 text-primary" />
         Responsable
       </h3>
 
-      {manager && (
+      {manager ? (
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -83,6 +117,24 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
               <span>{manager.phone}</span>
             </div>
           )}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+            <User className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-mono text-muted-foreground">
+            Aucun responsable assigné
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2"
+            onClick={() => setManagerModalOpen(true)}
+          >
+            <UserPlus className="w-4 h-4" />
+            Ajouter un responsable
+          </Button>
         </div>
       )}
 
@@ -229,6 +281,13 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
         {/* Right column — Manager card (1/3 on lg, hidden on mobile since shown above) */}
         <div className="hidden lg:block">{managerCard}</div>
       </div>
+
+      <ManagerModal
+        open={managerModalOpen}
+        onClose={() => setManagerModalOpen(false)}
+        onSave={handleCreateManager}
+        isSubmitting={createUser.isPending}
+      />
     </div>
   );
 }

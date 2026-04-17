@@ -12,7 +12,7 @@ export type ZoneType =
 
 export type FloodRisk = 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
 
-export type ApiWasteType = 'LIQUID' | 'SOLID';
+export type ApiWasteType = 'LIQUID' | 'SOLID' | 'MIXED';
 
 export type ApiSeverity = 'LOW' | 'MODERATE' | 'CRITICAL';
 
@@ -48,6 +48,7 @@ export interface ApiZone {
   floodRisk?: FloodRisk | null;
   leadOrganizationId?: string | null;
   leadOrganization?: { id: string; name: string; acronym?: string | null; slug: string } | null;
+  organizations?: { id: string; name: string; acronym?: string | null }[];
   parentId: string | null;
   parent?: ApiZone;
   children?: ApiZone[];
@@ -69,6 +70,7 @@ export interface ApiOrganization {
   activityType?: string | null;
   active: boolean;
   zones?: ApiZone[];
+  leadZones?: { id: string; name: string; code?: string | null; type: ZoneType }[];
   supervisors?: { id: string; name: string; email?: string; phone?: string; role?: string }[];
   members?: { id: string; name: string; email?: string; phone?: string; role?: string }[];
   createdAt: string;
@@ -247,6 +249,8 @@ export interface CreateZonePayload {
   type: ZoneType;
   floodRisk?: FloodRisk;
   parentId?: string;
+  leadOrganizationId?: string;
+  organizationIds?: string[];
 }
 export type UpdateZonePayload = Partial<CreateZonePayload>;
 
@@ -328,8 +332,9 @@ export const SEVERITY_META_API: Record<ApiSeverity, { label: string; color: stri
 };
 
 export const WASTE_TYPE_META: Record<ApiWasteType, { label: string; color: string; bg: string }> = {
-  LIQUID: { label: 'Liquide', color: 'text-blue-500',  bg: 'bg-blue-500/10' },
+  LIQUID: { label: 'Liquide', color: 'text-blue-500',   bg: 'bg-blue-500/10' },
   SOLID:  { label: 'Solide',  color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  MIXED:  { label: 'Mixte',   color: 'text-green-600',  bg: 'bg-green-500/10' },
 };
 
 export const REPORT_SOURCE_META: Record<ReportSource, { label: string }> = {

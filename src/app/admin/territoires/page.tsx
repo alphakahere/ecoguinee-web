@@ -9,11 +9,12 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useZoneTree, useZone } from '@/hooks/queries/useZones';
+import { useOrganizations } from '@/hooks/queries/useOrganizations';
 import { useCreateZone } from '@/hooks/mutations/useCreateZone';
 import { useUpdateZone } from '@/hooks/mutations/useUpdateZone';
 import { useDeleteZone } from '@/hooks/mutations/useDeleteZone';
 import { ZoneModal } from '@/components/admin/zone-modal';
-import type { ApiZone, CreateZonePayload, UpdateZonePayload, ZoneType } from '@/types/api';
+import type { ApiZone, CreateZonePayload, UpdateZonePayload, ZoneType, FloodRisk } from '@/types/api';
 import { ZONE_TYPE_META } from '@/types/api';
 import { getErrorMessage } from '@/services/api';
 
@@ -39,6 +40,15 @@ function getBreadcrumb(nodeId: string, byId: Map<string, ApiZone>): ApiZone[] {
   while (cur) { path.unshift(cur); cur = cur.parentId ? byId.get(cur.parentId) : undefined; }
   return path;
 }
+
+// ── Flood risk ────────────────────────────────────────────────────────────────
+
+const FLOOD_RISK_META: Record<FloodRisk, { label: string; color: string; bg: string; dot: string }> = {
+  LOW:       { label: 'Faible',      color: 'text-blue-600',    bg: 'bg-blue-500/10',    dot: 'bg-blue-500' },
+  MEDIUM:    { label: 'Moyen',       color: 'text-[#E8A020]',   bg: 'bg-[#E8A020]/10',  dot: 'bg-[#E8A020]' },
+  HIGH:      { label: 'Élevé',       color: 'text-orange-600',  bg: 'bg-orange-500/10', dot: 'bg-orange-500' },
+  VERY_HIGH: { label: 'Très élevé',  color: 'text-[#D94035]',   bg: 'bg-[#D94035]/10',  dot: 'bg-[#D94035]' },
+};
 
 // ── Type colors ───────────────────────────────────────────────────────────────
 
@@ -152,6 +162,7 @@ export default function AdminTerritoiresPage() {
   const [defaultParentId, setDefaultParentId] = useState('');
 
   const { data: zoneDetail } = useZone(selectedId ?? '');
+  const { data: orgsData } = useOrganizations({ limit: 200 });
 
   const createZone = useCreateZone();
   const updateZone = useUpdateZone();
@@ -193,6 +204,25 @@ export default function AdminTerritoiresPage() {
   );
   const selectedNode = selectedId ? byId.get(selectedId) ?? null : null;
   const children = selectedNode?.children ?? [];
+
+  // For non-leaf zones (region, sub-prefecture, etc.), the direct `_count.organizations`
+  // only counts orgs linked to that exact zone — with the new commune-level picker,
+  // orgs are linked to MUNICIPALITY nodes, so a REGION reports 0. Aggregate unique
+  // orgs across the selected zone's descendants instead.
+  const aggregatedOrgCount = useMemo<number | null>(() => {
+    if (!selectedId || !orgsData?.data) return null;
+    const node = byId.get(selectedId);
+    if (!node?.children?.length) return null;
+    const descendantIds = new Set<string>();
+    const walk = (n: ApiZone) => {
+      descendantIds.add(n.id);
+      n.children?.forEach(walk);
+    };
+    walk(node);
+    return orgsData.data.filter((org) =>
+      (org.zones ?? []).some((z) => descendantIds.has(z.id)),
+    ).length;
+  }, [selectedId, byId, orgsData]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -410,14 +440,28 @@ export default function AdminTerritoiresPage() {
                   </div>
                 </div>
 
-                {/* Lead organization badge */}
-                {zoneDetail?.leadOrganization && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-muted/30">
-                    <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="text-xs font-mono text-muted-foreground">Chef de file :</span>
-                    <span className="text-xs font-mono font-semibold text-foreground">
-                      {zoneDetail.leadOrganization.acronym ?? zoneDetail.leadOrganization.name}
-                    </span>
+                {/* Badges row: flood risk + lead organization */}
+                {(zoneDetail?.floodRisk || zoneDetail?.leadOrganization) && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {zoneDetail.floodRisk && (() => {
+                      const meta = FLOOD_RISK_META[zoneDetail.floodRisk];
+                      return (
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border ${meta.bg}`}>
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${meta.dot}`} />
+                          <span className="text-xs font-mono text-muted-foreground">Risque d&apos;inondation :</span>
+                          <span className={`text-xs font-mono font-semibold ${meta.color}`}>{meta.label}</span>
+                        </div>
+                      );
+                    })()}
+                    {zoneDetail.leadOrganization && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/30">
+                        <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span className="text-xs font-mono text-muted-foreground">Chef de file :</span>
+                        <span className="text-xs font-mono font-semibold text-foreground">
+                          {zoneDetail.leadOrganization.acronym ?? zoneDetail.leadOrganization.name}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -427,7 +471,7 @@ export default function AdminTerritoiresPage() {
                     {[
                       { icon: FileText,  label: 'Signalements', value: zoneDetail._count.reports,   color: 'text-[#D94035]', bg: 'bg-[#D94035]/10' },
                       { icon: Megaphone, label: 'Campagnes',    value: zoneDetail._count.campaigns, color: 'text-[#2D7D46]', bg: 'bg-[#2D7D46]/10' },
-                      { icon: Building2, label: 'Organisations', value: zoneDetail._count.organizations, color: 'text-primary',   bg: 'bg-primary/10'   },
+                      { icon: Building2, label: 'Organisations', value: aggregatedOrgCount ?? zoneDetail._count.organizations, color: 'text-primary',   bg: 'bg-primary/10'   },
                     ].map(({ icon: Icon, label, value, color, bg }) => (
                       <div key={label} className="rounded-xl border border-border p-3 flex items-center gap-3">
                         <span className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', bg)}>
@@ -500,8 +544,9 @@ export default function AdminTerritoiresPage() {
 
       <ZoneModal
         open={modalOpen}
-        zone={editZone}
+        zone={editZone ? (zoneDetail?.id === editZone.id ? zoneDetail : editZone) : null}
         allZones={flat}
+        organizations={orgsData?.data ?? []}
         defaultParentId={defaultParentId}
         onClose={() => { setModalOpen(false); setEditZone(null); }}
         onSave={handleSave}

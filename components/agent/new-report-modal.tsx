@@ -22,7 +22,7 @@ const EMPTY_ZONES: ApiZone[] = [];
 const schema = z.object({
   commune: z.string().min(1, 'Sélectionnez une commune'),
   quartier: z.string().min(1, 'Sélectionnez un quartier'),
-  wasteType: z.enum(['SOLID', 'LIQUID']),
+  wasteType: z.enum(['SOLID', 'LIQUID', 'MIXED']),
   severity: z.enum(['LOW', 'MODERATE', 'CRITICAL']),
   address: z.string().optional(),
   latitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
@@ -40,6 +40,7 @@ interface Props {
 const WASTE_TYPES = [
   { value: 'SOLID', label: 'Solide' },
   { value: 'LIQUID', label: 'Liquide' },
+  { value: 'MIXED', label: 'Mixte' },
 ] as const;
 
 const SEVERITIES = [

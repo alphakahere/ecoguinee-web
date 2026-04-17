@@ -11,7 +11,7 @@ import type { ApiSeverity, ApiWasteType, ReportStatus } from '@/types/api';
 
 // Reverse maps: frontend filter values → API query params
 const SEV_TO_API: Record<SeverityLevel, ApiSeverity> = { low: 'LOW', medium: 'MODERATE', high: 'CRITICAL', critical: 'CRITICAL' };
-const TYPE_TO_API: Record<WasteType, ApiWasteType | undefined> = { solid: 'SOLID', liquid: 'LIQUID', mixed: undefined };
+const TYPE_TO_API: Record<WasteType, ApiWasteType | undefined> = { solid: 'SOLID', liquid: 'LIQUID', mixed: 'MIXED' };
 const STATUS_TO_API: Record<InterventionStatus, ReportStatus> = { reported: 'REPORTED', 'in-progress': 'IN_PROGRESS', resolved: 'RESOLVED' };
 
 export default function CartePage() {

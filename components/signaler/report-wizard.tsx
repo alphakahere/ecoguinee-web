@@ -13,7 +13,7 @@ import { useLocationLabel } from '@/hooks/useLocationLabel';
 import { getErrorMessage } from '@/services/api';
 
 export type Step = 1 | 2 | 3 | 4;
-export type WasteType = 'liquid' | 'solid';
+export type WasteType = 'liquid' | 'solid' | 'mixed';
 export type Gravite = 'faible' | 'modere' | 'critique';
 
 export interface ReportData {
@@ -36,7 +36,7 @@ const INITIAL: ReportData = {
   photos: [], description: '', prenom: '', telephone: '',
 };
 
-const WASTE_MAP: Record<string, string> = { liquid: 'LIQUID', solid: 'SOLID' };
+const WASTE_MAP: Record<string, string> = { liquid: 'LIQUID', solid: 'SOLID', mixed: 'MIXED' };
 const SEVERITY_MAP: Record<string, string> = { faible: 'LOW', modere: 'MODERATE', critique: 'CRITICAL' };
 
 const STEP_LABELS = ['Localisation', 'Type & Gravité', 'Photos & Description', 'Confirmation'];
