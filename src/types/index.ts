@@ -6,7 +6,6 @@ export type {
 	UserStatus,
 	CampaignStatus,
 	CampaignType,
-	Sector,
 	Territoire,
 	Hotspot,
 	Intervention,

@@ -46,7 +46,7 @@ export function DynamicMap({ hotspots, center = CONAKRY_CENTER, zoom = 13, class
               {h.reference && (
                 <p className="font-mono text-xs font-semibold text-primary mb-1">{h.reference}</p>
               )}
-              <h4 className="font-semibold text-sm mb-0.5">{h.location.territoire}</h4>
+              <h4 className="font-semibold text-sm mb-0.5">{h.location.commune}</h4>
               {h.location.address !== '—' && (
                 <p className="text-xs text-muted-foreground mb-2">{h.location.address}</p>
               )}
