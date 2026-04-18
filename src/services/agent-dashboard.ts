@@ -15,6 +15,7 @@ export interface AgentOverview {
   resolutionRate: number;
   recentReports: {
     id: string;
+    reference?: string;
     severity: string;
     status: string;
     address?: string | null;

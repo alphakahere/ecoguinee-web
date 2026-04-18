@@ -34,7 +34,7 @@ export function RecentReports() {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent bg-muted/20">
-              {['ID', 'Gravité', 'Zone', 'Statut', 'Date'].map((h) => (
+              {['Référence', 'Gravité', 'Zone', 'Statut', 'Date'].map((h) => (
                 <TableHead key={h} className="text-xs font-mono text-muted-foreground font-semibold uppercase tracking-wide">{h}</TableHead>
               ))}
             </TableRow>
@@ -47,7 +47,7 @@ export function RecentReports() {
               const stMeta = REPORT_STATUS_META[r.status as keyof typeof REPORT_STATUS_META];
               return (
                 <TableRow key={r.id}>
-                  <TableCell className="text-[10px] font-mono text-muted-foreground">{r.id.slice(0, 8)}</TableCell>
+                  <TableCell className="text-[10px] font-mono text-muted-foreground">{r.reference ?? r.id.slice(0, 8)}</TableCell>
                   <TableCell>{sevMeta && <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0`}>{sevMeta.label}</Badge>}</TableCell>
                   <TableCell className="text-xs font-mono">{r.zone?.name ?? '—'}</TableCell>
                   <TableCell>{stMeta && <Badge className={`${stMeta.bg} ${stMeta.color} border-0`}>{stMeta.label}</Badge>}</TableCell>

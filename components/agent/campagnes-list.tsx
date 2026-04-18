@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ const NEXT_STATUS: Record<string, { status: ApiCampaignStatus; label: string }[]
 };
 
 export function CampagnesList() {
+  const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id ?? '';
 
@@ -97,6 +99,7 @@ export function CampagnesList() {
   );
 
   const columns: Column<ApiCampaign>[] = [
+    { key: 'reference', label: 'Référence', render: (c) => <span className="text-[10px] font-mono text-muted-foreground">{c.reference ?? c.id.slice(0, 8)}</span> },
     { key: 'title', label: 'Titre', render: (c) => <span className="text-sm font-mono font-medium">{c.title}</span> },
     { key: 'type', label: 'Type', render: (c) => { const m = API_CAMPAIGN_TYPE_META[c.type]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'status', label: 'Statut', render: (c) => { const m = API_CAMPAIGN_STATUS_META[c.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
@@ -109,11 +112,13 @@ export function CampagnesList() {
       render: (c) => {
         const transitions = NEXT_STATUS[c.status] ?? [];
         return (
-          <div className="flex items-center justify-end gap-1">
+          <div
+            className="flex items-center justify-end gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
             {transitions.map((t) => (
               <button key={t.status} type="button" onClick={() => handleStatusChange(c, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
             ))}
-            <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
             <Link href={`/agent/campagnes/${c.id}/modifier`} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
               <Pencil className="w-3 h-3" />
             </Link>
@@ -145,9 +150,22 @@ export function CampagnesList() {
                   const typeMeta = API_CAMPAIGN_TYPE_META[c.type];
                   const statusMeta = API_CAMPAIGN_STATUS_META[c.status];
                   return (
-                    <div key={c.id} className="rounded-xl border border-border bg-background p-3 space-y-2">
+                    <div
+                      key={c.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => router.push(`/agent/campagnes/${c.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          router.push(`/agent/campagnes/${c.id}`);
+                        }
+                      }}
+                      className="rounded-xl border border-border bg-background p-3 space-y-2 cursor-pointer hover:bg-muted/30 transition-colors"
+                    >
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1 min-w-0">
+                          <p className="text-[10px] font-mono text-muted-foreground">{c.reference ?? c.id.slice(0, 8)}</p>
                           <p className="text-sm font-mono font-medium truncate">{c.title}</p>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <Badge className={`${typeMeta.bg} ${typeMeta.color} border-0 text-[10px]`}>{typeMeta.label}</Badge>
@@ -157,11 +175,13 @@ export function CampagnesList() {
                         <span className="text-[10px] font-mono text-muted-foreground shrink-0">{formatDate(c.scheduledDate)}</span>
                       </div>
                       {c.zone && <p className="text-[10px] font-mono text-muted-foreground">{c.zone.name}</p>}
-                      <div className="flex items-center justify-end gap-1 pt-1 flex-wrap">
+                      <div
+                        className="flex items-center justify-end gap-1 pt-1 flex-wrap"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {(NEXT_STATUS[c.status] ?? []).map((t) => (
                           <button key={t.status} type="button" onClick={() => handleStatusChange(c, t.status)} disabled={updateCampaign.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
                         ))}
-                        <Link href={`/agent/campagnes/${c.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">Voir</Link>
                         <Link href={`/agent/campagnes/${c.id}/modifier`} className="p-1.5 rounded-lg border border-border hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                           <Pencil className="w-3 h-3" />
                         </Link>
@@ -202,6 +222,7 @@ export function CampagnesList() {
           toolbar={toolbar}
           isLoading={isLoading || !agentId}
           getRowKey={(c) => c.id}
+          onRowClick={(c) => router.push(`/agent/campagnes/${c.id}`)}
         />
       </div>
 

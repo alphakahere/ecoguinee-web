@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { SearchInput } from '@/components/shared/search-input';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +45,7 @@ function OwnershipBadge({ report, currentUserId }: { report: ApiReport; currentU
 }
 
 export function SignalementsList() {
+  const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const organizationId = currentUser?.organizationId;
   const assignReport = useAssignReport();
@@ -136,7 +137,10 @@ export function SignalementsList() {
       key: 'actions',
       label: '',
       render: (r) => (
-        <div className="flex items-center justify-end gap-1">
+        <div
+          className="flex items-center justify-end gap-1"
+          onClick={(e) => e.stopPropagation()}
+        >
           {r.status === 'REPORTED' && (
             <button
               type="button"
@@ -147,12 +151,6 @@ export function SignalementsList() {
               Prendre en charge
             </button>
           )}
-          <Link
-            href={`/agent/signalements/${r.id}`}
-            className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors"
-          >
-            Voir
-          </Link>
         </div>
       ),
     },
@@ -245,9 +243,22 @@ export function SignalementsList() {
                       const statusMeta = REPORT_STATUS_META[r.status];
                       const createdBy = r.source === 'AGENT' ? (r.agent?.name ?? '—') : (r.contactName ?? 'Citoyen');
                       return (
-                        <div key={r.id} className="rounded-xl border border-border p-3 space-y-2">
+                        <div
+                          key={r.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => router.push(`/agent/signalements/${r.id}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              router.push(`/agent/signalements/${r.id}`);
+                            }
+                          }}
+                          className="rounded-xl border border-border p-3 space-y-2 cursor-pointer hover:bg-muted/30 transition-colors"
+                        >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-[10px] font-mono text-muted-foreground">{r.reference ?? `#${r.id.slice(0, 8)}`}</span>
                               <Badge className={`${typeMeta.bg} ${typeMeta.color} border-0 text-[10px]`}>{typeMeta.label}</Badge>
                               <Badge className={`${sevMeta.bg} ${sevMeta.color} border-0 text-[10px]`}>{sevMeta.label}</Badge>
                               <Badge className={`${statusMeta.bg} ${statusMeta.color} border-0 text-[10px]`}>{statusMeta.label}</Badge>
@@ -262,7 +273,10 @@ export function SignalementsList() {
                           )}
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[10px] font-mono text-muted-foreground truncate">{createdBy}</span>
-                            <div className="flex items-center gap-1 shrink-0">
+                            <div
+                              className="flex items-center gap-1 shrink-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {r.status === 'REPORTED' && (
                                 <button
                                   type="button"
@@ -273,9 +287,6 @@ export function SignalementsList() {
                                   Prendre en charge
                                 </button>
                               )}
-                              <Link href={`/agent/signalements/${r.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">
-                                Voir
-                              </Link>
                             </div>
                           </div>
                         </div>
@@ -312,6 +323,7 @@ export function SignalementsList() {
               isLoading={tableQuery.isLoading || !organizationId}
               isError={tableQuery.isError}
               getRowKey={(r) => r.id}
+              onRowClick={(r) => router.push(`/agent/signalements/${r.id}`)}
             />
           </div>
         </>
