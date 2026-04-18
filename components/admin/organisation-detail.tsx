@@ -62,13 +62,17 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
   })();
 
   const groupZonesByMunicipality = () => {
-    const grouped: Record<string, ApiZone[]> = {};
+    const grouped: Record<string, { wholeCommune: boolean; quartiers: ApiZone[] }> = {};
+    const bucket = (key: string) => {
+      if (!grouped[key]) grouped[key] = { wholeCommune: false, quartiers: [] };
+      return grouped[key];
+    };
     (organisation.zones ?? []).forEach((zone) => {
-      const municipalityId = zone.parentId || 'root';
-      if (!grouped[municipalityId]) {
-        grouped[municipalityId] = [];
+      if (zone.type === 'MUNICIPALITY') {
+        bucket(zone.id).wholeCommune = true;
+      } else {
+        bucket(zone.parentId ?? 'root').quartiers.push(zone);
       }
-      grouped[municipalityId].push(zone);
     });
     return grouped;
   };
@@ -252,16 +256,20 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
             {(organisation.zones ?? []).length > 0 && (
               <div className="border-t border-border pt-4 space-y-3">
                 <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Zones couvertes</p>
-                {Object.entries(groupedZones).map(([municipalityId, zones]) => {
+                {Object.entries(groupedZones).map(([municipalityId, { wholeCommune, quartiers }]) => {
                   const municipalityName = getMunicipalityName(municipalityId);
-                  const neighborhoods = zones.filter((z) => z.type === 'NEIGHBORHOOD');
                   return (
                     <div key={municipalityId}>
                       {municipalityId !== 'root' && (
                         <p className="text-xs font-semibold text-foreground mb-1.5">{municipalityName}</p>
                       )}
                       <div className="flex flex-wrap gap-1.5">
-                        {neighborhoods.map((n) => (
+                        {wholeCommune && (
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold">
+                            Toute la commune
+                          </span>
+                        )}
+                        {quartiers.map((n) => (
                           <span
                             key={n.id}
                             className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary"

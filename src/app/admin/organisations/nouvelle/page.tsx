@@ -12,6 +12,8 @@ import {
 	FileText,
 	ArrowLeft,
 	ArrowRight,
+	ChevronDown,
+	ChevronRight,
 	Copy,
 	Eye,
 	EyeOff,
@@ -30,6 +32,7 @@ import {
   type OrganizationStepInput,
   type ManagerStepInput,
 } from '@/lib/validations/organization.schema';
+import { flattenTree } from '@/lib/utils';
 import type { ApiZone, CreateOrganizationPayload } from '@/types/api';
 
 // ── Password generator ─────────────────────────────────────────────────────
@@ -130,7 +133,13 @@ function Field({
   );
 }
 
-// ── Zone Picker (reused from modal pattern) ────────────────────────────────
+// ── Zone Picker (communes + quartiers) ─────────────────────────────────────
+
+function getQuartiers(municipality: ApiZone): ApiZone[] {
+	return (municipality.children ?? []).filter(
+		(z) => z.type === "NEIGHBORHOOD" || z.type === "DISTRICT",
+	);
+}
 
 function ZonePicker({
 	zones,
@@ -144,52 +153,188 @@ function ZonePicker({
 	error?: string;
 }) {
 	const municipalities = useMemo(
-		() => zones.filter((z) => z.type === "MUNICIPALITY"),
+		() =>
+			flattenTree(zones).filter((z) => z.type === "MUNICIPALITY"),
 		[zones],
 	);
 
-	const toggleMunicipality = (municipalityId: string) => {
-		if (selectedIds.includes(municipalityId)) {
-			onChange(selectedIds.filter((id) => id !== municipalityId));
+	const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+	const toggleExpanded = (id: string) => {
+		setExpanded((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return next;
+		});
+	};
+
+	const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+	const communeState = (m: ApiZone): "all" | "some" | "none" => {
+		if (selectedSet.has(m.id)) return "all";
+		const quartiers = getQuartiers(m);
+		if (quartiers.length === 0) return "none";
+		const qIds = quartiers.map((q) => q.id);
+		const selectedCount = qIds.filter((id) => selectedSet.has(id)).length;
+		if (selectedCount === 0) return "none";
+		if (selectedCount === qIds.length) return "all";
+		return "some";
+	};
+
+	const isQuartierChecked = (m: ApiZone, qid: string) =>
+		selectedSet.has(m.id) || selectedSet.has(qid);
+
+	const toggleQuartier = (m: ApiZone, qid: string) => {
+		if (selectedSet.has(m.id)) {
+			// Wildcard is on: expand to explicit quartiers minus this one.
+			const others = getQuartiers(m)
+				.map((q) => q.id)
+				.filter((id) => id !== qid);
+			onChange([
+				...selectedIds.filter((id) => id !== m.id),
+				...others,
+			]);
+			return;
+		}
+		onChange(
+			selectedSet.has(qid)
+				? selectedIds.filter((id) => id !== qid)
+				: [...selectedIds, qid],
+		);
+	};
+
+	const toggleCommune = (m: ApiZone) => {
+		const quartiers = getQuartiers(m);
+		if (quartiers.length === 0) {
+			onChange(
+				selectedSet.has(m.id)
+					? selectedIds.filter((id) => id !== m.id)
+					: [...selectedIds, m.id],
+			);
+			return;
+		}
+		const qIds = new Set(quartiers.map((q) => q.id));
+		if (communeState(m) === "all") {
+			onChange(
+				selectedIds.filter((id) => id !== m.id && !qIds.has(id)),
+			);
 		} else {
-			onChange([...selectedIds, municipalityId]);
+			onChange([
+				...selectedIds.filter((id) => !qIds.has(id)),
+				m.id,
+			]);
 		}
 	};
 
 	return (
 		<div>
 			<label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">
-				Communes couvertes *
+				Communes et quartiers couverts *
 			</label>
-			<div className="border border-border rounded-lg bg-muted/20 max-h-72 overflow-y-auto flex flex-wrap">
+			<div className="border border-border rounded-lg bg-muted/20 max-h-96 overflow-y-auto divide-y divide-border">
 				{municipalities.length === 0 ? (
 					<p className="text-xs text-muted-foreground p-3">
 						Aucune commune disponible
 					</p>
 				) : (
 					municipalities.map((municipality) => {
-						const isSelected = selectedIds.includes(
-							municipality.id,
-						);
+						const quartiers = getQuartiers(municipality);
+						const state = communeState(municipality);
+						const isExpanded = expanded.has(municipality.id);
+						const hasQuartiers = quartiers.length > 0;
+						const wholeCommune = selectedSet.has(municipality.id);
+						const selectedCount = wholeCommune
+							? quartiers.length
+							: quartiers.filter((q) => selectedSet.has(q.id))
+									.length;
+
 						return (
-							<label
-								key={municipality.id}
-								className="flex items-center gap-2 p-3 border-b border-border last:border-b-0 hover:bg-muted/40 cursor-pointer transition-colors"
-							>
-								<input
-									type="checkbox"
-									checked={isSelected}
-									onChange={() =>
-										toggleMunicipality(
-											municipality.id,
-										)
-									}
-									className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
-								/>
-								<span className="text-sm font-semibold flex-1">
-									{municipality.name}
-								</span>
-							</label>
+							<div key={municipality.id}>
+								<div className="flex items-center gap-2 p-3 hover:bg-muted/40 transition-colors">
+									{hasQuartiers ? (
+										<button
+											type="button"
+											onClick={() =>
+												toggleExpanded(
+													municipality.id,
+												)
+											}
+											className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
+											aria-label={
+												isExpanded
+													? "Réduire"
+													: "Développer"
+											}
+										>
+											{isExpanded ? (
+												<ChevronDown className="h-4 w-4" />
+											) : (
+												<ChevronRight className="h-4 w-4" />
+											)}
+										</button>
+									) : (
+										<span className="w-6 shrink-0" />
+									)}
+									<input
+										type="checkbox"
+										checked={state === "all"}
+										ref={(el) => {
+											if (el)
+												el.indeterminate =
+													state === "some";
+										}}
+										onChange={() =>
+											toggleCommune(municipality)
+										}
+										className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
+									/>
+									<span className="text-sm font-semibold flex-1">
+										{municipality.name}
+									</span>
+									{hasQuartiers && (
+										<span className="text-[11px] font-mono text-muted-foreground">
+											{selectedCount}/{quartiers.length}
+										</span>
+									)}
+								</div>
+								{hasQuartiers && isExpanded && (
+									<div className="pl-10 pr-3 pb-2 bg-muted/10">
+										{quartiers.map((q) => {
+											const isSelected = isQuartierChecked(
+												municipality,
+												q.id,
+											);
+											return (
+												<label
+													key={q.id}
+													className="flex items-center gap-2 py-1.5 cursor-pointer"
+												>
+													<input
+														type="checkbox"
+														checked={isSelected}
+														onChange={() =>
+															toggleQuartier(
+																municipality,
+																q.id,
+															)
+														}
+														className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
+													/>
+													<span className="text-sm flex-1">
+														{q.name}
+													</span>
+													{q.code && (
+														<span className="text-[11px] font-mono text-muted-foreground">
+															{q.code}
+														</span>
+													)}
+												</label>
+											);
+										})}
+									</div>
+								)}
+							</div>
 						);
 					})
 				)}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -10,10 +10,13 @@ import {
 	Phone,
 	MapPin,
 	FileText,
+	ChevronDown,
+	ChevronRight,
 	Loader2,
 } from "lucide-react";
 import { AnimatePresence, motion } from 'framer-motion';
 import { organizationFormSchema, type OrganizationFormInput } from '@/lib/validations/organization.schema';
+import { flattenTree } from "@/lib/utils";
 import type { ApiOrganization, ApiZone, CreateOrganizationPayload, UpdateOrganizationPayload } from '@/types/api';
 
 interface OrganizationModalProps {
@@ -23,6 +26,12 @@ interface OrganizationModalProps {
   onClose: () => void;
   onSave: (payload: CreateOrganizationPayload | UpdateOrganizationPayload, id?: string) => void | Promise<void>;
   isSubmitting?: boolean;
+}
+
+function getQuartiers(municipality: ApiZone): ApiZone[] {
+	return (municipality.children ?? []).filter(
+		(z) => z.type === "NEIGHBORHOOD" || z.type === "DISTRICT",
+	);
 }
 
 export function OrganizationModal({ open, organization, zones, onClose, onSave, isSubmitting = false }: OrganizationModalProps) {
@@ -53,6 +62,7 @@ function OrganizationModalInner({
 		(organization?.zones ?? []).map((z) => z.id),
   );
 
+
   const {
     register,
     handleSubmit,
@@ -70,14 +80,80 @@ function OrganizationModalInner({
     },
   });
 
-  const municipalities = useMemo(() => zones.filter((z) => z.type === 'MUNICIPALITY'), [zones]);
+  const municipalities = useMemo(
+		() => flattenTree(zones).filter((z) => z.type === "MUNICIPALITY"),
+		[zones],
+  );
 
-  const toggleMunicipality = (municipalityId: string) => {
-		setZoneIds((prev) =>
-			prev.includes(municipalityId)
-				? prev.filter((id) => id !== municipalityId)
-				: [...prev, municipalityId],
-		);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const selectedSet = useMemo(() => new Set(zoneIds), [zoneIds]);
+
+  const toggleExpanded = (id: string) => {
+		setExpanded((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return next;
+		});
+  };
+
+  const isQuartierChecked = (m: ApiZone, qid: string) =>
+		selectedSet.has(m.id) || selectedSet.has(qid);
+
+  const toggleQuartier = (m: ApiZone, qid: string) => {
+		setZoneIds((prev) => {
+			// If the whole-commune wildcard is on, unchecking one quartier
+			// expands the wildcard into the explicit list of the others.
+			if (prev.includes(m.id)) {
+				const others = getQuartiers(m)
+					.map((q) => q.id)
+					.filter((id) => id !== qid);
+				return [...prev.filter((id) => id !== m.id), ...others];
+			}
+			return prev.includes(qid)
+				? prev.filter((id) => id !== qid)
+				: [...prev, qid];
+		});
+  };
+
+  const toggleCommune = (m: ApiZone) => {
+		const quartiers = getQuartiers(m);
+		if (quartiers.length === 0) {
+			setZoneIds((prev) =>
+				prev.includes(m.id)
+					? prev.filter((id) => id !== m.id)
+					: [...prev, m.id],
+			);
+			return;
+		}
+		const qIds = new Set(quartiers.map((q) => q.id));
+		const state = communeState(m);
+		if (state === "all") {
+			// Clear: remove wildcard and any explicit quartier ids under this commune.
+			setZoneIds((prev) =>
+				prev.filter((id) => id !== m.id && !qIds.has(id)),
+			);
+		} else {
+			// Mark all: store commune id as wildcard, drop redundant quartier ids.
+			setZoneIds((prev) => [
+				...prev.filter((id) => !qIds.has(id)),
+				m.id,
+			]);
+		}
+  };
+
+  const communeState = (m: ApiZone): "all" | "some" | "none" => {
+		if (selectedSet.has(m.id)) return "all";
+		const quartiers = getQuartiers(m);
+		if (quartiers.length === 0) return "none";
+		const qIds = quartiers.map((q) => q.id);
+		const selectedCount = qIds.filter((id) =>
+			selectedSet.has(id),
+		).length;
+		if (selectedCount === 0) return "none";
+		if (selectedCount === qIds.length) return "all";
+		return "some";
   };
 
   const onValid = async (data: OrganizationFormInput) => {
@@ -256,9 +332,10 @@ function OrganizationModalInner({
 							{/* Zone picker */}
 							<div>
 								<label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wide">
-									Communes couvertes
+									Communes et quartiers
+									couverts
 								</label>
-								<div className="border border-border rounded-lg bg-muted/20 max-h-80 overflow-y-auto flex flex-wrap">
+								<div className="border border-border rounded-lg bg-muted/20 max-h-80 overflow-y-auto divide-y divide-border">
 									{municipalities.length ===
 									0 ? (
 										<p className="text-xs text-muted-foreground p-3">
@@ -270,35 +347,161 @@ function OrganizationModalInner({
 											(
 												municipality,
 											) => {
-												const isSelected =
-													zoneIds.includes(
+												const quartiers =
+													getQuartiers(
+														municipality,
+													);
+												const state =
+													communeState(
+														municipality,
+													);
+												const isExpanded =
+													expanded.has(
 														municipality.id,
 													);
+												const hasQuartiers =
+													quartiers.length >
+													0;
+												const wholeCommune =
+													selectedSet.has(
+														municipality.id,
+													);
+												const selectedCount =
+													wholeCommune
+														? quartiers.length
+														: quartiers.filter(
+																(
+																	q,
+																) =>
+																	selectedSet.has(
+																		q.id,
+																	),
+															)
+																.length;
+
 												return (
-													<label
+													<div
 														key={
 															municipality.id
 														}
-														className="flex items-center gap-2 p-3 border-b border-border last:border-b-0 hover:bg-muted/40 cursor-pointer transition-colors"
 													>
-														<input
-															type="checkbox"
-															checked={
-																isSelected
-															}
-															onChange={() =>
-																toggleMunicipality(
-																	municipality.id,
-																)
-															}
-															className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
-														/>
-														<span className="text-sm font-semibold flex-1">
-															{
-																municipality.name
-															}
-														</span>
-													</label>
+														<div className="flex items-center gap-2 p-3 hover:bg-muted/40 transition-colors">
+															{hasQuartiers ? (
+																<button
+																	type="button"
+																	onClick={() =>
+																		toggleExpanded(
+																			municipality.id,
+																		)
+																	}
+																	className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
+																	aria-label={
+																		isExpanded
+																			? "Réduire"
+																			: "Développer"
+																	}
+																>
+																	{isExpanded ? (
+																		<ChevronDown className="h-4 w-4" />
+																	) : (
+																		<ChevronRight className="h-4 w-4" />
+																	)}
+																</button>
+															) : (
+																<span className="w-6 shrink-0" />
+															)}
+															<input
+																type="checkbox"
+																checked={
+																	state ===
+																	"all"
+																}
+																ref={(
+																	el,
+																) => {
+																	if (
+																		el
+																	)
+																		el.indeterminate =
+																			state ===
+																			"some";
+																}}
+																onChange={() =>
+																	toggleCommune(
+																		municipality,
+																	)
+																}
+																className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
+															/>
+															<span className="text-sm font-semibold flex-1">
+																{
+																	municipality.name
+																}
+															</span>
+															{hasQuartiers && (
+																<span className="text-[11px] font-mono text-muted-foreground">
+																	{
+																		selectedCount
+																	}
+
+																	/
+																	{
+																		quartiers.length
+																	}
+																</span>
+															)}
+														</div>
+														{hasQuartiers &&
+															isExpanded && (
+																<div className="pl-10 pr-3 pb-2 bg-muted/10">
+																	{quartiers.map(
+																		(
+																			q,
+																		) => {
+																			const isSelected =
+																				isQuartierChecked(
+																					municipality,
+																					q.id,
+																				);
+																			return (
+																				<label
+																					key={
+																						q.id
+																					}
+																					className="flex items-center gap-2 py-1.5 cursor-pointer"
+																				>
+																					<input
+																						type="checkbox"
+																						checked={
+																							isSelected
+																						}
+																						onChange={() =>
+																							toggleQuartier(
+																								municipality,
+																								q.id,
+																							)
+																						}
+																						className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
+																					/>
+																					<span className="text-sm flex-1">
+																						{
+																							q.name
+																						}
+																					</span>
+																					{q.code && (
+																						<span className="text-[11px] font-mono text-muted-foreground">
+																							{
+																								q.code
+																							}
+																						</span>
+																					)}
+																				</label>
+																			);
+																		},
+																	)}
+																</div>
+															)}
+													</div>
 												);
 											},
 										)
