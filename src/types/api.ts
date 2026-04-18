@@ -73,6 +73,13 @@ export interface ApiOrganization {
   leadZones?: { id: string; name: string; code?: string | null; type: ZoneType }[];
   supervisors?: { id: string; name: string; email?: string; phone?: string; role?: string }[];
   members?: { id: string; name: string; email?: string; phone?: string; role?: string }[];
+  _count?: {
+    interventions?: number;
+    campaigns?: number;
+    reports?: number;
+    supervisors?: number;
+    members?: number;
+  };
   createdAt: string;
   updatedAt: string;
 }

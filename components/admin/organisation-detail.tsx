@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ChevronLeft, Mail, Phone, MapPin, FileText, User, Shield, UserPlus } from 'lucide-react';
+import { ChevronLeft, Mail, Phone, MapPin, FileText, User, Shield, UserPlus, Megaphone, AlertTriangle, Wrench, MapPinned } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,17 +48,19 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
     }
   };
 
-  // Build a flat id→name map from the zone tree
-  const zoneNameMap = (() => {
-    const map: Record<string, string> = {};
+  // Build flat maps from the zone tree
+  const { zoneNameMap, zoneMap } = (() => {
+    const nameMap: Record<string, string> = {};
+    const byId: Record<string, ApiZone> = {};
     const walk = (zones: ApiZone[]) => {
       zones.forEach((z) => {
-        map[z.id] = z.name;
+        nameMap[z.id] = z.name;
+        byId[z.id] = z;
         if (z.children) walk(z.children);
       });
     };
     walk(tree);
-    return map;
+    return { zoneNameMap: nameMap, zoneMap: byId };
   })();
 
   const groupZonesByMunicipality = () => {
@@ -83,6 +85,42 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
   };
 
   const groupedZones = groupZonesByMunicipality();
+
+  // KPI counts
+  const communesCount = (() => {
+    const set = new Set<string>();
+    (organisation.zones ?? []).forEach((z) => {
+      if (z.type === 'MUNICIPALITY') set.add(z.id);
+      else if (z.parentId) set.add(z.parentId);
+    });
+    return set.size;
+  })();
+  const quartiersCount = (() => {
+    let count = 0;
+    const coveredCommunes = new Set<string>();
+    (organisation.zones ?? []).forEach((z) => {
+      if (z.type === 'MUNICIPALITY') {
+        const fromTree = zoneMap[z.id];
+        const children = (fromTree?.children ?? []).filter(
+          (c) => c.type === 'NEIGHBORHOOD' || c.type === 'DISTRICT',
+        );
+        count += children.length;
+        coveredCommunes.add(z.id);
+      }
+    });
+    (organisation.zones ?? []).forEach((z) => {
+      if (
+        (z.type === 'NEIGHBORHOOD' || z.type === 'DISTRICT') &&
+        !(z.parentId && coveredCommunes.has(z.parentId))
+      ) {
+        count += 1;
+      }
+    });
+    return count;
+  })();
+  const campaignsCount = organisation._count?.campaigns ?? 0;
+  const reportsCount = organisation._count?.reports ?? 0;
+  const interventionsCount = organisation._count?.interventions ?? 0;
 
   const manager = (organisation.supervisors ?? []).find((s) => s.role === 'MANAGER');
   const otherSupervisors = (organisation.supervisors ?? []).filter((s) => s.role !== 'MANAGER');
@@ -196,6 +234,19 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
         <span className="text-xs font-mono text-muted-foreground">ID: {organisation.id.slice(0, 8)}…</span>
       </div>
 
+      {/* KPI row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiTile icon={Megaphone} label="Campagnes" value={campaignsCount} />
+        <KpiTile icon={AlertTriangle} label="Signalements" value={reportsCount} />
+        <KpiTile icon={Wrench} label="Interventions" value={interventionsCount} />
+        <KpiTile
+          icon={MapPinned}
+          label="Zones couvertes"
+          value={`${communesCount} commune${communesCount > 1 ? 's' : ''}`}
+          sub={`${quartiersCount} quartier${quartiersCount > 1 ? 's' : ''}`}
+        />
+      </div>
+
       {/* Mobile: Manager card shown above */}
       <div className="lg:hidden">{managerCard}</div>
 
@@ -296,6 +347,31 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
         onSave={handleCreateManager}
         isSubmitting={createUser.isPending}
       />
+    </div>
+  );
+}
+
+function KpiTile({
+  icon: Icon,
+  label,
+  value,
+  sub,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number | string;
+  sub?: string;
+}) {
+  return (
+    <div className="bg-card rounded-2xl border border-border p-4 flex items-start gap-3">
+      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-primary" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide">{label}</p>
+        <p className="text-xl font-semibold font-mono">{value}</p>
+        {sub && <p className="text-[11px] font-mono text-muted-foreground">{sub}</p>}
+      </div>
     </div>
   );
 }
