@@ -70,10 +70,21 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
       return grouped[key];
     };
     (organisation.zones ?? []).forEach((zone) => {
-      if (zone.type === 'MUNICIPALITY') {
-        bucket(zone.id).wholeCommune = true;
-      } else {
+      if (zone.type === 'NEIGHBORHOOD' || zone.type === 'DISTRICT') {
         bucket(zone.parentId ?? 'root').quartiers.push(zone);
+      } else if (zone.type === 'MUNICIPALITY') {
+        bucket(zone.id);
+      }
+    });
+    // Derive "Toute la commune" = all of its quartiers in the tree are covered
+    Object.entries(grouped).forEach(([communeId, data]) => {
+      if (communeId === 'root') return;
+      const treeCommune = zoneMap[communeId];
+      const totalQuartiers = (treeCommune?.children ?? []).filter(
+        (c) => c.type === 'NEIGHBORHOOD' || c.type === 'DISTRICT',
+      ).length;
+      if (totalQuartiers > 0 && data.quartiers.length === totalQuartiers) {
+        data.wholeCommune = true;
       }
     });
     return grouped;
@@ -90,34 +101,14 @@ export function OrganisationDetail({ organisation }: OrganisationDetailProps) {
   const communesCount = (() => {
     const set = new Set<string>();
     (organisation.zones ?? []).forEach((z) => {
-      if (z.type === 'MUNICIPALITY') set.add(z.id);
-      else if (z.parentId) set.add(z.parentId);
+      if (z.parentId) set.add(z.parentId);
+      else if (z.type === 'MUNICIPALITY') set.add(z.id);
     });
     return set.size;
   })();
-  const quartiersCount = (() => {
-    let count = 0;
-    const coveredCommunes = new Set<string>();
-    (organisation.zones ?? []).forEach((z) => {
-      if (z.type === 'MUNICIPALITY') {
-        const fromTree = zoneMap[z.id];
-        const children = (fromTree?.children ?? []).filter(
-          (c) => c.type === 'NEIGHBORHOOD' || c.type === 'DISTRICT',
-        );
-        count += children.length;
-        coveredCommunes.add(z.id);
-      }
-    });
-    (organisation.zones ?? []).forEach((z) => {
-      if (
-        (z.type === 'NEIGHBORHOOD' || z.type === 'DISTRICT') &&
-        !(z.parentId && coveredCommunes.has(z.parentId))
-      ) {
-        count += 1;
-      }
-    });
-    return count;
-  })();
+  const quartiersCount = (organisation.zones ?? []).filter(
+    (z) => z.type === 'NEIGHBORHOOD' || z.type === 'DISTRICT',
+  ).length;
   const campaignsCount = organisation._count?.campaigns ?? 0;
   const reportsCount = organisation._count?.reports ?? 0;
   const interventionsCount = organisation._count?.interventions ?? 0;

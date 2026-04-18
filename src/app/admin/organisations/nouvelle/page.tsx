@@ -172,9 +172,10 @@ function ZonePicker({
 	const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
 	const communeState = (m: ApiZone): "all" | "some" | "none" => {
-		if (selectedSet.has(m.id)) return "all";
 		const quartiers = getQuartiers(m);
-		if (quartiers.length === 0) return "none";
+		if (quartiers.length === 0) {
+			return selectedSet.has(m.id) ? "all" : "none";
+		}
 		const qIds = quartiers.map((q) => q.id);
 		const selectedCount = qIds.filter((id) => selectedSet.has(id)).length;
 		if (selectedCount === 0) return "none";
@@ -182,21 +183,7 @@ function ZonePicker({
 		return "some";
 	};
 
-	const isQuartierChecked = (m: ApiZone, qid: string) =>
-		selectedSet.has(m.id) || selectedSet.has(qid);
-
-	const toggleQuartier = (m: ApiZone, qid: string) => {
-		if (selectedSet.has(m.id)) {
-			// Wildcard is on: expand to explicit quartiers minus this one.
-			const others = getQuartiers(m)
-				.map((q) => q.id)
-				.filter((id) => id !== qid);
-			onChange([
-				...selectedIds.filter((id) => id !== m.id),
-				...others,
-			]);
-			return;
-		}
+	const toggleQuartier = (qid: string) => {
 		onChange(
 			selectedSet.has(qid)
 				? selectedIds.filter((id) => id !== qid)
@@ -214,16 +201,14 @@ function ZonePicker({
 			);
 			return;
 		}
-		const qIds = new Set(quartiers.map((q) => q.id));
+		const qIds = quartiers.map((q) => q.id);
+		const qIdSet = new Set(qIds);
 		if (communeState(m) === "all") {
-			onChange(
-				selectedIds.filter((id) => id !== m.id && !qIds.has(id)),
-			);
+			onChange(selectedIds.filter((id) => !qIdSet.has(id)));
 		} else {
-			onChange([
-				...selectedIds.filter((id) => !qIds.has(id)),
-				m.id,
-			]);
+			const next = new Set(selectedIds);
+			qIds.forEach((id) => next.add(id));
+			onChange([...next]);
 		}
 	};
 
@@ -243,11 +228,9 @@ function ZonePicker({
 						const state = communeState(municipality);
 						const isExpanded = expanded.has(municipality.id);
 						const hasQuartiers = quartiers.length > 0;
-						const wholeCommune = selectedSet.has(municipality.id);
-						const selectedCount = wholeCommune
-							? quartiers.length
-							: quartiers.filter((q) => selectedSet.has(q.id))
-									.length;
+						const selectedCount = quartiers.filter((q) =>
+							selectedSet.has(q.id),
+						).length;
 
 						return (
 							<div key={municipality.id}>
@@ -301,8 +284,7 @@ function ZonePicker({
 								{hasQuartiers && isExpanded && (
 									<div className="pl-10 pr-3 pb-2 bg-muted/10">
 										{quartiers.map((q) => {
-											const isSelected = isQuartierChecked(
-												municipality,
+											const isSelected = selectedSet.has(
 												q.id,
 											);
 											return (
@@ -314,10 +296,7 @@ function ZonePicker({
 														type="checkbox"
 														checked={isSelected}
 														onChange={() =>
-															toggleQuartier(
-																municipality,
-																q.id,
-															)
+															toggleQuartier(q.id)
 														}
 														className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
 													/>

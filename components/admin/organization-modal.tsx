@@ -98,23 +98,12 @@ function OrganizationModalInner({
 		});
   };
 
-  const isQuartierChecked = (m: ApiZone, qid: string) =>
-		selectedSet.has(m.id) || selectedSet.has(qid);
-
-  const toggleQuartier = (m: ApiZone, qid: string) => {
-		setZoneIds((prev) => {
-			// If the whole-commune wildcard is on, unchecking one quartier
-			// expands the wildcard into the explicit list of the others.
-			if (prev.includes(m.id)) {
-				const others = getQuartiers(m)
-					.map((q) => q.id)
-					.filter((id) => id !== qid);
-				return [...prev.filter((id) => id !== m.id), ...others];
-			}
-			return prev.includes(qid)
+  const toggleQuartier = (qid: string) => {
+		setZoneIds((prev) =>
+			prev.includes(qid)
 				? prev.filter((id) => id !== qid)
-				: [...prev, qid];
-		});
+				: [...prev, qid],
+		);
   };
 
   const toggleCommune = (m: ApiZone) => {
@@ -127,30 +116,24 @@ function OrganizationModalInner({
 			);
 			return;
 		}
-		const qIds = new Set(quartiers.map((q) => q.id));
-		const state = communeState(m);
-		if (state === "all") {
-			// Clear: remove wildcard and any explicit quartier ids under this commune.
-			setZoneIds((prev) =>
-				prev.filter((id) => id !== m.id && !qIds.has(id)),
-			);
+		const qIds = quartiers.map((q) => q.id);
+		const qIdSet = new Set(qIds);
+		if (communeState(m) === "all") {
+			setZoneIds((prev) => prev.filter((id) => !qIdSet.has(id)));
 		} else {
-			// Mark all: store commune id as wildcard, drop redundant quartier ids.
-			setZoneIds((prev) => [
-				...prev.filter((id) => !qIds.has(id)),
-				m.id,
-			]);
+			setZoneIds((prev) => {
+				const next = new Set(prev);
+				qIds.forEach((id) => next.add(id));
+				return [...next];
+			});
 		}
   };
 
   const communeState = (m: ApiZone): "all" | "some" | "none" => {
-		if (selectedSet.has(m.id)) return "all";
 		const quartiers = getQuartiers(m);
-		if (quartiers.length === 0) return "none";
+		if (quartiers.length === 0) return selectedSet.has(m.id) ? "all" : "none";
 		const qIds = quartiers.map((q) => q.id);
-		const selectedCount = qIds.filter((id) =>
-			selectedSet.has(id),
-		).length;
+		const selectedCount = qIds.filter((id) => selectedSet.has(id)).length;
 		if (selectedCount === 0) return "none";
 		if (selectedCount === qIds.length) return "all";
 		return "some";
@@ -362,22 +345,10 @@ function OrganizationModalInner({
 												const hasQuartiers =
 													quartiers.length >
 													0;
-												const wholeCommune =
-													selectedSet.has(
-														municipality.id,
-													);
 												const selectedCount =
-													wholeCommune
-														? quartiers.length
-														: quartiers.filter(
-																(
-																	q,
-																) =>
-																	selectedSet.has(
-																		q.id,
-																	),
-															)
-																.length;
+													quartiers.filter((q) =>
+														selectedSet.has(q.id),
+													).length;
 
 												return (
 													<div
@@ -459,10 +430,7 @@ function OrganizationModalInner({
 																			q,
 																		) => {
 																			const isSelected =
-																				isQuartierChecked(
-																					municipality,
-																					q.id,
-																				);
+																				selectedSet.has(q.id);
 																			return (
 																				<label
 																					key={
@@ -476,10 +444,7 @@ function OrganizationModalInner({
 																							isSelected
 																						}
 																						onChange={() =>
-																							toggleQuartier(
-																								municipality,
-																								q.id,
-																							)
+																							toggleQuartier(q.id)
 																						}
 																						className="w-4 h-4 rounded accent-primary cursor-pointer shrink-0"
 																					/>
