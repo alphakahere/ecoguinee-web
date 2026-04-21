@@ -15,6 +15,7 @@ interface CreateReportPayload {
 	agentId?: string;
 	contactName?: string;
 	contactPhone?: string;
+	linearMeters?: number;
 	photos?: string[];
 	organizationId?: string;
 }

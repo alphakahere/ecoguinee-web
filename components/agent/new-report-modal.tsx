@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { X, MapPin, Navigation, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { X, MapPin, Navigation, Loader2, Info } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -19,16 +19,30 @@ import { getErrorMessage } from '@/services/api';
 
 const EMPTY_ZONES: ApiZone[] = [];
 
-const schema = z.object({
-  commune: z.string().min(1, 'Sélectionnez une commune'),
-  quartier: z.string().min(1, 'Sélectionnez un quartier'),
-  wasteType: z.enum(['SOLID', 'LIQUID', 'MIXED']),
-  severity: z.enum(['LOW', 'MODERATE', 'CRITICAL']),
-  address: z.string().optional(),
-  latitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
-  longitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
-  description: z.string().optional(),
-});
+const schema = z
+  .object({
+    commune: z.string().min(1, 'Sélectionnez une commune'),
+    quartier: z.string().min(1, 'Sélectionnez un quartier'),
+    wasteType: z.enum(['SOLID', 'LIQUID', 'MIXED']),
+    severity: z.enum(['LOW', 'MODERATE', 'CRITICAL']),
+    address: z.string().optional(),
+    latitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
+    longitude: z.number().refine((v) => v !== 0, { message: 'Position GPS requise' }),
+    linearMeters: z
+      .number()
+      .positive('Doit être supérieur à 0')
+      .optional(),
+    description: z.string().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.wasteType === 'MIXED' && (val.linearMeters === undefined || Number.isNaN(val.linearMeters))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['linearMeters'],
+        message: 'Longueur de curage requise pour le type Mixte',
+      });
+    }
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -69,6 +83,7 @@ export function NewReportModal({ open, onClose }: Props) {
 
 
   const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
 
@@ -89,16 +104,15 @@ export function NewReportModal({ open, onClose }: Props) {
       address: '',
       latitude: 0,
       longitude: 0,
+      linearMeters: undefined,
       description: '',
     },
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const commune = watch('commune');
-  const quartier = watch('quartier');
+  const wasteType = watch('wasteType');
   const latitude = watch('latitude');
   const longitude = watch('longitude');
-
 
   /** Parmi les quartiers de l’agent, ceux rattachés à la commune sélectionnée. */
   const quartierZones = useMemo(() => {
@@ -109,7 +123,6 @@ export function NewReportModal({ open, onClose }: Props) {
     return underCommune.filter((q) => allowed.has(q.id));
   }, [flat, commune, agentQuartiers]);
 
-  // Auto-select when the agent's zone restricts to a single option
   useEffect(() => {
     if (open) {
       reset();
@@ -117,6 +130,12 @@ export function NewReportModal({ open, onClose }: Props) {
     }
   }, [open, reset]);
 
+  // Reset quartier whenever commune changes (manual or programmatic).
+  useEffect(() => {
+    setValue('quartier', '', { shouldValidate: false });
+  }, [commune, setValue]);
+
+  // Auto-select when the agent's zone restricts to a single option.
   useEffect(() => {
     if (!open || communeZones.length !== 1) return;
     setValue('commune', communeZones[0].id, { shouldValidate: true });
@@ -129,20 +148,35 @@ export function NewReportModal({ open, onClose }: Props) {
 
   const isSubmitting = isUploading || createReport.isPending;
 
-  const getLocation = () => {
-    if (!navigator.geolocation) { toast.error('Géolocalisation non disponible'); return; }
+  const getLocation = useCallback((opts: { silent?: boolean } = {}) => {
+    if (!navigator.geolocation) {
+      setGeoError(true);
+      if (!opts.silent) toast.error('Géolocalisation non disponible');
+      return;
+    }
     setGeoLoading(true);
+    setGeoError(false);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setValue('latitude', pos.coords.latitude, { shouldValidate: true });
         setValue('longitude', pos.coords.longitude, { shouldValidate: true });
         setGeoLoading(false);
-        toast.success('Position obtenue');
+        if (!opts.silent) toast.success('Position obtenue');
       },
-      () => { setGeoLoading(false); toast.error("Impossible d'obtenir la position"); },
+      () => {
+        setGeoLoading(false);
+        setGeoError(true);
+        if (!opts.silent) toast.error("Impossible d'obtenir la position");
+      },
       { enableHighAccuracy: true, timeout: 10000 },
     );
-  };
+  }, [setValue]);
+
+  // Auto-fetch position when the modal opens (silent — inline UI reflects state).
+  useEffect(() => {
+    if (!open) return;
+    getLocation({ silent: true });
+  }, [open, getLocation]);
 
   const onSubmit = async (values: FormValues) => {
     const zoneId = values.quartier;
@@ -173,6 +207,7 @@ export function NewReportModal({ open, onClose }: Props) {
         zoneId,
         agentId: currentUser?.id,
         organizationId,
+        linearMeters: values.wasteType === 'MIXED' ? values.linearMeters : undefined,
         photos: photoUrls.length > 0 ? photoUrls : undefined,
       });
       toast.success('Signalement créé');
@@ -195,7 +230,7 @@ export function NewReportModal({ open, onClose }: Props) {
             transition={{ type: 'spring', stiffness: 350, damping: 30 }}
             className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
           >
-            <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto border border-border overflow-hidden max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto border border-border max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30 sticky top-0 z-10">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -213,40 +248,55 @@ export function NewReportModal({ open, onClose }: Props) {
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
                 <fieldset disabled={isSubmitting} className="space-y-4 disabled:opacity-60">
-                {/* Commune */}
-                <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Commune *</label>
-                  <select
-                    className={`${inputCls} appearance-none`}
-                    disabled={communeZones.length <= 1}
-                    {...register('commune')}
-                    onChange={(e) => {
-                      setValue('commune', e.target.value, { shouldValidate: true });
-                      setValue('quartier', '', { shouldValidate: false });
-                    }}
-                  >
-                    <option value="">— Sélectionner —</option>
-                    {communeZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                  </select>
-                  {errors.commune && <p className={errorCls}>{errors.commune.message}</p>}
-                </div>
-
-                {commune && (
-                  <div>
-                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Quartier *</label>
-                    <select
-                      className={`${inputCls} appearance-none`}
-                      disabled={quartierZones.length <= 1}
-                      {...register('quartier')}
-                      onChange={(e) => {
-                        setValue('quartier', e.target.value, { shouldValidate: true });
-                      }}
-                    >
-                      <option value="">— Sélectionner —</option>
-                      {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                    {errors.quartier && <p className={errorCls}>{errors.quartier.message}</p>}
+                {latitude === 0 && (
+                  <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                    <Info className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                    <p className="text-[11px] font-mono text-muted-foreground leading-relaxed">
+                      Ce signalement utilisera votre position actuelle. Autorisez la géolocalisation dans votre navigateur.
+                    </p>
                   </div>
+                )}
+
+                {agentQuartiers.length === 0 ? (
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs font-mono text-destructive">
+                    Aucun quartier n’est assigné à votre organisation. Contactez votre superviseur.
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Commune *</label>
+                      <select
+                        className={`${inputCls} appearance-none`}
+                        disabled={communeZones.length <= 1}
+                        {...register('commune')}
+                      >
+                        <option value="">— Sélectionner —</option>
+                        {communeZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                      </select>
+                      {errors.commune && <p className={errorCls}>{errors.commune.message}</p>}
+                    </div>
+
+                    {commune && (
+                      <div>
+                        <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Quartier *</label>
+                        <select
+                          className={`${inputCls} appearance-none`}
+                          disabled={quartierZones.length <= 1}
+                          {...register('quartier')}
+                        >
+                          <option value="">— Sélectionner —</option>
+                          {quartierZones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
+                        </select>
+                        {errors.quartier && <p className={errorCls}>{errors.quartier.message}</p>}
+                      </div>
+                    )}
+
+                    {/* Adresse */}
+                    <div>
+                      <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Adresse</label>
+                      <input className={inputCls} placeholder="Rue, quartier…" {...register('address')} />
+                    </div>
+                  </>
                 )}
 
                 {/* Type + Gravité */}
@@ -265,32 +315,62 @@ export function NewReportModal({ open, onClose }: Props) {
                   </div>
                 </div>
 
-                {/* Adresse */}
-                <div>
-                  <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Adresse</label>
-                  <input className={inputCls} placeholder="Rue, quartier…" {...register('address')} />
-                </div>
+                {/* Longueur de curage — uniquement pour le type Mixte */}
+                {wasteType === 'MIXED' && (
+                  <div>
+                    <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Longueur de curage (m) *</label>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.1"
+                      min="0"
+                      placeholder="Ex. 12.5"
+                      className={inputCls}
+                      {...register('linearMeters', { setValueAs: (v) => (v === '' || v === null ? undefined : Number(v)) })}
+                    />
+                    {errors.linearMeters && <p className={errorCls}>{errors.linearMeters.message}</p>}
+                  </div>
+                )}
 
                 {/* GPS */}
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1 uppercase tracking-wide">Position GPS *</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={getLocation}
-                      disabled={geoLoading}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50"
-                    >
-                      <Navigation className="w-3.5 h-3.5" />
-                      {geoLoading ? 'Localisation…' : 'Ma position'}
-                    </button>
-                    {latitude !== 0 && (
-                      <span className="text-[10px] font-mono text-muted-foreground">
+                  {geoLoading ? (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted/30 text-xs font-mono text-muted-foreground">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Localisation en cours…
+                    </div>
+                  ) : latitude !== 0 ? (
+                    <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-muted/30">
+                      <span className="text-[11px] font-mono">
                         {latitude.toFixed(5)}, {longitude.toFixed(5)}
                       </span>
-                    )}
-                  </div>
-                  {errors.latitude && <p className={errorCls}>{errors.latitude.message}</p>}
+                      <button
+                        type="button"
+                        onClick={() => getLocation()}
+                        className="text-[10px] font-mono text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      >
+                        Actualiser
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={() => getLocation()}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono border border-border hover:bg-muted transition-colors"
+                      >
+                        <Navigation className="w-3.5 h-3.5" />
+                        Ma position
+                      </button>
+                      {geoError && (
+                        <p className="text-[11px] font-mono text-destructive">
+                          Impossible d’obtenir votre position. Activez la géolocalisation dans votre navigateur puis réessayez.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {errors.latitude && !geoError && <p className={errorCls}>{errors.latitude.message}</p>}
                 </div>
 
                 {/* Photos */}

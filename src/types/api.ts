@@ -105,6 +105,8 @@ export interface ApiReport {
 	assignedOrganisation?: { id: string; name: string } | null;
 	contactName?: string | null;
 	contactPhone?: string | null;
+	/** Longueur de curage en mètres linéaires — renseignée uniquement pour les signalements de type MIXED. */
+	linearMeters?: number | null;
 	photos: string[];
 	createdAt: string;
 	updatedAt: string;
