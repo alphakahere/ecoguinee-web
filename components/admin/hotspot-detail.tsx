@@ -278,47 +278,36 @@ export function HotspotDetail({ id }: { id: string }) {
 										INTERVENTION_STATUS_META[
 											iv.status
 										];
+									const orgLabel = iv.organization?.name ?? null;
+									const agentLabel = iv.agent?.name ?? null;
+									const meta = [orgLabel, agentLabel].filter(Boolean).join(" · ");
 									return (
-										<div
+										<Link
 											key={iv.id}
-											className="flex items-center justify-between p-3 rounded-xl border border-border bg-background"
+											href={`/admin/interventions/${iv.id}`}
+											className="flex items-center justify-between p-3 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors"
 										>
 											<div className="flex items-center gap-3 min-w-0">
 												<Badge
 													className={`${sMeta.bg} ${sMeta.color} border-0 shrink-0`}
 												>
-													{
-														sMeta.label
-													}
+													{sMeta.label}
 												</Badge>
 												<div className="min-w-0">
 													<p className="text-xs font-mono truncate">
-														{iv
-															.organization
-															?.name ??
-															iv.organizationId.slice(
-																0,
-																8,
-															)}
+														{iv.reference ?? `#INT-${iv.id.slice(0, 6)}`}
 													</p>
-													<p className="text-[10px] font-mono text-muted-foreground">
-														{iv
-															.agent
-															?.name ??
-															"—"}
+													<p className="text-[10px] font-mono text-muted-foreground truncate">
+														{meta || "—"}
 													</p>
 												</div>
 											</div>
 											<span className="text-[10px] font-mono text-muted-foreground shrink-0 ml-2">
 												{iv.assignedDate
-													? formatDate(
-															iv.assignedDate,
-														)
-													: formatDate(
-															iv.createdAt,
-														)}
+													? formatDate(iv.assignedDate)
+													: formatDate(iv.createdAt)}
 											</span>
-										</div>
+										</Link>
 									);
 								})}
 							</div>

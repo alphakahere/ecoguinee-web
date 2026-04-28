@@ -28,7 +28,8 @@ export type ApiInterventionStatus =
   | 'ASSIGNED'
   | 'IN_PROGRESS'
   | 'RESOLVED'
-  | 'FAILED';
+  | 'FAILED'
+  | 'CANCELLED';
 
 export type ApiCampaignStatus =
   | 'PLANNED'
@@ -369,6 +370,7 @@ export const INTERVENTION_STATUS_META: Record<ApiInterventionStatus, { label: st
   IN_PROGRESS: { label: 'En cours',  color: 'text-[#E8A020]',        bg: 'bg-[#E8A020]/10' },
   RESOLVED:    { label: 'Résolue',   color: 'text-[#6FCF4A]',        bg: 'bg-[#6FCF4A]/10' },
   FAILED:      { label: 'Échouée',   color: 'text-[#D94035]',        bg: 'bg-[#D94035]/10' },
+  CANCELLED:   { label: 'Annulée',   color: 'text-muted-foreground', bg: 'bg-muted/20'    },
 };
 
 export { type UserRole, type UserStatus };

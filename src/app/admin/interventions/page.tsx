@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import { InterventionStatusModal } from '@/components/admin/intervention-status-
 import { getErrorMessage } from '@/services/api';
 
 export default function AdminInterventionsPage() {
+  const router = useRouter();
   const [statusFilter, setStatusFilter] = useState('');
   const [organizationFilter, setOrganizationFilter] = useState('');
   const [editIntervention, setEditIntervention] = useState<ApiIntervention | null>(null);
@@ -53,7 +55,8 @@ export default function AdminInterventionsPage() {
   };
 
   const columns: Column<ApiIntervention>[] = [
-    { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline">{iv.report?.reference ?? `#${iv.reportId.slice(0, 8)}`}</Link> },
+    { key: 'reference', label: 'Référence', render: (iv) => <Link href={`/admin/interventions/${iv.id}`} className="font-mono text-xs text-primary hover:underline" onClick={(e) => e.stopPropagation()}>{iv.reference ?? `#INT-${iv.id.slice(0, 6)}`}</Link> },
+    { key: 'report', label: 'Signalement', render: (iv) => <Link href={`/admin/signalements/${iv.reportId}`} className="font-mono text-xs text-primary hover:underline" onClick={(e) => e.stopPropagation()}>{iv.report?.reference ?? `#${iv.reportId.slice(0, 8)}`}</Link> },
     { key: 'status', label: 'Statut', render: (iv) => { const m = INTERVENTION_STATUS_META[iv.status]; return <Badge className={`${m.bg} ${m.color} border-0`}>{m.label}</Badge>; } },
     { key: 'organization', label: 'Organisation', render: (iv) => <span className="text-sm font-mono">{iv.organization?.name ?? iv.organizationId.slice(0, 8)}</span> },
     { key: 'agent', label: 'Agent', render: (iv) => <span className="text-xs font-mono">{iv.agent?.name ?? '—'}</span> },
@@ -95,6 +98,7 @@ export default function AdminInterventionsPage() {
         isLoading={isLoading}
         isError={isError}
         getRowKey={(iv) => iv.id}
+        onRowClick={(iv) => router.push(`/admin/interventions/${iv.id}`)}
       />
       <InterventionStatusModal
         intervention={editIntervention}

@@ -7,30 +7,30 @@ import { cn } from '@/lib/utils';
 import { useScrollRevealMotion } from '@/lib/motion-prefs';
 
 const audiences = [
-  {
-    icon: Users,
-    color: '#6FCF4A',
-    bg: 'rgba(111,207,74,0.1)',
-    title: 'Citoyens',
-    desc: 'Signalez un dépôt sauvage ou un déversement près de chez vous. Votre contribution améliore votre quartier.',
-    cta: { label: 'Faire un signalement', href: '/signaler' },
-  },
-  {
-    icon: Wrench,
-    color: '#2D7D46',
-    bg: 'rgba(45,125,70,0.1)',
-    title: 'Agents de terrain',
-    desc: 'Collectez et gérez les incidents depuis le terrain. Suivez vos interventions en temps réel.',
-    cta: { label: 'Espace Agent', href: '/agent' },
-  },
-  {
-    icon: Landmark,
-    color: '#E8A020',
-    bg: 'rgba(232,160,32,0.1)',
-    title: 'Autorités locales',
-    desc: 'Pilotez les interventions, analysez les données par territoire et optimisez les ressources en temps réel.',
-    cta: { label: 'Administration', href: '/login?next=%2Fadmin' },
-  },
+	{
+		icon: Users,
+		color: "#6FCF4A",
+		bg: "rgba(111,207,74,0.1)",
+		title: "Citoyens",
+		desc: "Signalez un dépôt sauvage ou un déversement près de chez vous. Votre contribution améliore votre quartier.",
+		cta: { label: "Faire un signalement", href: "/" },
+	},
+	{
+		icon: Wrench,
+		color: "#2D7D46",
+		bg: "rgba(45,125,70,0.1)",
+		title: "Agents de terrain",
+		desc: "Collectez et gérez les incidents depuis le terrain. Suivez vos interventions en temps réel.",
+		cta: { label: "Espace Agent", href: "/agent" },
+	},
+	{
+		icon: Landmark,
+		color: "#E8A020",
+		bg: "rgba(232,160,32,0.1)",
+		title: "Autorités locales",
+		desc: "Pilotez les interventions, analysez les données par territoire et optimisez les ressources en temps réel.",
+		cta: { label: "Administration", href: "/login?next=%2Fadmin" },
+	},
 ];
 
 export function WhoIsItFor() {

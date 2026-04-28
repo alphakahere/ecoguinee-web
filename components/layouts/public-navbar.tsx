@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MapPin, FileText, LogIn, Map, Megaphone, LogOut } from 'lucide-react';
+import { MapPin, LogIn, Map, Megaphone, LogOut } from "lucide-react";
 import { useAuthStore } from '@/stores/auth.store';
 
 const NAV_LINKS = [
@@ -89,7 +89,7 @@ export function PublicNavbar() {
 							Connexion
 						</Link>
 					)}
-					<Link
+					{/* <Link
 						href="/"
 						className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-mono hover:bg-primary/90 transition-all hover:shadow-md hover:shadow-primary/30"
 					>
@@ -97,7 +97,7 @@ export function PublicNavbar() {
 						<span className="hidden sm:inline">
 							Signaler
 						</span>
-					</Link>
+					</Link> */}
 				</div>
 			</div>
 		</header>
