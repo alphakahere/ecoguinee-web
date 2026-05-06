@@ -11,6 +11,7 @@ export const queryKeys = {
     filtered: (filters: object) =>
       ['interventions', 'list', filters] as const,
     detail: (id: string) => ['interventions', 'detail', id] as const,
+    journal: (id: string) => ['interventions', 'journal', id] as const,
   },
 
   campaigns: {

@@ -3,22 +3,35 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, getImageUrl } from '@/lib/utils';
 import { useIntervention } from '@/hooks/queries/useInterventions';
 import { useReport } from '@/hooks/queries/useReports';
+import { useJournalEntries } from '@/hooks/queries/useJournalEntries';
 import { useUpdateIntervention } from '@/hooks/mutations/useUpdateIntervention';
+import { useDeleteJournalEntry } from '@/hooks/mutations/useDeleteJournalEntry';
 import { MapLoader } from '@/components/maps/map-loader';
+import { Dialog } from '@/components/ui/dialog';
+import { JournalForm } from '@/components/shared/journal-form';
+import { JournalTimeline } from '@/components/shared/journal-timeline';
 import { apiReportsToHotspots } from '@/lib/reports-to-hotspots';
+import { useAuthStore } from '@/stores/auth.store';
 import {
   INTERVENTION_STATUS_META,
   SEVERITY_META_API,
   type ApiIntervention,
+  type InterventionJournalEntry,
 } from '@/types/api';
 import type { ApiReport } from '@/types/api';
 import { getErrorMessage } from '@/services/api';
+
+const TERMINAL_INTERVENTION_STATUSES = new Set([
+  'RESOLVED',
+  'FAILED',
+  'CANCELLED',
+]);
 
 export function InterventionDetail({ id }: { id: string }) {
   const { data: rawIntervention, isLoading, isError } = useIntervention(id);
@@ -26,6 +39,7 @@ export function InterventionDetail({ id }: { id: string }) {
 
   const reportId = intervention?.reportId ?? '';
   const { data: report } = useReport(reportId) as { data: ApiReport | undefined };
+  const { data: journalEntries = [] } = useJournalEntries(intervention?.id);
 
   const hotspots = useMemo(
     () => (report ? apiReportsToHotspots([report]) : []),
@@ -50,6 +64,27 @@ export function InterventionDetail({ id }: { id: string }) {
   const updateIntervention = useUpdateIntervention();
 
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [journalDialogOpen, setJournalDialogOpen] = useState(false);
+  const [editingJournalEntry, setEditingJournalEntry] =
+    useState<InterventionJournalEntry | null>(null);
+  const currentUserId = useAuthStore((s) => s.user?.id);
+  const deleteJournalEntry = useDeleteJournalEntry();
+
+  async function handleDeleteJournalEntry(entry: InterventionJournalEntry) {
+    if (typeof window !== 'undefined' && !window.confirm('Supprimer cette entrée du journal ?')) {
+      return;
+    }
+    try {
+      await deleteJournalEntry.mutateAsync({
+        interventionId: entry.interventionId,
+        entryId: entry.id,
+      });
+      toast.success('Entrée supprimée');
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Impossible de supprimer');
+      toast.error(message);
+    }
+  }
 
   async function handleSave() {
     try {
@@ -86,6 +121,7 @@ export function InterventionDetail({ id }: { id: string }) {
   const severityMeta = reportSeverity ? SEVERITY_META_API[reportSeverity] : null;
   const photos = intervention.photos ?? [];
   const isResolved = intervention.status === 'RESOLVED';
+  const isJournalLocked = TERMINAL_INTERVENTION_STATUSES.has(intervention.status);
 
   return (
 		<div className="space-y-6">
@@ -259,6 +295,46 @@ export function InterventionDetail({ id }: { id: string }) {
 						</div>
 					)}
 
+					{/* Journal de bord */}
+					<div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+						<div className="flex items-center justify-between gap-2 flex-wrap">
+							<h3 className="text-sm font-semibold">
+								Journal de bord
+								{journalEntries.length > 0 && (
+									<span className="ml-2 text-xs font-mono text-muted-foreground">
+										({journalEntries.length})
+									</span>
+								)}
+							</h3>
+							{!isJournalLocked && (
+								<button
+									type="button"
+									onClick={() => {
+										setEditingJournalEntry(null);
+										setJournalDialogOpen(true);
+									}}
+									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+								>
+									<Plus className="w-3.5 h-3.5" />
+									Ajouter une entrée
+								</button>
+							)}
+						</div>
+						<JournalTimeline
+							updates={journalEntries}
+							currentUserId={currentUserId}
+							onEdit={
+								isJournalLocked
+									? undefined
+									: (entry) => {
+											setEditingJournalEntry(entry);
+											setJournalDialogOpen(true);
+										}
+							}
+							onDelete={isJournalLocked ? undefined : handleDeleteJournalEntry}
+						/>
+					</div>
+
 					{/* PV Document */}
 					{intervention.pvDocument && (
 						<div className="rounded-2xl border border-border bg-card p-5 space-y-3">
@@ -415,6 +491,33 @@ export function InterventionDetail({ id }: { id: string }) {
 					</div>
 				</div>
 			</div>
+
+			<Dialog
+				open={journalDialogOpen}
+				onClose={() => {
+					setJournalDialogOpen(false);
+					setEditingJournalEntry(null);
+				}}
+				title={
+					editingJournalEntry
+						? "Modifier l'entrée du journal"
+						: 'Ajouter une entrée au journal'
+				}
+			>
+				<JournalForm
+					key={editingJournalEntry?.id ?? 'new'}
+					interventionId={intervention.id}
+					entry={editingJournalEntry ?? undefined}
+					minDate={
+						intervention.assignedDate ??
+						intervention.createdAt
+					}
+					onSuccess={() => {
+						setJournalDialogOpen(false);
+						setEditingJournalEntry(null);
+					}}
+				/>
+			</Dialog>
 
 			{/* Lightbox */}
 			{lightboxIdx !== null && photos.length > 0 && (

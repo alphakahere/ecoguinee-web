@@ -129,6 +129,19 @@ export interface ApiIntervention {
   pvDocument?: string | null;
   photos?: string[];
   resolutionNote?: string | null;
+  _count?: { journalEntries: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InterventionJournalEntry {
+  id: string;
+  interventionId: string;
+  agentId: string;
+  agent?: { id: string; name: string };
+  note: string;
+  photos: string[];
+  entryDate: string;
   createdAt: string;
   updatedAt: string;
 }
