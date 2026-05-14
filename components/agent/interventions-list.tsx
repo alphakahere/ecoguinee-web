@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ const NEXT_STATUS: Record<string, { status: ApiInterventionStatus; label: string
 };
 
 export function InterventionsList() {
+  const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const agentId = currentUser?.id;
   const [statusFilter, setStatusFilter] = useState('');
@@ -107,14 +108,12 @@ export function InterventionsList() {
       key: 'actions', label: '', headerClassName: 'text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground', className: 'text-right',
       render: (iv) => {
         const transitions = NEXT_STATUS[iv.status] ?? [];
+        if (transitions.length === 0) return null;
         return (
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
             {transitions.map((t) => (
               <button key={t.status} type="button" onClick={() => handleStatusChange(iv.id, t.status)} disabled={updateIntervention.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
             ))}
-            <Link href={`/agent/interventions/${iv.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">
-              Voir
-            </Link>
           </div>
         );
       },
@@ -157,7 +156,19 @@ export function InterventionsList() {
                   const sevMeta = sev ? SEVERITY_META_API[sev] : null;
                   const transitions = NEXT_STATUS[iv.status] ?? [];
                   return (
-                    <div key={iv.id} className="rounded-xl border border-border p-3 space-y-2">
+                    <div
+                      key={iv.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => router.push(`/agent/interventions/${iv.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          router.push(`/agent/interventions/${iv.id}`);
+                        }
+                      }}
+                      className="rounded-xl border border-border p-3 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <Badge className={`${sMeta.bg} ${sMeta.color} border-0 text-[10px]`}>{sMeta.label}</Badge>
@@ -179,14 +190,13 @@ export function InterventionsList() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center justify-end gap-1">
-                        {transitions.map((t) => (
-                          <button key={t.status} type="button" onClick={() => handleStatusChange(iv.id, t.status)} disabled={updateIntervention.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
-                        ))}
-                        <Link href={`/agent/interventions/${iv.id}`} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors">
-                          Voir
-                        </Link>
-                      </div>
+                      {transitions.length > 0 && (
+                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          {transitions.map((t) => (
+                            <button key={t.status} type="button" onClick={() => handleStatusChange(iv.id, t.status)} disabled={updateIntervention.isPending} className="px-2 py-1 rounded-lg text-[10px] font-mono border border-border hover:bg-muted transition-colors disabled:opacity-50">{t.label}</button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -220,6 +230,7 @@ export function InterventionsList() {
           toolbar={toolbar}
           isLoading={isLoading || !agentId}
           getRowKey={(iv) => iv.id}
+          onRowClick={(iv) => router.push(`/agent/interventions/${iv.id}`)}
         />
       </div>
     </>

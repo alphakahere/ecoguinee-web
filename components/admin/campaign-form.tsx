@@ -16,11 +16,6 @@ const TYPES = Object.entries(API_CAMPAIGN_TYPE_META) as [ApiCampaignType, { labe
 
 const EMPTY_ZONES: ApiZone[] = [];
 
-function toDatetimeLocalValue(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 export interface CampaignFormValues {
   title: string;
   description: string;
@@ -177,8 +172,7 @@ export function CampaignForm(props: CampaignFormProps) {
   const inputCls = 'w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30';
   const selectCls = `${inputCls} appearance-none pr-10`;
 
-  const minScheduled = toDatetimeLocalValue(new Date());
-  const minEndDate = form.scheduledDate && form.scheduledDate >= minScheduled ? form.scheduledDate : minScheduled;
+  const minEndDate = form.scheduledDate || undefined;
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border p-6 space-y-5">
@@ -270,10 +264,10 @@ export function CampaignForm(props: CampaignFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Date prévue *</label>
-          <input type="datetime-local" value={form.scheduledDate} onChange={(e) => update('scheduledDate', e.target.value)} min={minScheduled} className={inputCls} required />
+          <input type="datetime-local" value={form.scheduledDate} onChange={(e) => update('scheduledDate', e.target.value)} className={inputCls} required />
         </div>
         <div>
-          <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Date de fin</label>
+          <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wide">Date de fin <span className="normal-case lowercase">(optionnel)</span></label>
           <input type="datetime-local" value={form.endDate} onChange={(e) => update('endDate', e.target.value)} min={minEndDate} className={inputCls} />
         </div>
       </div>

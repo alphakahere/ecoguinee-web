@@ -3,9 +3,8 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, MapPin, Calendar, Building2, Users, FileText, Camera, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Building2, FileText, Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCampaignBySlug } from '@/hooks/queries/useCampaigns';
-import { API_CAMPAIGN_TYPE_META, API_CAMPAIGN_STATUS_META } from '@/types/api';
 import { formatDate, getImageUrl } from '@/lib/utils';
 
 const TYPE_EMOJI: Record<string, string> = { AWARENESS: '📢', PROMOTION: '🎯', TRAINING: '📚' };
@@ -37,8 +36,6 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
     );
   }
 
-  const tm = API_CAMPAIGN_TYPE_META[campaign.type];
-  const sm = API_CAMPAIGN_STATUS_META[campaign.status];
   const emoji = TYPE_EMOJI[campaign.type] ?? '📋';
   const heroPhoto = getImageUrl(campaign.photos?.[0]);
   const isCompleted = campaign.status === 'COMPLETED';
@@ -54,13 +51,13 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
       </div>
 
       {/* Hero */}
-      <div className="relative overflow-hidden mt-5" style={{ height: 'clamp(240px, 40vw, 360px)' }}>
+      <div className="relative overflow-hidden mt-5" style={{ height: 'clamp(300px, 48vw, 460px)' }}>
         {heroPhoto ? (
           <Image
             src={heroPhoto}
             alt={campaign.title}
             fill
-            className="object-cover"
+            className="object-cover object-top"
             sizes="100vw"
             priority
             unoptimized
@@ -70,21 +67,14 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
             <span style={{ fontSize: '6rem', opacity: 0.35 }}>{emoji}</span>
           </div>
         )}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,26,16,0.9) 0%, rgba(10,26,16,0.3) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,26,16,0.98) 0%, rgba(10,26,16,0.85) 30%, rgba(10,26,16,0.45) 60%, transparent 100%)' }} />
         <div className="absolute bottom-0 left-0 right-0 max-w-7xl mx-auto px-5 pb-8">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono ${tm.bg} ${tm.color}`}>
-              {emoji} {tm.label}
-            </span>
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono ${sm.bg} ${sm.color}`}>
-              {sm.label}
-            </span>
-          </div>
-          <h1 className="font-bold text-white mb-2" style={{ fontSize: 'clamp(1.4rem,3.5vw,2.25rem)', lineHeight: 1.2 }}>
+          <h1 className="font-bold text-white mb-2" style={{ fontSize: 'clamp(1.4rem,3.5vw,2.25rem)', lineHeight: 1.2, textShadow: '0 1px 8px rgba(0,0,0,0.45)' }}>
             {campaign.title}
           </h1>
-          <p className="font-mono text-sm" style={{ color: '#6FCF4A' }}>
-            {campaign.zone?.name ?? '—'}
+          <p className="font-mono text-sm inline-flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.92)', textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}>
+            <MapPin className="w-3.5 h-3.5 shrink-0" />
+            {campaign.address || campaign.zone?.name || '—'}
           </p>
         </div>
       </div>
@@ -100,14 +90,10 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
               </section>
             )}
 
-            <section>
-              <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>Résultats</h2>
-              {isCompleted ? (
+            {isCompleted && (
+              <section>
+                <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>Résultats</h2>
                 <div className="rounded-2xl p-6 flex flex-col gap-3" style={{ borderLeft: '3px solid #6FCF4A', background: 'rgba(111,207,74,0.05)', border: '1px solid rgba(111,207,74,0.2)' }}>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 shrink-0" style={{ color: '#6FCF4A' }} />
-                    <span className="font-mono text-sm"><span style={{ color: '#6FCF4A', fontWeight: 600 }}>{campaign.participantCount ?? 0}</span> participants</span>
-                  </div>
                   <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 shrink-0 text-muted-foreground" />
                     <span className="font-mono text-sm text-muted-foreground">Tenue le <span className="text-foreground">{formatDate(campaign.actualDate ?? campaign.scheduledDate)}</span></span>
@@ -119,21 +105,13 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="rounded-2xl p-6 flex items-start gap-4" style={{ background: 'rgba(232,160,32,0.06)', border: '1px solid rgba(232,160,32,0.25)' }}>
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#E8A020' }} />
-                  <div>
-                    <p className="font-mono text-sm" style={{ color: '#E8A020' }}>Cette campagne n&apos;a pas encore eu lieu.</p>
-                    <p className="font-mono text-sm text-muted-foreground mt-1">Rendez-vous le <span className="text-foreground">{formatDate(campaign.scheduledDate)}</span>.</p>
-                  </div>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* Photos */}
-            <section>
-              <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>Photos</h2>
-              {campaign.photos && campaign.photos.length > 0 ? (
+            {campaign.photos && campaign.photos.length > 0 && (
+              <section>
+                <h2 className="font-bold mb-4" style={{ fontSize: '1.15rem' }}>Photos</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {campaign.photos.map((url, i) => (
                     <button key={i} type="button" className="group relative overflow-hidden rounded-xl aspect-square cursor-pointer" onClick={() => setLightboxIdx(i)}>
@@ -151,27 +129,14 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                     </button>
                   ))}
                 </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3 py-12 rounded-xl border border-dashed border-border text-center">
-                  <Camera className="w-10 h-10" style={{ color: 'rgba(45,125,70,0.2)' }} />
-                  <p className="text-sm font-mono text-muted-foreground">Aucune photo disponible.</p>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="hidden lg:block">
             <div style={{ position: 'sticky', top: 88 }}>
               <div className="rounded-2xl p-6 border border-border bg-card flex flex-col gap-3">
-                <div className="flex items-center gap-2 flex-wrap mb-2">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono ${tm.bg} ${tm.color}`}>
-                    {emoji} {tm.label}
-                  </span>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono ${sm.bg} ${sm.color}`}>
-                    {sm.label}
-                  </span>
-                </div>
                 {campaign.zone && (
                   <div className="flex items-start gap-3"><MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" /><span className="font-mono text-sm">{campaign.zone.name}</span></div>
                 )}
@@ -181,9 +146,6 @@ export function CampaignDetailView({ id, basePath = '/campagnes' }: Props) {
                 )}
                 {campaign.organization && (
                   <div className="flex items-center gap-3"><Building2 className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm">{campaign.organization.name}</span></div>
-                )}
-                {campaign.agent && (
-                  <div className="flex items-center gap-3"><Users className="w-4 h-4 text-muted-foreground shrink-0" /><span className="font-mono text-sm text-muted-foreground">Agent : {campaign.agent.name}</span></div>
                 )}
               </div>
             </div>

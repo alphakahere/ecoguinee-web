@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X, Plus, Play, Lock } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X, Plus, Play, Lock, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, getImageUrl } from '@/lib/utils';
@@ -16,6 +16,7 @@ import { MapLoader } from '@/components/maps/map-loader';
 import { Dialog } from '@/components/ui/dialog';
 import { JournalForm } from '@/components/shared/journal-form';
 import { JournalTimeline } from '@/components/shared/journal-timeline';
+import { ResolveInterventionDialog } from '@/components/agent/resolve-intervention-dialog';
 import { apiReportsToHotspots } from '@/lib/reports-to-hotspots';
 import { useAuthStore } from '@/stores/auth.store';
 import {
@@ -65,6 +66,7 @@ export function InterventionDetail({ id }: { id: string }) {
 
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [journalDialogOpen, setJournalDialogOpen] = useState(false);
+  const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [editingJournalEntry, setEditingJournalEntry] =
     useState<InterventionJournalEntry | null>(null);
   const currentUserId = useAuthStore((s) => s.user?.id);
@@ -107,6 +109,19 @@ export function InterventionDetail({ id }: { id: string }) {
     }
   }
 
+  async function handleFailIntervention() {
+    if (typeof window !== 'undefined' && !window.confirm('Marquer cette intervention comme échouée ?')) {
+      return;
+    }
+    try {
+      await updateIntervention.mutateAsync({ id, payload: { status: 'FAILED' } });
+      toast.success('Intervention marquée comme échouée');
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Impossible de mettre à jour l\'intervention');
+      toast.error(message);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -132,8 +147,10 @@ export function InterventionDetail({ id }: { id: string }) {
   const photos = intervention.photos ?? [];
   const isResolved = intervention.status === 'RESOLVED';
   const isAssigned = intervention.status === 'ASSIGNED';
+  const isInProgress = intervention.status === 'IN_PROGRESS';
   const isJournalLocked = TERMINAL_INTERVENTION_STATUSES.has(intervention.status);
   const canAddJournal = !isAssigned && !isJournalLocked;
+  const hasActions = isAssigned || isInProgress;
 
   return (
 		<div className="space-y-6">
@@ -153,30 +170,80 @@ export function InterventionDetail({ id }: { id: string }) {
 							`#INT-${id.slice(0, 6)}`}
 					</span>
 				</div>
-				{isAssigned && (
-					<button
-						type="button"
-						onClick={handleStartIntervention}
-						disabled={updateIntervention.isPending}
-						className="hidden lg:inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors shrink-0"
-					>
-						<Play className="w-3.5 h-3.5" />
-						{updateIntervention.isPending ? 'Démarrage…' : 'Démarrer'}
-					</button>
+				{hasActions && (
+					<div className="hidden lg:flex items-center gap-2 shrink-0">
+						{isAssigned && (
+							<button
+								type="button"
+								onClick={handleStartIntervention}
+								disabled={updateIntervention.isPending}
+								className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors"
+							>
+								<Play className="w-3.5 h-3.5" />
+								{updateIntervention.isPending ? 'Démarrage…' : 'Démarrer'}
+							</button>
+						)}
+						{isInProgress && (
+							<>
+								<button
+									type="button"
+									onClick={handleFailIntervention}
+									disabled={updateIntervention.isPending}
+									className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono border border-destructive/40 text-destructive hover:bg-destructive/10 disabled:opacity-60 transition-colors"
+								>
+									<XCircle className="w-3.5 h-3.5" />
+									Échouer
+								</button>
+								<button
+									type="button"
+									onClick={() => setResolveDialogOpen(true)}
+									disabled={updateIntervention.isPending}
+									className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors"
+								>
+									<CheckCircle2 className="w-3.5 h-3.5" />
+									Résoudre
+								</button>
+							</>
+						)}
+					</div>
 				)}
 			</div>
 
-			{isAssigned && (
+			{hasActions && (
 				<div className="lg:hidden fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 bg-gradient-to-t from-background via-background/95 to-transparent">
-					<button
-						type="button"
-						onClick={handleStartIntervention}
-						disabled={updateIntervention.isPending}
-						className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors shadow-lg"
-					>
-						<Play className="w-4 h-4" />
-						{updateIntervention.isPending ? 'Démarrage…' : 'Démarrer l’intervention'}
-					</button>
+					{isAssigned && (
+						<button
+							type="button"
+							onClick={handleStartIntervention}
+							disabled={updateIntervention.isPending}
+							className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors shadow-lg"
+						>
+							<Play className="w-4 h-4" />
+							{updateIntervention.isPending ? 'Démarrage…' : 'Démarrer l’intervention'}
+						</button>
+					)}
+					{isInProgress && (
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={handleFailIntervention}
+								disabled={updateIntervention.isPending}
+								className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-mono border border-destructive/40 bg-background text-destructive hover:bg-destructive/10 disabled:opacity-60 transition-colors shadow-lg"
+							>
+								<XCircle className="w-4 h-4" />
+								Échouer
+							</button>
+							<button
+								type="button"
+								onClick={() => setResolveDialogOpen(true)}
+								disabled={updateIntervention.isPending}
+								className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors shadow-lg"
+							>
+								<CheckCircle2 className="w-4 h-4" />
+								Résoudre
+							</button>
+						</div>
+					)}
 				</div>
 			)}
 
@@ -581,6 +648,12 @@ export function InterventionDetail({ id }: { id: string }) {
 					}}
 				/>
 			</Dialog>
+
+			<ResolveInterventionDialog
+				open={resolveDialogOpen}
+				interventionId={intervention.id}
+				onClose={() => setResolveDialogOpen(false)}
+			/>
 
 			{/* Lightbox */}
 			{lightboxIdx !== null && photos.length > 0 && (
