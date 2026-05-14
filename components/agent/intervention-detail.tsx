@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X, Plus } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X, Plus, Play, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, getImageUrl } from '@/lib/utils';
@@ -97,6 +97,16 @@ export function InterventionDetail({ id }: { id: string }) {
     }
   }
 
+  async function handleStartIntervention() {
+    try {
+      await updateIntervention.mutateAsync({ id, payload: { status: 'IN_PROGRESS' } });
+      toast.success('Intervention démarrée');
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Impossible de démarrer l\'intervention');
+      toast.error(message);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -121,25 +131,54 @@ export function InterventionDetail({ id }: { id: string }) {
   const severityMeta = reportSeverity ? SEVERITY_META_API[reportSeverity] : null;
   const photos = intervention.photos ?? [];
   const isResolved = intervention.status === 'RESOLVED';
+  const isAssigned = intervention.status === 'ASSIGNED';
   const isJournalLocked = TERMINAL_INTERVENTION_STATUSES.has(intervention.status);
+  const canAddJournal = !isAssigned && !isJournalLocked;
 
   return (
 		<div className="space-y-6">
 			{/* Breadcrumb */}
-			<div className="flex items-center gap-2">
-				<Link
-					href="/agent/interventions"
-					className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground"
-				>
-					<ChevronLeft className="w-3.5 h-3.5" />{" "}
-					Interventions
-				</Link>
-				<span className="text-xs text-muted-foreground">/</span>
-				<span className="text-xs font-mono">
-					{intervention.reference ??
-						`#INT-${id.slice(0, 6)}`}
-				</span>
+			<div className="flex items-center justify-between gap-2">
+				<div className="flex items-center gap-2 min-w-0">
+					<Link
+						href="/agent/interventions"
+						className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground"
+					>
+						<ChevronLeft className="w-3.5 h-3.5" />{" "}
+						Interventions
+					</Link>
+					<span className="text-xs text-muted-foreground">/</span>
+					<span className="text-xs font-mono truncate">
+						{intervention.reference ??
+							`#INT-${id.slice(0, 6)}`}
+					</span>
+				</div>
+				{isAssigned && (
+					<button
+						type="button"
+						onClick={handleStartIntervention}
+						disabled={updateIntervention.isPending}
+						className="hidden lg:inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors shrink-0"
+					>
+						<Play className="w-3.5 h-3.5" />
+						{updateIntervention.isPending ? 'Démarrage…' : 'Démarrer'}
+					</button>
+				)}
 			</div>
+
+			{isAssigned && (
+				<div className="lg:hidden fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 bg-gradient-to-t from-background via-background/95 to-transparent">
+					<button
+						type="button"
+						onClick={handleStartIntervention}
+						disabled={updateIntervention.isPending}
+						className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-mono bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors shadow-lg"
+					>
+						<Play className="w-4 h-4" />
+						{updateIntervention.isPending ? 'Démarrage…' : 'Démarrer l’intervention'}
+					</button>
+				</div>
+			)}
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Left — main content */}
@@ -302,16 +341,24 @@ export function InterventionDetail({ id }: { id: string }) {
 								Journal de bord
 								{journalEntries.length > 0 && (
 									<span className="ml-2 text-xs font-mono text-muted-foreground">
-										({journalEntries.length})
+										(
+										{
+											journalEntries.length
+										}
+										)
 									</span>
 								)}
 							</h3>
-							{!isJournalLocked && (
+							{canAddJournal && (
 								<button
 									type="button"
 									onClick={() => {
-										setEditingJournalEntry(null);
-										setJournalDialogOpen(true);
+										setEditingJournalEntry(
+											null,
+										);
+										setJournalDialogOpen(
+											true,
+										);
 									}}
 									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
 								>
@@ -320,18 +367,34 @@ export function InterventionDetail({ id }: { id: string }) {
 								</button>
 							)}
 						</div>
+						{isAssigned && (
+							<div className="flex items-start gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-3 py-2.5">
+								<Lock className="w-3.5 h-3.5 mt-0.5 text-muted-foreground shrink-0" />
+								<p className="text-xs font-mono text-muted-foreground">
+									Le journal est verrouillé. Démarrez l&apos;intervention pour ajouter des entrées.
+								</p>
+							</div>
+						)}
 						<JournalTimeline
 							updates={journalEntries}
 							currentUserId={currentUserId}
 							onEdit={
-								isJournalLocked
-									? undefined
-									: (entry) => {
-											setEditingJournalEntry(entry);
-											setJournalDialogOpen(true);
+								canAddJournal
+									? (entry) => {
+											setEditingJournalEntry(
+												entry,
+											);
+											setJournalDialogOpen(
+												true,
+											);
 										}
+									: undefined
 							}
-							onDelete={isJournalLocked ? undefined : handleDeleteJournalEntry}
+							onDelete={
+								canAddJournal
+									? handleDeleteJournalEntry
+									: undefined
+							}
 						/>
 					</div>
 
@@ -501,11 +564,11 @@ export function InterventionDetail({ id }: { id: string }) {
 				title={
 					editingJournalEntry
 						? "Modifier l'entrée du journal"
-						: 'Ajouter une entrée au journal'
+						: "Ajouter une entrée au journal"
 				}
 			>
 				<JournalForm
-					key={editingJournalEntry?.id ?? 'new'}
+					key={editingJournalEntry?.id ?? "new"}
 					interventionId={intervention.id}
 					entry={editingJournalEntry ?? undefined}
 					minDate={
