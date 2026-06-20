@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X, Plus, Play, Lock, CheckCircle2, XCircle } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, Plus, Play, Lock, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, getImageUrl } from '@/lib/utils';
@@ -16,6 +15,7 @@ import { MapLoader } from '@/components/maps/map-loader';
 import { Dialog } from '@/components/ui/dialog';
 import { JournalForm } from '@/components/shared/journal-form';
 import { JournalTimeline } from '@/components/shared/journal-timeline';
+import { PhotoGallery } from '@/components/shared/photo-gallery';
 import { ResolveInterventionDialog } from '@/components/agent/resolve-intervention-dialog';
 import { apiReportsToHotspots } from '@/lib/reports-to-hotspots';
 import { useAuthStore } from '@/stores/auth.store';
@@ -64,7 +64,6 @@ export function InterventionDetail({ id }: { id: string }) {
 
   const updateIntervention = useUpdateIntervention();
 
-  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [journalDialogOpen, setJournalDialogOpen] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [editingJournalEntry, setEditingJournalEntry] =
@@ -367,39 +366,12 @@ export function InterventionDetail({ id }: { id: string }) {
 					</div>
 
 					{/* Photos */}
-					{photos.length > 0 && (
-						<div className="rounded-2xl border border-border bg-card p-5 space-y-3">
-							<div className="flex items-center gap-2">
-								<ImageIcon className="w-4 h-4 text-muted-foreground" />
-								<h3 className="text-sm font-semibold">
-									Photos ({photos.length})
-								</h3>
-							</div>
-							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-								{photos.map((url, i) => (
-									<button
-										key={i}
-										type="button"
-										onClick={() =>
-											setLightboxIdx(
-												i,
-											)
-										}
-										className="relative aspect-square rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors group"
-									>
-										<Image
-											src={getImageUrl(
-												url,
-											)}
-											alt={`Photo ${i + 1}`}
-											fill
-											className="object-cover group-hover:scale-105 transition-transform duration-200"
-										/>
-									</button>
-								))}
-							</div>
-						</div>
-					)}
+					<PhotoGallery
+						photos={photos}
+						thumbAspect="square"
+						columns={4}
+						icon={<ImageIcon className="w-4 h-4 text-muted-foreground" />}
+					/>
 
 					{/* Journal de bord */}
 					<div className="rounded-2xl border border-border bg-card p-5 space-y-3">
@@ -654,69 +626,6 @@ export function InterventionDetail({ id }: { id: string }) {
 				interventionId={intervention.id}
 				onClose={() => setResolveDialogOpen(false)}
 			/>
-
-			{/* Lightbox */}
-			{lightboxIdx !== null && photos.length > 0 && (
-				<div
-					className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-					onClick={() => setLightboxIdx(null)}
-				>
-					<button
-						type="button"
-						onClick={() => setLightboxIdx(null)}
-						className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-					>
-						<X className="w-5 h-5 text-white" />
-					</button>
-					<div
-						className="relative max-w-3xl max-h-[80vh] w-full"
-						onClick={(e) => e.stopPropagation()}
-					>
-						<Image
-							src={getImageUrl(photos[lightboxIdx])}
-							alt={`Photo ${lightboxIdx + 1}`}
-							width={1200}
-							height={800}
-							className="w-full h-auto max-h-[80vh] object-contain rounded-xl"
-						/>
-						{photos.length > 1 && (
-							<div className="flex items-center justify-center gap-3 mt-3">
-								<button
-									type="button"
-									onClick={() =>
-										setLightboxIdx(
-											(lightboxIdx -
-												1 +
-												photos.length) %
-												photos.length,
-										)
-									}
-									className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-mono transition-colors"
-								>
-									← Précédent
-								</button>
-								<span className="text-white/60 text-xs font-mono">
-									{lightboxIdx + 1} /{" "}
-									{photos.length}
-								</span>
-								<button
-									type="button"
-									onClick={() =>
-										setLightboxIdx(
-											(lightboxIdx +
-												1) %
-												photos.length,
-										)
-									}
-									className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-mono transition-colors"
-								>
-									Suivant →
-								</button>
-							</div>
-						)}
-					</div>
-				</div>
-			)}
 		</div>
   );
 }

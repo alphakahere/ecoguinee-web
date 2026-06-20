@@ -1,15 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useMemo } from 'react';
 import { ChevronLeft, MapPin, Calendar, User, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatDate, getImageUrl } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { useReport } from '@/hooks/queries/useReports';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { MapLoader } from '@/components/maps/map-loader';
 import { InterventionListCard } from '@/components/shared/intervention-list-card';
+import { PhotoGallery } from '@/components/shared/photo-gallery';
 import { apiReportsToHotspots } from '@/lib/reports-to-hotspots';
 import {
   REPORT_STATUS_META,
@@ -50,6 +50,7 @@ export function SignalementDetail({ id }: { id: string }) {
     );
   }
 
+  const photos = report.photos;
   const statusMeta = REPORT_STATUS_META[report.status];
   const severityMeta = SEVERITY_META_API[report.severity];
   const typeMeta = WASTE_TYPE_META[report.type];
@@ -90,29 +91,7 @@ export function SignalementDetail({ id }: { id: string }) {
           </div>
 
           {/* Photos */}
-          {report.photos.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <h3 className="text-sm font-semibold mb-3">
-                Photos ({report.photos.length})
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {report.photos.map((url, i) => (
-                  <Image
-                    key={i}
-                    src={getImageUrl(url)}
-                    alt={`Photo ${i + 1}`}
-                    width={100}
-                    height={100}
-                    quality={100}
-                    priority
-                    loading="eager"
-                    unoptimized
-                    className="rounded-xl border border-border object-cover aspect-video w-full"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <PhotoGallery photos={photos} unoptimized />
 
           {/* Description */}
           {report.description && (

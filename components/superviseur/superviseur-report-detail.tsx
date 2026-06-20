@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ChevronLeft, MapPin, Calendar, User, Phone, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { formatDate, getImageUrl } from '@/lib/utils';
+import { PhotoGallery } from '@/components/shared/photo-gallery';
+import { formatDate } from '@/lib/utils';
 import { useReport } from '@/hooks/queries/useReports';
 import { useInterventions } from '@/hooks/queries/useInterventions';
 import { useSupervisorOverview } from '@/hooks/queries/useSupervisorDashboard';
@@ -18,7 +19,6 @@ import {
   type ApiIntervention,
 } from '@/types/api';
 import { SuperviseurCreateInterventionModal } from './superviseur-create-intervention-modal';
-import Image from 'next/image';
 
 export function SuperviseurReportDetail({ id }: { id: string }) {
   const { data: overview, isLoading: overviewLoading } = useSupervisorOverview();
@@ -55,6 +55,7 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
     );
   }
 
+  const photos = report.photos;
   const statusMeta = REPORT_STATUS_META[report.status];
   const severityMeta = SEVERITY_META_API[report.severity];
   const typeMeta = WASTE_TYPE_META[report.type];
@@ -93,29 +94,7 @@ export function SuperviseurReportDetail({ id }: { id: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
-          {report.photos.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <h3 className="text-sm font-semibold mb-3">
-                Photos ({report.photos.length})
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {report.photos.map((url, i) => (
-                  <Image
-                    key={i}
-                    src={getImageUrl(url)}
-                    alt={`Photo ${i + 1}`}
-                    width={100}
-                    height={100}
-                    quality={100}
-                    priority={i === 0}
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    unoptimized
-                    className="rounded-xl border border-border object-cover aspect-video w-full"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <PhotoGallery photos={photos} unoptimized />
 
           {report.description && (
             <div className="rounded-2xl border border-border bg-card p-5">

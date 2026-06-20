@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { ChevronLeft, Calendar, MapPin, User, Building2, Pencil, FileText, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { documentLabel, formatDate, getDocumentUrl, getImageUrl } from '@/lib/utils';
+import { PhotoGallery } from '@/components/shared/photo-gallery';
+import { documentLabel, formatDate, getDocumentUrl } from '@/lib/utils';
 import { useCampaign } from '@/hooks/queries/useCampaigns';
 import { useUpdateCampaign } from '@/hooks/mutations/useUpdateCampaign';
 import type { ApiCampaignStatus } from '@/types/api';
 import { API_CAMPAIGN_STATUS_META, API_CAMPAIGN_TYPE_META } from '@/types/api';
-import Image from 'next/image';
 import { getErrorMessage } from '@/services/api';
 
 // Valid status transitions
@@ -86,6 +86,7 @@ export function AdminCampaignDetail({
   const statusMeta = API_CAMPAIGN_STATUS_META[campaign.status];
   const typeMeta = API_CAMPAIGN_TYPE_META[campaign.type];
   const transitions = TRANSITIONS[campaign.status] ?? [];
+  const photos = campaign.photos ?? [];
 
   return (
 		<div className="space-y-6">
@@ -175,31 +176,7 @@ export function AdminCampaignDetail({
 					)}
 
 					{/* Photos */}
-					{(campaign.photos ?? []).length > 0 && (
-						<div className="rounded-2xl border border-border bg-card p-5">
-							<h3 className="text-sm font-semibold mb-3">
-								Photos (
-								{(campaign.photos ?? []).length}
-								)
-							</h3>
-							<div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-								{(campaign.photos ?? []).map(
-									(url, i) => (
-										<Image
-											key={i}
-											src={getImageUrl(
-												url,
-											)}
-											alt={`Photo ${i + 1}`}
-											className="rounded-xl border border-border object-cover aspect-video w-full"
-											width={100}
-											height={100}
-										/>
-									),
-								)}
-							</div>
-						</div>
-					)}
+					<PhotoGallery photos={photos} />
 
 					{/* Documents */}
 					{(campaign.documents ?? []).length > 0 && (
