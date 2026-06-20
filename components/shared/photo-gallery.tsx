@@ -17,6 +17,8 @@ interface PhotoGalleryProps {
   columns?: 3 | 4;
   /** Pass through to next/image — needed for API-served photos. */
   unoptimized?: boolean;
+  /** Optional badge shown over the lightbox image (e.g. "Avant" / "Après"). */
+  label?: string;
 }
 
 const GRID_CLS: Record<3 | 4, string> = {
@@ -36,6 +38,7 @@ export function PhotoGallery({
   thumbAspect = 'video',
   columns = 3,
   unoptimized = false,
+  label,
 }: PhotoGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -87,6 +90,11 @@ export function PhotoGallery({
             className="relative max-w-3xl max-h-[80vh] w-full"
             onClick={(e) => e.stopPropagation()}
           >
+            {label && (
+              <div className="absolute top-3 left-3 z-10 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-mono">
+                {label}
+              </div>
+            )}
             <Image
               src={getImageUrl(photos[lightboxIndex])}
               alt={`${title} ${lightboxIndex + 1}`}

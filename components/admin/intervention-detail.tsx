@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download, X } from 'lucide-react';
+import { ChevronLeft, MapPin, Calendar, User, Building2, FileText, Phone, ImageIcon, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, getImageUrl } from '@/lib/utils';
 import { useIntervention } from '@/hooks/queries/useInterventions';
 import { useReport } from '@/hooks/queries/useReports';
 import { MapLoader } from '@/components/maps/map-loader';
+import { PhotoGallery } from '@/components/shared/photo-gallery';
 import { apiReportsToHotspots } from '@/lib/reports-to-hotspots';
 import {
   INTERVENTION_STATUS_META,
@@ -16,8 +16,6 @@ import {
   type ApiIntervention,
   type ApiReport,
 } from '@/types/api';
-
-type LightboxState = { source: 'before' | 'after'; index: number } | null;
 
 export function AdminInterventionDetail({ id }: { id: string }) {
   const { data: rawIntervention, isLoading, isError } = useIntervention(id);
@@ -30,8 +28,6 @@ export function AdminInterventionDetail({ id }: { id: string }) {
     () => (report ? apiReportsToHotspots([report]) : []),
     [report],
   );
-
-  const [lightbox, setLightbox] = useState<LightboxState>(null);
 
   if (isLoading) {
     return (
@@ -58,7 +54,7 @@ export function AdminInterventionDetail({ id }: { id: string }) {
   const beforePhotos = report?.photos ?? [];
   const afterPhotos = intervention.photos ?? [];
   const isResolved = intervention.status === 'RESOLVED';
-  const activePhotos = lightbox?.source === 'before' ? beforePhotos : afterPhotos;
+  const photoIcon = <ImageIcon className="w-4 h-4 text-muted-foreground" />;
 
   return (
     <div className="space-y-6">
@@ -144,82 +140,22 @@ export function AdminInterventionDetail({ id }: { id: string }) {
             )}
           </div>
 
-          {(beforePhotos.length > 0 || afterPhotos.length > 0) && (
-            <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold">Photos avant / après</h3>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-mono uppercase text-muted-foreground">
-                    Avant intervention
-                  </h4>
-                  <span className="text-xs font-mono text-muted-foreground">
-                    {beforePhotos.length} photo{beforePhotos.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                {beforePhotos.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                    {beforePhotos.map((url, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setLightbox({ source: 'before', index: i })}
-                        className="relative aspect-square rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors group"
-                      >
-                        <Image
-                          src={getImageUrl(url)}
-                          alt={`Avant ${i + 1}`}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs font-mono text-muted-foreground py-4">
-                    Aucune photo du signalement.
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2 border-t border-border pt-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-mono uppercase text-muted-foreground">
-                    Après intervention
-                  </h4>
-                  <span className="text-xs font-mono text-muted-foreground">
-                    {afterPhotos.length} photo{afterPhotos.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                {afterPhotos.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                    {afterPhotos.map((url, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setLightbox({ source: 'after', index: i })}
-                        className="relative aspect-square rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors group"
-                      >
-                        <Image
-                          src={getImageUrl(url)}
-                          alt={`Après ${i + 1}`}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs font-mono text-muted-foreground py-4">
-                    Aucune photo de résolution.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+          <PhotoGallery
+            photos={beforePhotos}
+            title="Photos avant"
+            label="Avant"
+            icon={photoIcon}
+            thumbAspect="square"
+            columns={4}
+          />
+          <PhotoGallery
+            photos={afterPhotos}
+            title="Photos après"
+            label="Après"
+            icon={photoIcon}
+            thumbAspect="square"
+            columns={4}
+          />
 
           {intervention.pvDocument && (
             <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
@@ -317,67 +253,6 @@ export function AdminInterventionDetail({ id }: { id: string }) {
           </div>
         </div>
       </div>
-
-      {lightbox !== null && activePhotos.length > 0 && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
-        >
-          <button
-            type="button"
-            onClick={() => setLightbox(null)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          <div
-            className="relative max-w-3xl max-h-[80vh] w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute top-3 left-3 z-10 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-mono">
-              {lightbox.source === 'before' ? 'Avant' : 'Après'}
-            </div>
-            <Image
-              src={getImageUrl(activePhotos[lightbox.index])}
-              alt={`${lightbox.source === 'before' ? 'Avant' : 'Après'} ${lightbox.index + 1}`}
-              width={1200}
-              height={800}
-              className="w-full h-auto max-h-[80vh] object-contain rounded-xl"
-            />
-            {activePhotos.length > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setLightbox({
-                      source: lightbox.source,
-                      index: (lightbox.index - 1 + activePhotos.length) % activePhotos.length,
-                    })
-                  }
-                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-mono transition-colors"
-                >
-                  ← Précédent
-                </button>
-                <span className="text-white/60 text-xs font-mono">
-                  {lightbox.index + 1} / {activePhotos.length}
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setLightbox({
-                      source: lightbox.source,
-                      index: (lightbox.index + 1) % activePhotos.length,
-                    })
-                  }
-                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-mono transition-colors"
-                >
-                  Suivant →
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
